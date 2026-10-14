@@ -154,3 +154,8 @@ UPDATES.md; it gets frozen before v1.1.
 - Questions for me
 - Output of `git log --format='%h %an <%ae> %cn <%ce> %cI'`, pasted as is
 ````
+
+Built: the repo and its rules; Snake v1.0 (tag v1.0, dist/v1.0/); the measuring rig with a test fixture, `npm run fps-check`
+and the bloat chart; the short recorder; UPDATES.md as a proposal. No update built.
+What broke: the bot pressed before the first frame was drawn; headless WebGL ran in software; the per-frame frame-rate
+median jumped under load; the short's first frame was a title card; the replay lost a key on the fixture. All fixed; see DEVLOG.md.
