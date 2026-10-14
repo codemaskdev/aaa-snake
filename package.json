@@ -11,7 +11,8 @@
     "fps-check": "node tools/fps-check.mjs",
     "chart": "node tools/chart.mjs",
     "short": "node tools/short.mjs",
-    "voice": "node tools/voice.mjs"
+    "voice": "node tools/voice.mjs",
+    "play-share": "node tools/play-share.mjs"
   },
   "engines": {
     "node": ">=22"

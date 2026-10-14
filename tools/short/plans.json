@@ -18,5 +18,8 @@
   },
   "v1.3": {
     "start": "screen:update-required"
+  },
+  "v1.4": {
+    "start": "screen:update-required"
   }
 }

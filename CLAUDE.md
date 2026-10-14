@@ -26,7 +26,8 @@ measurements/ are the raw material for the video.
 ## Versions
 - Every update is one git tag (v1.0, v1.1, ...) and one build in dist/<version>/ (`npm run build <version>` copies
   src/ there; it refuses to overwrite an existing build). Every version stays playable side by side (`npm run serve`).
-- Never rewrite an old tag. tests/build.test.mjs checks that each tagged build in dist/ still matches its tag.
+- Never rewrite an old tag. tests/build.test.mjs checks that each tagged build in dist/ still matches its tag, except
+  its voice lines (see Voice).
 - The VERSION constant in src/game.js names the version being built.
 - UPDATES.md is the plan. Once approved it is frozen; changes to it after that are new, logged decisions.
 
@@ -42,11 +43,13 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
 - `log`: events the game pushes, each with `t` = performance.now() (ms since navigation start):
   `{type: 'screen', name}` when the screen changes, `{type: 'frame', name}` on the first drawn frame of a screen,
   `{type: 'accepts', name}` on the first drawn frame where a non-control screen starts reacting to a key,
-  `{type: 'apple', score, tick}` when an apple is eaten.
+  `{type: 'apple', score, tick}` when an apple is eaten, `{type: 'reconnect', playTicks, ms}` when v1.4's connection
+  drops during play.
 - Load time = the first drawn frame of a screen that accepts any key: the first `frame` of a control screen or the
   first `accepts` entry, whichever comes first (approved in prompt 2).
-- `probe()`: `{screen, shown, next, tick, heading, snake, apple, score, grid}`. `next` is the key that leaves the current
-  screen (skip, continue, restart), or null. `apple` is only what the player can see (null if hidden).
+- `probe()`: `{screen, shown, next, tick, heading, snake, apple, score, grid}`. `next` is the key that moves the current
+  screen on (skip, continue, restart; on v1.4's terms of service, Page Down until they are scrolled to the bottom, then
+  Enter), or null. `apple` is only what the player can see (null if hidden).
 - Screen names `ready` and `play` mean "arrow keys steer the snake right now" and are the only control screens
   (tools/rig/stats.mjs, pre-registered). Never use them for a screen where input does not steer the snake. Every other
   screen gets its own honest name.
@@ -60,6 +63,9 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
   window for frame rate (`npm run fps-check` showed why). Frame rate and the JS heap use the same window: the first 60 s
   of play (frame-rate method 2, since prompt 4; the method-1 files are in measurements/old-method/). Definitions are
   written into every measurements/<version>.json.
+- Control share has two numbers: over the first 180 s from navigation start (launch screens included), and in play
+  (since prompt 5): from the first control frame until 60 s of control, the same window. `npm run play-share` gives the
+  second for versions measured before it existed, from their saved runs.
 - measurements/summary.csv has one row per version; `npm run chart` draws out/bloat.png from it.
 - `npm run short <version>` replays the median run into the fixed short layout; its counter shows the run's clock and
   freezes on the measured median. Clip plans live in tools/short/plans.json.
@@ -76,6 +82,9 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
 - The story's lines live in src/story.js; `npm run voice` writes voice/LINES.md and a silent placeholder (src/voice/NN.mp3)
   for every line not yet recorded. Each line has a slot; the game holds the line for its slot whether or not the sound
   plays, and a recording must fit its slot (`npm run voice -- --check`). Do not generate audio unless asked.
+- src/voice/ is the only place the voice files live. Every version from v1.3 on plays them through its build, and
+  `npm run voice` copies src/voice/ into every dist/<version>/voice/: the one part of an old build that may change
+  after its tag, so a recording replaces its placeholder everywhere without any other change.
 
 ## Disclosure
 - Any generated image or voice line records, next to the file (and in DEVLOG.md), the tool name and version as shown

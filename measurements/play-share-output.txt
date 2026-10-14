@@ -1,0 +1,26 @@
+$ npm run play-share
+control share in play: the first 60000 ms of control, from the first control frame, in each saved headless run
+v1.0: median 1
+  run 1: 60000 ms of control from 15.200000002980232 to 60015.20000000298 ms = 1
+  run 2: 60000 ms of control from 13.299999997019768 to 60013.29999999702 ms = 1
+  run 3: 60000 ms of control from 13.299999997019768 to 60013.29999999702 ms = 1
+  run 4: 60000 ms of control from 22.599999994039536 to 60022.59999999404 ms = 1
+  run 5: 60000 ms of control from 26.799999997019768 to 60026.79999999702 ms = 1
+v1.1: median 1
+  run 1: 60000 ms of control from 18622.60000000894 to 78622.60000000894 ms = 1
+  run 2: 60000 ms of control from 18609 to 78609 ms = 1
+  run 3: 60000 ms of control from 18619.90000000596 to 78619.90000000596 ms = 1
+  run 4: 60000 ms of control from 18627.79999999702 to 78627.79999999702 ms = 1
+  run 5: 60000 ms of control from 18627.79999999702 to 78627.79999999702 ms = 1
+v1.2: median 1
+  run 1: 60000 ms of control from 40663.70000000298 to 100663.70000000298 ms = 1
+  run 2: 60000 ms of control from 40680.89999999106 to 100680.89999999106 ms = 1
+  run 3: 60000 ms of control from 40683.20000000298 to 100683.20000000298 ms = 1
+  run 4: 60000 ms of control from 40686.60000000894 to 100686.60000000894 ms = 1
+  run 5: 60000 ms of control from 40692.29999999702 to 100692.29999999702 ms = 1
+v1.3: median 0.14181426803644825
+  run 1: no value, its log has 59962.09999996424 ms of control, less than 60000
+  run 2: 60000 ms of control from 84708.40000000596 to 507926.3000000566 ms = 0.1417709411629159
+  run 3: 60000 ms of control from 84719.5 to 507788.90000002086 ms = 0.1418207036481415
+  run 4: 60000 ms of control from 84695.79999999702 to 507803.59999994934 ms = 0.14180783242475503
+  run 5: 60000 ms of control from 84673.20000000298 to 507739.59999996424 ms = 0.14182170931089186

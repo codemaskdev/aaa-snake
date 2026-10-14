@@ -1,7 +1,11 @@
 // `npm run voice`: the voice lines of the story, from src/story.js.
-//   npm run voice            writes voice/LINES.md and a silent placeholder for every line
-//                            that has no recording yet (src/voice/NN.mp3, as close to one slot as MP3 frames allow)
-//   npm run voice -- --check lists every file's length against its slot (a recording must fit)
+//   npm run voice            writes voice/LINES.md, a silent placeholder for every line that has no
+//                            recording yet (src/voice/NN.mp3, as close to one slot as MP3 frames allow),
+//                            and copies src/voice/ into every build that has voice lines (dist/v*/voice/)
+//   npm run voice -- --check lists every file's length against its slot (a recording must fit) and
+//                            every build whose voice lines differ from src/voice/
+// src/voice/ is the only place the lines live: every version from v1.3 on plays them from there,
+// through its build. Old builds are never rebuilt, but their voice files are kept in step with it.
 // Placeholders are silence, MP3 44.1 kHz mono at 64 kbps constant bitrate, the format the
 // recordings will be delivered in, so the bytes the game downloads stay about the same.
 import fs from 'node:fs';
@@ -12,6 +16,31 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const VOICE_DIR = path.join(ROOT, 'src/voice');
+const DIST = path.join(ROOT, 'dist');
+
+// Every build with a voice/ folder, and which of its files differ from src/voice/.
+export function buildsOutOfStep(distDir = DIST, voiceDir = VOICE_DIR) {
+  const names = fs.readdirSync(voiceDir).filter(name => name.endsWith('.mp3')).sort();
+  const builds = fs.existsSync(distDir) ? fs.readdirSync(distDir).filter(v => /^v\d+\.\d+$/.test(v) && fs.existsSync(path.join(distDir, v, 'voice'))) : [];
+  return builds.map(version => ({
+    version,
+    differ: names.filter(name => {
+      const copy = path.join(distDir, version, 'voice', name);
+      return !fs.existsSync(copy) || !fs.readFileSync(copy).equals(fs.readFileSync(path.join(voiceDir, name)));
+    }),
+  }));
+}
+
+export function syncBuilds(distDir = DIST, voiceDir = VOICE_DIR) {
+  const copied = [];
+  for (const { version, differ } of buildsOutOfStep(distDir, voiceDir)) {
+    for (const name of differ) {
+      fs.copyFileSync(path.join(voiceDir, name), path.join(distDir, version, 'voice', name));
+      copied.push(`${version}/voice/${name}`);
+    }
+  }
+  return copied;
+}
 
 export function loadStory(file = path.join(ROOT, 'src/story.js')) {
   const code = fs.readFileSync(file, 'utf8');
@@ -39,7 +68,7 @@ export const ELEVENLABS = {
 export function linesMarkdown(story) {
   const { LINES, SPEAKING_RATE, LINE_PAUSE, slotMs } = story;
   const rows = LINES.map(line => `| ${line.id} | ${line.scene} | ${line.emotion} | ${line.text} | ${(slotMs(line) / 1000).toFixed(1)} | src/voice/${fileFor(line)} |`);
-  return `# Warden Snek: voice lines (v1.3)
+  return `# Warden Snek: voice lines (since v1.3)
 
 Generated from src/story.js by \`npm run voice\`; edit the lines there, not here.
 
@@ -61,7 +90,8 @@ change any timing. Check with \`npm run voice -- --check\`.
 - Language: ${ELEVENLABS.language}
 - Output format: ${ELEVENLABS.output}
 - Text: ${ELEVENLABS.text}
-- Save each take as the file in the last column, replacing the placeholder.
+- Save each take as the file in the last column, replacing the placeholder, then run \`npm run voice\`: it copies
+  src/voice/ into every build that has voice lines (dist/v1.3/voice/, dist/v1.4/voice/ and on), so nothing else changes.
 
 ## Disclosure (fill in when recording)
 
@@ -88,6 +118,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       if (!fits) bad++;
       console.log(`${fileFor(line)}  slot ${story.slotMs(line)} ms  file ${ms === null ? 'missing' : `${ms} ms`}  ${fits ? 'fits' : 'DOES NOT FIT'}`);
     }
+    for (const { version, differ } of buildsOutOfStep()) {
+      if (differ.length) bad++;
+      console.log(`dist/${version}/voice/: ${differ.length ? `${differ.length} file(s) differ from src/voice/ (run npm run voice)` : 'same as src/voice/'}`);
+    }
     process.exitCode = bad ? 1 : 0;
   } else {
     fs.mkdirSync(VOICE_DIR, { recursive: true });
@@ -105,6 +139,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       }
       made++;
     }
-    console.log(`wrote voice/LINES.md; ${made} silent placeholder(s) in src/voice/`);
+    const copied = syncBuilds();
+    console.log(`wrote voice/LINES.md; ${made} silent placeholder(s) in src/voice/; ${copied.length} file(s) copied into builds${copied.length ? `: ${copied.join(', ')}` : ''}`);
   }
 }

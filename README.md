@@ -18,6 +18,8 @@ npm run measure <version>   # 5 measured runs -> measurements/<version>.json, su
 npm run fps-check           # headless vs visible window frame rate, on test loads
 npm run chart               # measurements/summary.csv -> out/bloat.png
 npm run short <version>     # 30-second vertical short -> out/shorts/<version>/
+npm run voice               # voice/LINES.md, placeholders, and src/voice/ copied into every build
+npm run play-share          # control share in play, from the saved runs of every version
 ```
 
 `npm run measure` opens visible Chromium windows for its frame-rate runs.

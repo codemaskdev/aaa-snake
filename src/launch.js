@@ -1,6 +1,7 @@
-// AAA Snake v1.3: the launch experience.
+// AAA Snake v1.4: the launch experience.
 // Everything you sit through before the snake: the day-one update (update.js), three
-// studio logos you cannot skip, a health warning, a title screen, a loading screen
+// studio logos you cannot skip, a health warning, a title screen, the online screens
+// (online.js: connecting, signing in, the queue, the terms of service), a loading screen
 // with tips (it loads the voice lines), the opening cutscene (story.js), and an
 // autosave notice before every game.
 // The studio names are invented. Times are in ms of animation frames, never the clock.
@@ -14,13 +15,19 @@ const LAUNCH = {
   'studio-logo':     { lasts: 3000, then: 'engine-logo' },  // cannot be skipped
   'engine-logo':     { lasts: 3000, then: 'warning' },      // cannot be skipped
   'warning':         { listensAfter: 4000, then: 'title' }, // any key, once it listens
-  'title':           { listensAfter: 2500, then: 'loading' }, // after the title animation
+  'title':           { listensAfter: 2500, then: 'connecting' }, // after the title animation
+  'connecting':      { lasts: ONLINE.connectMs, then: 'sign-in' }, // a stub: no request is made
+  'sign-in':         { listensAfter: ONLINE.signInListensAfter, key: 'Enter', then: 'signing-in' },
+  'signing-in':      { lasts: ONLINE.signingInMs, then: 'queue' },
+  'queue':           { lasts: 0, needs: queueDone, then: 'terms' }, // until the position reaches 0
+  'terms':           { listensAfter: 0, needs: termsRead, key: 'Enter', then: 'loading' }, // scrolled to the bottom
   'loading':         { listensAfter: 5000, needs: voiceLoaded, then: 'opening' }, // tips, then "Press any key"
   'opening':         { lasts: cutsceneMs(OPENING), then: 'autosave' }, // skippable "after your first playthrough"
   'autosave':        { lasts: 3000, then: 'ready' },        // before every game
 };
 
 const UPDATE_SCREENS = ['update-required', 'patch-download', 'patch-install', 'preparing'];
+const ONLINE_SCREENS = ['connecting', 'sign-in', 'signing-in', 'queue', 'terms'];
 
 const TIPS = [
   'Tip: apples are food.',
@@ -32,7 +39,7 @@ const TIPS = [
 
 const GOLD = '#e8c66a';
 
-// True if this launch screen reacts to a key yet.
+// True if this launch screen reacts to a key yet (any key, or only its own `key`).
 function launchListens(screen, time) {
   const step = LAUNCH[screen];
   return Boolean(step && step.listensAfter !== undefined && time >= step.listensAfter && (!step.needs || step.needs(time)));
@@ -62,6 +69,7 @@ function drawLaunch(ctx, screen, time, width, height) {
   if (screen === 'engine-logo') drawEngine(ctx, time, width, height);
   if (screen === 'warning') drawWarning(ctx, time, width, height);
   if (screen === 'title') drawTitle(ctx, time, width, height);
+  if (ONLINE_SCREENS.includes(screen)) drawOnline(ctx, screen, time, width, height);
   if (screen === 'loading') drawLoading(ctx, time, width, height);
   if (screen === 'autosave') drawAutosave(ctx, time, width, height);
   ctx.restore();

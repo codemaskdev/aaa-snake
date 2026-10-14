@@ -18,13 +18,16 @@ test('src/ declares a version', () => {
   assert.match(versionInSource(), /^v\d+\.\d+$/);
 });
 
-test('each tagged build in dist/ is unchanged since its tag', () => {
+// The one exception: voice lines (dist/<version>/voice/) follow src/voice/, so a recording
+// replaces its placeholder in every build (npm run voice); tests/v1.4.test.mjs checks they match.
+test('each tagged build in dist/ is unchanged since its tag, except its voice lines', () => {
   const tags = new Set(git(['tag', '--list', 'v*']).split('\n').filter(Boolean));
   for (const version of listVersions()) {
     if (!tags.has(version)) continue; // built, not tagged yet
     const files = git(['ls-tree', '-r', '--name-only', version, '--', `dist/${version}`]).split('\n').filter(Boolean);
     assert.ok(files.length > 0, `${version}: the tag has no dist/${version}`);
     for (const file of files) {
+      if (file.startsWith(`dist/${version}/voice/`)) continue;
       const tagged = execFileSync('git', ['show', `${version}:${file}`], { cwd: ROOT });
       assert.ok(tagged.equals(fs.readFileSync(path.join(ROOT, file))), `${file} changed since tag ${version}`);
     }

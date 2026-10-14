@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { median, percentile, segments, controlMs, loadMs, frameRate, firstApple, offOrigin, firstMs, PAGE_LOAD } from '../tools/rig/stats.mjs';
+import { median, percentile, segments, controlMs, loadMs, frameRate, firstApple, offOrigin, firstMs, playShare, PAGE_LOAD } from '../tools/rig/stats.mjs';
 
 const log = [
   { t: 10, type: 'screen', name: 'logo' },
@@ -109,4 +109,17 @@ test('the first 60 s of play: control intervals taken in order until the amount 
   assert.deepEqual(firstMs([[100, 30100], [40000, 80000]], 60000), [[100, 30100], [40000, 70000]]);
   assert.deepEqual(firstMs([[0, 10000]], 60000), [[0, 10000]], 'less play than asked: all of it');
   assert.deepEqual(firstMs([[0, 10000], [20000, 30000]], 10000), [[0, 10000]]);
+});
+
+test('control share in play: from the first control frame until the window of control is full', () => {
+  const play = [
+    { t: 0, type: 'screen', name: 'title' },
+    { t: 1000, type: 'screen', name: 'ready' },
+    { t: 1100, type: 'screen', name: 'play' },
+    { t: 3000, type: 'screen', name: 'reconnecting' },
+    { t: 5000, type: 'screen', name: 'play' },
+  ];
+  // 1000..3000 is control, 3000..5000 is not, then 1000 ms more control: 3000 ms of control over 4000 ms.
+  assert.deepEqual(playShare(play, 9000, 3000), { controlMs: 3000, fromMs: 1000, toMs: 6000, share: 0.6 });
+  assert.equal(playShare(play, 5500, 3000), null, 'not enough control in the log');
 });

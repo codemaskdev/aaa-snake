@@ -1,13 +1,14 @@
-// AAA Snake v1.3: the screen, the keys and the game loop.
+// AAA Snake v1.4: the screen, the keys and the game loop.
 // The rules live in rules.js, the day-one update in update.js, the story in story.js,
-// the launch experience in launch.js. The grass and the shadows arrive in the day-one patch.
+// SnakeNet in online.js, the launch experience in launch.js. The grass and the shadows
+// arrive in the day-one patch.
 
-const VERSION = 'v1.3';
+const VERSION = 'v1.4';
 const CELL = 24;        // each cell is 24 x 24 pixels
 const HUD = 32;         // a strip at the top for the score
 const BOARD = GRID * CELL;
 const TICK_MS = 100;    // the snake moves one cell every 100 ms (10 per second)
-const COLORS = { hud: '#000', snake: '#3b3', head: '#8f8', apple: '#e33', text: '#fff', eye: '#fff', pupil: '#000' };
+const COLORS = { snake: '#3b3', head: '#8f8', apple: '#e33', text: '#fff', eye: '#fff', pupil: '#000' };
 const DARKNESS = 'rgba(0, 0, 0, 0.82)'; // the field at night
 const LIGHT = 110;                     // radius of the light around Warden Snek's head, in pixels
 
@@ -31,6 +32,7 @@ const darkCtx = dark.getContext('2d');
 const seed = Number(new URLSearchParams(location.search).get('seed') || 1) >>> 0;
 const random = makeRandom(seed);
 let game = newGame(random);
+startOnline(seed);
 let before = copySnake();  // where the snake was before its last move, for smooth drawing
 let reflection = null;     // the line of the cutscene after an apple
 let best = 0;
@@ -41,8 +43,12 @@ window.addEventListener('keydown', event => {
   const direction = KEYS[event.code];
   if (direction) event.preventDefault(); // stop the arrow keys from scrolling the page
 
-  if (LAUNCH[screen]) {
-    if (launchListens(screen, screenTime)) setScreen(LAUNCH[screen].then); // any key
+  if (screen === 'terms' && TERMS_KEYS[event.code]) {
+    event.preventDefault();
+    scrollTerms(TERMS_KEYS[event.code]);
+  } else if (LAUNCH[screen]) {
+    const key = LAUNCH[screen].key;
+    if (launchListens(screen, screenTime) && (!key || event.code === key)) setScreen(LAUNCH[screen].then); // any key, or its own
   } else if (screen === 'ready' && direction) {
     queueTurn(game, direction);
     setScreen('play');
@@ -57,6 +63,12 @@ window.addEventListener('keydown', event => {
   }
 });
 
+canvas.addEventListener('wheel', event => {
+  if (screen !== 'terms') return;
+  event.preventDefault();
+  scrollTerms(event.deltaY);
+}, { passive: false });
+
 // The game loop. The browser calls frame() about 60 times a second.
 // The snake moves on a fixed beat (TICK_MS), however fast the screen draws.
 let lastFrame = null;
@@ -66,6 +78,7 @@ function frame(now) {
   lastFrame = now;
   screenTime += elapsed;
   updateWork(screen, screenTime, seed, canvas.width, BOARD);
+  onlineWork(screen, screenTime, elapsed);
   if (screen === 'loading' && !voice.started) loadVoice();
   if (screen === 'opening') speak(lineAt(OPENING, screenTime));
   if (screen === 'reflection') speak(lineAt([reflection], screenTime));
@@ -73,6 +86,10 @@ function frame(now) {
   if (next) setScreen(next);
   if (screen === 'finisher-bite' && screenTime >= FINISHER.biteMs) bite();
   if (screen === 'reflection' && screenTime >= cutsceneMs([reflection])) setScreen('play');
+  if (screen === 'reconnecting' && screenTime >= online.dropMs) {
+    reconnected();
+    setScreen('play');
+  }
   if (screen === 'play') {
     waited += elapsed;
     while (waited >= TICK_MS && screen === 'play') {
@@ -98,6 +115,9 @@ function tick() {
   if (!game.alive) {
     best = Math.max(best, game.score);
     setScreen('gameover');
+  } else if (connectionDrops()) { // the game pauses until SnakeNet "reconnects"
+    report('reconnect', { playTicks: online.playTicks, ms: online.dropMs });
+    setScreen('reconnecting');
   }
 }
 
@@ -115,6 +135,7 @@ function setScreen(name) {
   screenTime = 0;
   waited = 0;
   voice.spoken = null;
+  onlineScreen(name);
   report('screen', { name });
 }
 
@@ -125,18 +146,11 @@ function copySnake() {
 function draw() {
   if (LAUNCH[screen] && screen !== 'opening') {
     drawLaunch(ctx, screen, screenTime, canvas.width, canvas.height);
+    drawToasts(ctx, canvas.width);
     reportFirstFrame();
     return;
   }
-  ctx.fillStyle = COLORS.hud;
-  ctx.fillRect(0, 0, canvas.width, HUD);
-  ctx.fillStyle = COLORS.text;
-  ctx.font = '16px monospace';
-  ctx.textBaseline = 'middle';
-  ctx.textAlign = 'left';
-  ctx.fillText(`Score ${game.score}   Best ${best}`, 8, HUD / 2);
-  ctx.textAlign = 'right';
-  ctx.fillText(VERSION, canvas.width - 8, HUD / 2);
+  drawTopBar(ctx, canvas.width, `Score ${game.score}   Best ${best}`, VERSION);
 
   // How far the snake is between its last cell and its new one: 0 to 1.
   const progress = screen === 'play' ? Math.min(waited / TICK_MS, 1) : 1;
@@ -176,6 +190,8 @@ function draw() {
   if (screen === 'finisher' && screenTime >= FINISHER.slowMs) drawMessage('Press E to eat', HUD + BOARD - 50); // below the close-up of the head
   if (screen === 'ready') drawMessage('Press an arrow key or WASD');
   if (screen === 'gameover') drawMessage('Game over. Press Enter to play again');
+  if (screen === 'reconnecting') drawReconnecting(ctx, screenTime, canvas.width, canvas.height);
+  drawToasts(ctx, canvas.width);
   reportFirstFrame();
 }
 
@@ -292,9 +308,11 @@ let reportedListening = false;
 function report(type, data) {
   log.push({ t: performance.now(), type, ...data });
 }
-// The key that leaves this screen right now, or null if it doesn't listen yet.
+// The key that moves this screen on right now (leaves it, or on the terms scrolls them first), or null.
 function nextKey() {
-  if (launchListens(screen, screenTime) || screen === 'gameover') return 'Enter';
+  if (screen === 'terms' && !termsRead()) return 'PageDown'; // the terms must be scrolled to the bottom first
+  if (launchListens(screen, screenTime)) return LAUNCH[screen].key || 'Enter';
+  if (screen === 'gameover') return 'Enter';
   if (screen === 'finisher' && screenTime >= FINISHER.slowMs) return FINISHER.key;
   return null;
 }
@@ -314,7 +332,7 @@ window.snakeGame = {
   probe: () => ({
     screen,
     shown: screen === lastDrawnScreen, // false until the screen is on the display
-    next: nextKey(),                   // the key that leaves this screen, once it listens
+    next: nextKey(),                   // the key that moves this screen on, once it listens
     tick: game.tick,
     heading: game.turns.length > 0 ? game.turns[game.turns.length - 1] : game.direction,
     snake: game.snake,

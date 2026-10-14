@@ -2,7 +2,7 @@
 import { chromium } from 'playwright';
 import { decide, KEY_FOR } from './bot.mjs';
 import {
-  CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin, firstMs,
+  CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin, firstMs, playShare,
 } from './stats.mjs';
 
 // Injected before any game code. It records the time of every animation frame
@@ -169,7 +169,9 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
 
     if (!memory && controlSoFar >= playMsForMemory) memory = await readHeap();
     if (stopAfterControlMs !== null && controlSoFar >= stopAfterControlMs) break;
-    if (stopAfterControlMs === null && t >= sessionMs && memory && sawApple) break;
+    // Go on for 1 s of control past the 60 s window, so the game's own log (which the window
+    // is cut from) has all of it too: the bot's count of control and the log's differ by ms.
+    if (stopAfterControlMs === null && t >= sessionMs && memory && sawApple && controlSoFar >= fpsPlayMs + 1000) break;
     if (t >= maxMs) {
       incomplete = true;
       break;
@@ -218,6 +220,7 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
       sessionMs: session,
       controlMs: controlMs(raw.log, session),
       controlShare: controlMs(raw.log, session) / session,
+      controlInPlay: playShare(raw.log, end, fpsPlayMs),
       memory: memory && { ...memory, raw: undefined },
       memoryRaw: memory?.raw ?? null,
       fps,

@@ -54,6 +54,7 @@ const METHOD = {
   timeToFirstApple: 'performance.now() in the page when the game logs its first apple; 0 is navigation start.',
   screensBeforeFirstApple: `Segments of the game's screen log between navigation start and the first apple. "${PAGE_LOAD}" is the time before the game reports its first screen.`,
   bot: 'tools/rig/bot.mjs. Seed 1. It acts only on screens already drawn, presses the key a screen offers to leave it (skip/continue/restart) at once, and on control screens takes a shortest path to the apple (breadth-first search). Keys are real key presses (Playwright keyboard). It polls the game every 4 ms.',
+  controlShareInPlay: 'Since prompt 5: from the first drawn frame of a control screen until the bot has had 60000 ms of control (the heap\'s and the frame rate\'s window), control time divided by the time that passed. The launch screens are left out; what stops play after the first control frame (finishing moves, cutscenes, deaths, reconnects) counts against it (tools/rig/stats.mjs playShare).',
   controlShare: `Time in control screens (${[...CONTROL_SCREENS].join(', ')}) divided by the session, over the first sessionMs from navigation start. Control screens are those where arrow keys steer the snake; the list is fixed in tools/rig/stats.mjs.`,
   steering: 'In play, every turn key the bot sends is checked on the next look at the game: accepted means the game now heads that way. A turn sent just before the snake died cannot be checked and is counted as unchecked.',
   load: 'performance.now() of the first drawn frame of a screen that accepts any key: the first frame of a control screen, or the game\'s first "accepts" log entry (the first drawn frame where another screen starts reacting to a key), whichever comes first.',
@@ -95,7 +96,7 @@ export async function measure(opts) {
       runs.push({ run: i, ...summary });
       rawRuns.push(raw);
       const s = summary;
-      say(`run ${i}/${o.runs} headless: first apple ${s.timeToFirstAppleMs} ms (tick ${s.firstAppleTick}), load ${s.loadMs} ms, control ${s.controlMs} / ${s.sessionMs} ms = ${s.controlShare}, heap ${s.memory?.usedSizeAfterGc} bytes after GC (${s.memory?.usedSizeBeforeGc} before) at ${s.memory?.controlMsAtRead} ms of control, download ${s.requests.bytes} bytes in ${s.requests.count} requests, headless fps median ${s.fps.median} p5 ${s.fps.p5}, steering ${s.steering.accepted}/${s.steering.sent} (${s.steering.unchecked} unchecked), deaths ${s.deathsInSession}, errors ${s.errors.length}${s.incomplete ? ', INCOMPLETE' : ''}`);
+      say(`run ${i}/${o.runs} headless: first apple ${s.timeToFirstAppleMs} ms (tick ${s.firstAppleTick}), load ${s.loadMs} ms, control ${s.controlMs} / ${s.sessionMs} ms = ${s.controlShare}, control in play ${s.controlInPlay?.controlMs} / ${s.controlInPlay ? s.controlInPlay.toMs - s.controlInPlay.fromMs : null} ms = ${s.controlInPlay?.share}, heap ${s.memory?.usedSizeAfterGc} bytes after GC (${s.memory?.usedSizeBeforeGc} before) at ${s.memory?.controlMsAtRead} ms of control, download ${s.requests.bytes} bytes in ${s.requests.count} requests, headless fps median ${s.fps.median} p5 ${s.fps.p5}, steering ${s.steering.accepted}/${s.steering.sent} (${s.steering.unchecked} unchecked), deaths ${s.deathsInSession}, errors ${s.errors.length}${s.incomplete ? ', INCOMPLETE' : ''}`);
       say(`  screens before the first apple: ${(s.screensBeforeFirstApple || []).map(x => `${x.screen} ${x.ms} ms`).join(' -> ')}`);
     }
     for (let i = 1; i <= o.fpsRuns; i++) {
@@ -130,6 +131,7 @@ export async function measure(opts) {
       timeToFirstAppleMs: pick(r => r.timeToFirstAppleMs),
       loadMs: pick(r => r.loadMs),
       controlShare: pick(r => r.controlShare),
+      controlShareInPlay: pick(r => r.controlInPlay?.share),
       heapUsedAfterGcBytes: pick(r => r.memory?.usedSizeAfterGc),
       downloadBytes: pick(r => r.requests.bytes),
       fpsMedian: median(fpsRuns.map(r => r.median)),
@@ -167,6 +169,7 @@ export async function measure(opts) {
   for (const s of medianScreens) say(`    ${s.screen.padEnd(16)} ${s.ms} ms`);
   say(`  load time             ${m.loadMs} ms`);
   say(`  control share         ${m.controlShare} (of ${o.sessionMs} ms)`);
+  say(`  control share in play ${m.controlShareInPlay} (first ${o.fpsPlayMs} ms of control, from the first control frame)`);
   say(`  JS heap after GC      ${m.heapUsedAfterGcBytes} bytes`);
   say(`  download              ${m.downloadBytes} bytes`);
   say(`  frame rate (${o.fpsMode})  median ${m.fpsMedian} fps, p5 ${m.fpsP5} fps`);

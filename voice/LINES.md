@@ -1,4 +1,4 @@
-# Warden Snek: voice lines (v1.3)
+# Warden Snek: voice lines (since v1.3)
 
 Generated from src/story.js by `npm run voice`; edit the lines there, not here.
 
@@ -20,7 +20,8 @@ change any timing. Check with `npm run voice -- --check`.
 - Language: English
 - Output format: MP3, 44.1 kHz, 64 kbps (mp3_44100_64)
 - Text: the line exactly as written below, with its emotion as an audio tag in front, e.g. "[weary] There was an orchard here once."
-- Save each take as the file in the last column, replacing the placeholder.
+- Save each take as the file in the last column, replacing the placeholder, then run `npm run voice`: it copies
+  src/voice/ into every build that has voice lines (dist/v1.3/voice/, dist/v1.4/voice/ and on), so nothing else changes.
 
 ## Disclosure (fill in when recording)
 

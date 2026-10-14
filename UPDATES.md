@@ -4,6 +4,8 @@
 Warden Snek, not Commander Snek; v1.2's patch comes only from the game's own origin; v1.5 keeps its note that control
 share may go up. Any later change to this file is a new, logged decision.
 
+Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10-14, PROMPTS.md #5).
+
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
 
@@ -127,6 +129,10 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   up; during play, at times set by the seed, "Connection interrupted. Reconnecting..." pauses the game.
 - **Metrics:** time to first apple and load time up; control share down, also during play (the reconnect pauses);
   external requests stay at zero, checked.
+- **Bot rule (logged change, 2026-10-14, PROMPTS.md #5, written before v1.4 was measured):** the terms of service
+  must be scrolled to the bottom before "Accept" can be pressed. Until then the screen offers its scroll key (Page
+  Down), then Enter. The bot presses the key a screen offers, as on every screen, at most once every 250 ms on the same
+  screen; it does not use the mouse wheel. Nothing else in the bot changes.
 - **Patch note:** "Always-online connectivity keeps you close to the Snake community, even when you'd rather play."
 - **Generated art / voice:** none.
 - **Graphics (budget):** UI chrome: a top bar with an online indicator and a currency counter, toast notifications,

@@ -83,6 +83,19 @@ export function firstMs(intervals, amount) {
   return out;
 }
 
+// Control share in play: from the first frame of a control screen until `amount` ms of control
+// have passed (the heap's and the frame rate's window), the share of that time spent in control.
+// The launch screens before it are left out; whatever stops play after it (finishing moves,
+// cutscenes, deaths, reconnects) counts against it. Null if the log has less control than that.
+export function playShare(log, end, amount) {
+  const window = firstMs(controlIntervals(log, end), amount);
+  const controlled = window.reduce((sum, [a, b]) => sum + b - a, 0);
+  if (!window.length || controlled < amount) return null;
+  const fromMs = window[0][0];
+  const toMs = window[window.length - 1][1];
+  return { controlMs: controlled, fromMs, toMs, share: controlled / (toMs - fromMs) };
+}
+
 export function firstApple(log) {
   return log.find(e => e.type === 'apple') || null;
 }
