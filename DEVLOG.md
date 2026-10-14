@@ -447,3 +447,39 @@ requests; 0 page errors. Budget: pass.
 - **v1.3 run 1 had no control share in play** (its log stopped 37.90000003576279 ms short of the window); see the
   rig changes above. Headless runs now go on to 61 s of control, and each v1.4 run is about 9 minutes long.
 - **The full `npm test` now takes about 11 minutes,** longer than one tool call can wait, so it runs in the background.
+
+## Prompt 6: v1.5 Open world
+
+### v1.5, the plan for the world and its culling (written before building)
+**World size: 256 x 256 cells** (6144 x 6144 px at 24 px a cell). The view stays 20 x 20 cells, as in every version
+so far, so the world is 12.8 screens wide and 163.84 screens in all.
+- **Why this size: the walk.** UPDATES.md says time to first apple goes up "by the travel distance". The apple is
+  placed by the seed at least 128 cells from the head (counted along the grid, as the snake moves), half the world's
+  width. At one cell per tick (100 ms), that is at least 12.8 s of walking and at most 25.6 s from the middle (a
+  corner is 256 cells away). Long enough to show in the numbers and in the short; short enough that every measured
+  run still reaches several apples in its 60 s of control.
+- **Why not bigger:** with culling the cost of a frame does not depend on the world's size, so a bigger world would
+  only make each walk longer, and the rig's runs with it. The size is chosen for the walk, not for the frame rate.
+- **Memory:** the ground and the props are one byte per cell each (65536 bytes each). The markers are objects:
+  hundreds of them, 600 in all: 120 question marks, 24 viewpoints, 40 camps, 160 chests (all empty) and 256 acorns
+  (the collectibles, with a running total). That is about one marker every 109 cells, about 4 on a screen, and on the
+  world map, 480 px across for 256 cells, the world is covered in icons.
+- **Rules unchanged:** one cell per tick; the walls are the edges of the world. Trees, rocks and markers are scenery,
+  never obstacles, so the snake and the bot move exactly as before; the bot gets the bigger grid from the probe.
+
+**How culling keeps the frame rate inside the budget** (median at least 50 fps, 5th percentile at least 30 fps):
+- **Ground:** each frame works out the rectangle of cells the camera sees (20 x 20 at normal zoom, fewer in a
+  close-up) and draws only those, plus one cell at the edges: at most 21 x 21 = 441 small images, from an atlas of
+  ground tiles made once on the "Preparing your experience" screen. Anywhere in the world, a frame draws the same
+  amount of ground; the other 65095 cells are never touched.
+- **Trees, rocks and markers:** looked up by cell inside the same rectangle (two cells wider, for the canopies and
+  shadows that hang over the edge), never by going through the whole world. Their sprites, shadows included, are
+  drawn once at "Preparing" and then copied: no blur and no shadow is computed per frame.
+- **Cloud shadows:** a few dozen soft shapes drifting over the whole world; each frame checks their rectangles and
+  draws only the ones that overlap the view (one to three).
+- **Minimap:** one image of the whole world at one pixel per cell (256 x 256), made once; each frame copies the
+  part around the snake into the corner. A marker that changes (a chest opened, an acorn taken) changes one pixel.
+- **The world map** is its own screen, not play, so it is not in the frame-rate window; it is drawn from the same
+  256 x 256 image, scaled up, with the markers on top.
+- What I cannot know before measuring: whether 441 tile copies a frame, plus the sprites, keep the 5th percentile
+  above 30 fps in the visible window on the M1. If it does not, I stop and report, and do not make the world smaller.

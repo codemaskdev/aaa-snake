@@ -300,3 +300,27 @@ metric (also for v1.0 to v1.3, from their saved runs); expectations written befo
 chart with five versions.
 What broke: the short cut the last word of the patch note; three bugs in my own v1.4 test; v1.3 run 1 had no value
 for control share in play. See DEVLOG.md.
+
+## 6. Build v1.5, Open world
+
+````text
+v1.4 is accepted. Build v1.5 (open world) exactly as the frozen
+UPDATES.md describes: a large world the camera follows, hundreds of map
+markers (question marks, viewpoints, empty chests, collectibles with a
+running total), a minimap, a full world-map screen, exactly one apple
+placed far away by the seed with a quest marker pointing to it, "fast
+travel coming in a future update". Rules unchanged: one cell per tick.
+Graphics step: tiled textured world drawing only visible tiles, shadows
+from trees and rocks, drifting cloud shadows, minimap. 2D canvas.
+This is the first version that can hit the performance budget. Before
+building, write in DEVLOG the world size you intend and why, and how
+culling keeps the frame rate inside the budget. If the measured frame
+rate falls below the budget, do not tune the world down silently: stop,
+report the numbers, and ask me.
+Before measuring, write the expected direction of each metric,
+including the two control-share metrics separately. UPDATES.md predicts
+control share may go UP here; say whether you still expect that and why.
+Tag v1.5, run measure and short, update the chart, full npm test, STOP.
+Do not start v1.6.
+Report as before.
+````
