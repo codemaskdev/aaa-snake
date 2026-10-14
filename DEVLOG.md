@@ -586,3 +586,12 @@ requests; 0 page errors. **Budget: pass** (median 60 fps, 5th percentile 54.6448
   bar, so during the walk it covers "Score". v1.5's is the first short whose sped-up part shows play (the walk), so the
   first where it covers something that matters; moving it changes the fixed short layout, so I leave that for later.
 - Nothing broke while measuring. The full `npm test` after it: 75 of 75, exit 0.
+
+## Prompt 7: the short's speed label; v1.6 Progression
+
+### The speed label moved
+The label with the playback speed ("5.75x") sat at the top left of the game, over the game's top bar; in v1.5's short
+it covered "Score" during the walk. It now sits at the top right of the patch-note card, where it never covers the
+game. tests/short.test.mjs checks that it stays off the game and off the card's "Patch notes" (it failed with the old
+place). All six shorts were rendered again (`npm run short v1.0` to `v1.5`, each exit 0); nothing else in them
+changed: 720, 762, 757, 894, 894 and 896 frames, as before.

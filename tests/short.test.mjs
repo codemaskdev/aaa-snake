@@ -39,6 +39,17 @@ test('every patch note so far fits the card whole (v1.4\'s lost its last word)',
       await checkSafeArea(page);
       assert.equal(await page.evaluate(() => document.getElementById('note').textContent), note, version);
     }
+    // The speed label never covers the game, its top bar included, and stays clear of the card's text.
+    const boxes = await page.evaluate(() => {
+      window.layout.setSpeed('12.35x');
+      const r = id => document.getElementById(id).getBoundingClientRect().toJSON();
+      return { speed: r('speed'), game: r('game'), card: r('card'), words: (() => { const range = document.createRange(); range.selectNodeContents(document.querySelector('#card .label')); return range.getBoundingClientRect().toJSON(); })() };
+    });
+    const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
+    assert.ok(apart(boxes.speed, boxes.game), 'the speed label is off the game');
+    assert.ok(apart(boxes.speed, boxes.words), 'the speed label is off the card\'s "Patch notes"');
+    assert.ok(boxes.speed.top >= boxes.card.top && boxes.speed.right <= boxes.card.right, 'inside the card');
+    await checkSafeArea(page);
   } finally {
     await browser.close();
   }

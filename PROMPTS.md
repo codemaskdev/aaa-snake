@@ -332,3 +332,27 @@ measured, its short, the chart with six versions. The frame rate stayed inside t
 What broke: world.js did not load (a variable declared twice); the quest arrow hid under the minimap; v1.0's bot test
 failed once (a turn sent on the run's last look counted as refused); an apostrophe broke tools/measure.mjs. See
 DEVLOG.md.
+
+## 7. Move the short's speed label; build v1.6, Progression
+
+````text
+v1.5 is accepted.
+[If moving the label:] First, move the speed label in the short layout so
+it never covers the game's top bar; re-render all shorts and show the
+v1.5 middle frame.
+Then build v1.6 (progression) exactly as the frozen UPDATES.md describes:
+XP for moving and eating; "Turn left" (counter-clockwise) is a skill
+unlocked at level 5, so until then only right turns work and a locked
+turn shows "Skill locked: Turn left (requires level 5)"; every level-up
+stops the game for a full-screen LEVEL UP and a skill-tree screen where
+the next skill must be chosen before play resumes. The bot spends points
+on "Turn left" first, then whatever comes first in the list; its path
+search must respect the turns the probe says are allowed. Graphics step:
+level-up particles, glowing XP bar, skill tree with animated links. 2D
+canvas, inside the budget.
+Before measuring, write the expected direction of each metric, both
+control-share metrics separately, and your expectation for the first
+apple's tick (right-turns-only paths are longer). Tag v1.6, run measure
+and short, update the chart, full npm test, STOP. Do not start v1.7.
+Report as before.
+````
