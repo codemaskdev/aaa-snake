@@ -268,3 +268,27 @@ v1.3 Story mode with 17 lines in voice/LINES.md and silent placeholders (no audi
 before measuring, measured, its short, the chart with four versions.
 What broke: a ghost apple after every bite; the light grew with the close-up; the E prompt covered the head; MP3
 placeholders longer than their slots; two test bugs. See DEVLOG.md.
+
+## 5. Build v1.4, Always online
+
+````text
+v1.3 is accepted. Build v1.4 (always online) exactly as the frozen
+UPDATES.md describes: "Connecting to SnakeNet..." as a local stub with no
+network request (the offOrigin rule and the external-request check must
+stay at zero), a sign-in screen with a pre-filled guest account, a server
+queue counting down from a seed-derived position, a terms-of-service
+window that must be scrolled to the bottom before Accept lights up, and
+seed-timed "Connection interrupted. Reconnecting..." pauses during play.
+Graphics step: UI chrome only (top bar with online indicator and a
+currency counter, toasts, spinners). No new rendering tech.
+The voice files for v1.3 are still placeholders; when I replace them, the
+build must pick them up without any other change. Make sure v1.4 inherits
+them from the same place.
+Before measuring, write the expected direction of each metric in DEVLOG,
+and this time also write what you expect control share to do during play
+(the reconnect pauses), separately from the launch screens. Tag v1.4, run
+measure and short, update the chart, full npm test, STOP. Do not start
+v1.5.
+Report as before: measure output as is, expected vs. measured, three
+frames, chart, DEVLOG quotes, git log.
+````

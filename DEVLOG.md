@@ -346,3 +346,60 @@ requests; 0 page errors. Budget: pass. In the median run the opening lasted 4401
 - **My own tests, again:** the v1.3 test pressed one arrow and waited for the apple "3 cells ahead", but with seed 1
   the apple is at (11,12), two rows down; it timed out after 90 s. It now checks the start and steers there. The
   size test assumed src/ had no assets; it now has the voice files.
+
+## Prompt 5: v1.4 Always online
+
+### v1.4, what was built
+As UPDATES.md says, with SnakeNet as a stub in src/online.js that makes no request (tests/v1.4.test.mjs checks that no
+request is made from "Connecting to SnakeNet..." to the end of the terms; the rig's own-origin check still runs on
+every request).
+- **Where it goes:** after the title, as in most online games: title -> "Connecting to SnakeNet..." (3000 ms) ->
+  sign-in with a pre-filled guest account (seed 1: guest-23361; Enter only, after 1500 ms) -> "Signing in..." (2000 ms)
+  -> the server queue -> the terms of service -> the loading screen of v1.2 -> the opening of v1.3.
+- **The queue** starts at a position from the seed (seed 1: 42) and goes down by 1 to 3 every 200 to 800 ms (also from
+  the seed) to 0; with seed 1 it lasts 7300 ms.
+- **The terms of service:** 22 sections in a box; "Accept" stays dark until the box is scrolled to the bottom (Page
+  Down, Space, the arrow keys or the mouse wheel; the box scrolls at 2000 px a second). Enter accepts.
+- **Reconnects:** after 150 to 300 moves of play (from the seed), "Connection interrupted. Reconnecting..." pauses the
+  game for 3000 to 6000 ms, then "Connection restored". Keys do nothing meanwhile. The screen is called `reconnecting`,
+  so it is not control. With seed 1 the drops come at moves 194 (4300 ms), 375 (4200 ms) and 592 (5500 ms), then on.
+- **UI chrome:** a top bar with the score, an online indicator (Online / Reconnecting), a currency counter (Scales:
+  100 from a daily login bonus; nothing can be bought, and nothing buys them), and the version; toasts for connecting,
+  signing in, the bonus, the terms and every reconnect; three-dot spinners. Canvas 2D only.
+- SnakeNet has its own generator from the seed, so the apples are the same as in v1.3.
+- **The voice lines** still come from src/voice/: v1.4's build copies them like v1.3's did, and `npm run voice` now
+  copies src/voice/ into every build that has a voice/ folder, so a recording saved over a placeholder reaches v1.3 and
+  v1.4 with no other change. tests/v1.4.test.mjs fails if any build's voice files differ from src/voice/, and
+  tests/build.test.mjs no longer asks a build's voice/ folder to match its tag (CLAUDE.md, Voice).
+- **A miss from v1.3, fixed in v1.4:** the patch notes that scroll by during the day-one patch are meant to be "every
+  patch note so far", but v1.3 never added its own. v1.4's list has v1.0 to v1.4 (checked against UPDATES.md).
+
+### Changes to the rig and the plan, before measuring
+- **A logged change to UPDATES.md:** the bot needs a rule for terms that must be scrolled. The screen offers Page Down
+  (probe `next`) until the bottom, then Enter, and the bot presses what is offered, as on every screen, at most every
+  250 ms. The rule is written in UPDATES.md's v1.4 section.
+- **Control share in play (new):** from the first control frame until 60 s of control, control time divided by the
+  time that passed (tools/rig/stats.mjs playShare). The launch screens are not in it; everything that stops play once
+  it has started is. `npm run measure` reports it from now on, and `npm run play-share` computes it for v1.0 to v1.3
+  from their saved runs (measurements/play-share-output.txt): v1.0 1, v1.1 1, v1.2 1, v1.3 0.14181426803644825.
+  In v1.3, run 1 has no value: its log ends with 59962.09999996424 ms of control, because a headless run stopped right
+  after the heap read, which goes by the bot's own count of control, a few ms ahead of the game's log. v1.3's value is
+  the median of runs 2 to 5.
+- **So headless runs now go on until 61 s of control**, as the visible runs already did, so the game's log always has
+  the whole window. Nothing that is measured changes with it: the heap is read at the same point, control share is over
+  the first 180 s, and the run lasts longer than 180 s anyway.
+
+### v1.4, expected direction of every metric (written before `npm run measure v1.4`)
+| Metric | Expected | Why |
+|---|---|---|
+| Time to first apple | up | connecting, sign-in, signing in, the queue and the terms come before the loading screen |
+| Load time | unchanged | the online screens come after the title, so the warning is still the first screen that accepts a key. UPDATES.md guessed "up"; that would need a screen before the warning, and the frozen plan does not place them |
+| Control share (first 180 s) | down | play starts later, so less of the first 180 s is play |
+| Control share in play | down, a little | with seed 1, two or three drops (8500 to 14000 ms) fall in the moves of the first 60 s of control; v1.3's finishing moves and reflections already take most of that time, so the drops add only a little to it |
+| Download | up, a little | online.js and the longer game.js, launch.js and update.js |
+| JS lines / bytes | up | online.js |
+| Assets | unchanged | the same voice placeholders |
+| JS heap after GC | up, a little | the terms text and SnakeNet's state |
+| Frame rate median | unchanged | the top bar and toasts are a few rectangles and text |
+| Frame rate 5th percentile | unchanged or slightly down | the same |
+| Requests to another origin | zero | SnakeNet is a stub; the rig checks every request |
