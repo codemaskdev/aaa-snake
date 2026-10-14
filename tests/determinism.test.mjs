@@ -22,9 +22,13 @@ test('no Math.random anywhere in the game (src and every build)', () => {
   }
 });
 
-test('rules.js never reads a clock', () => {
-  const text = fs.readFileSync(path.join(ROOT, 'src/rules.js'), 'utf8');
-  assert.ok(!/performance\.now|Date\.now|new Date|setTimeout|setInterval|requestAnimationFrame/.test(text));
+test('rules.js and launch.js never read a clock', () => {
+  for (const name of ['rules.js', 'launch.js']) {
+    const file = path.join(ROOT, 'src', name);
+    if (!fs.existsSync(file)) continue;
+    const text = fs.readFileSync(file, 'utf8');
+    assert.ok(!/performance\.now|Date\.now|new Date|setTimeout|setInterval|requestAnimationFrame/.test(text), name);
+  }
 });
 
 test('game.js reads the clock only in report(), the log for the measuring bot', () => {

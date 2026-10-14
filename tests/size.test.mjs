@@ -7,7 +7,7 @@ import { countLines, sizeOf } from '../tools/rig/size.mjs';
 import { ROOT } from './helpers.mjs';
 
 test('line counts match wc -l', () => {
-  for (const name of ['rules.js', 'game.js', 'index.html']) {
+  for (const name of fs.readdirSync(path.join(ROOT, 'src'))) {
     const file = path.join(ROOT, 'src', name);
     const wc = Number(execFileSync('wc', ['-l', file], { encoding: 'utf8' }).trim().split(/\s+/)[0]);
     assert.equal(countLines(fs.readFileSync(file)), wc, name);
@@ -20,6 +20,7 @@ test('sizes: js, code and assets are split by file type', () => {
   assert.equal(s.assetBytes, 65536, 'blob.bin is the only asset');
   assert.equal(s.buildBytes, 65536 + fs.statSync(path.join(ROOT, 'tests/fixture/index.html')).size);
   const src = sizeOf(path.join(ROOT, 'src'));
-  assert.equal(src.jsBytes, fs.statSync(path.join(ROOT, 'src/rules.js')).size + fs.statSync(path.join(ROOT, 'src/game.js')).size);
+  const jsFiles = fs.readdirSync(path.join(ROOT, 'src')).filter(f => f.endsWith('.js'));
+  assert.equal(src.jsBytes, jsFiles.reduce((sum, f) => sum + fs.statSync(path.join(ROOT, 'src', f)).size, 0));
   assert.equal(src.assetBytes, 0);
 });
