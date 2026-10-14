@@ -228,3 +228,8 @@ full npm test, and STOP. Do not start v1.3.
 - Three frames each for the re-rendered v1.1 and for v1.2
 - The chart; DEVLOG quotes of anything that broke; git log as before
 ````
+
+Built: one fixed plan for every short after v1.0 (v1.1 re-rendered); v1.2 Day-one patch (tag v1.2), expectations
+written before measuring, measured, its short, the chart with three versions.
+What broke: the patch's grass was drawn before it existed and froze the game; the comparison counter spilled out of
+its box; three test bugs. See DEVLOG.md.

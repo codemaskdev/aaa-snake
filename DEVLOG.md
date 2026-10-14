@@ -172,3 +172,70 @@ v1.2 is built and tagged (998f1f7). Nothing has been measured yet. What each met
   JS heap.
 - **Frame rate: unchanged or slightly down, within the budget.** The field is drawn once and copied each frame; the
   shadows add blur work on a 480 × 512 canvas.
+
+## 2026-10-14 — Prompt 3: one fixed plan for every short; v1.2 Day-one patch measured
+
+Commits: 43d0cd3 (fixed short plan, v1.1 re-rendered), 998f1f7 (v1.2, tag v1.2), dc0a05f (expectations, before
+measuring), 01230fb (v1.2 measured), 0fda333 (v1.2 short plan).
+
+### The fixed short plan
+Every short after v1.0 now opens on the result: 3 s of the previous version reaching its first apple (its counter
+freezes on its median, then the new median appears next to it, labelled "v<prev> -> v<new>"), 3 s of the patch note,
+the new version's launch sped up to fill 16 s of clip, then its first apple at real speed. The speed-up is the largest
+multiple of 0.05 that keeps that part at 16 s or more (tools/short.mjs `compressSpeed`), shown in small type.
+- v1.1 re-rendered: its launch (516.6666666666667 to 16908.79999999702 ms of the run) is shorter than 16 s at any
+  speed above 1x, so it plays at 1x and the short is 25400 ms. It is not sped up 3x to 4x: at 3x the short would
+  have been far below 25 s.
+- v1.2: 2.4x; the short is 25233.333333333332 ms. Also below 3x, for the same reason: its launch is shorter than
+  48 s.
+
+### v1.2, what was built
+As UPDATES.md says. On start, "A required update is available" (2000 ms). The game then downloads patch/day-one.js
+from its own server in 256-byte range requests, one per 1000 ms (the throttle), showing the real bytes received, with
+this file's patch notes scrolling in a box. "Installing" runs the downloaded bytes as a script from a blob: URL;
+"Preparing your experience" draws the grass the patch adds (offscreen, once, from the seed, with its own generator)
+and fades it in. After the title, a loading screen with tips listens for a key after 5000 ms. The patch also adds soft
+shadows under the snake and the apple. tools/serve.mjs now answers byte ranges; its plain 200 responses keep exactly
+the headers they had, so download bytes stay comparable.
+
+### v1.2, measured (`npm run measure v1.2`, medians of 5 runs) against the expectations written before measuring
+| Metric | Expected | v1.1 | v1.2 | Direction |
+|---|---|---|---|---|
+| Time to first apple | up | 18908.79999999702 ms | 40996.10000000894 ms | up, as expected |
+| Load time | up | 13089.39999999106 ms | 30147.30000001192 ms | up, as expected |
+| Control share | down | 0.8798588888888558 | 0.7572477777778275 | down, as expected |
+| Download | up | 19454 bytes | 34115 bytes | up, as expected |
+| JS lines / bytes | up | 488 / 17929 | 793 / 29965 | up, as expected |
+| Assets | unchanged | 0 bytes | 0 bytes | unchanged, as expected |
+| JS heap after GC | up a little | 1048108 bytes | 1282896 bytes | up, as expected |
+| Frame rate median | unchanged or slightly down | 60 fps | 60 fps | unchanged |
+| Frame rate 5th percentile | unchanged or slightly down | 57.142857142857146 fps | 56.49717514125223 fps | slightly down |
+
+Checks: first apple on tick 3 in all 5 runs; 885 of 885 turns accepted; 0 requests outside the game's origin; 0 page
+errors. Budget: pass. The patch is 2126 bytes; in the median run (run 5) its 9 range requests came to 4519 bytes on the
+wire: the headers weigh more than the patch.
+
+### What broke
+- **The patch killed the game loop.** On the first frame of "Preparing your experience" the grass was not drawn yet
+  (the work happens on the screen's frames, and the screen changes after the work of that frame). Drawing it threw
+  `Failed to execute 'drawImage' on 'CanvasRenderingContext2D': The provided value is not of type '(CSSImageValue or
+  HTMLCanvasElement or HTMLImageElement or HTMLVideoElement or ImageBitmap or OffscreenCanvas or SVGImageElement or
+  VideoFrame)'.`, the exception stopped requestAnimationFrame, and the game froze on that screen. My first trial run of
+  the bot never reached an apple and I stopped it after its 200-second command timeout. The screen now draws the
+  field only once it exists.
+- **One unexplained slow trial.** In the trial run right after that fix, the bot spent much longer in play than the
+  usual three moves before its first apple. Three more trials and all 5 measured runs ate it on tick 3. The trial was
+  not saved, and I could not find a cause (no Playwright processes were left over afterwards).
+- **The comparison counter spilled out of its box**, past the right edge and into the safe margin, in the first
+  render of the v1.1 short. The safe-area check passed, because it measured boxes, not the text inside them. The
+  counter now has two rows in comparison mode, and every frame is checked for text spilling out of any box.
+- **My own tests, again:** the size tests assumed src/ had no folders (it now has patch/); a plan test expected 3.75x
+  where the rule gives 3.6x (3.625 rounded down to a multiple of 0.05); the recorder compared the fixture's apples up
+  to the end of the plan instead of the last frame drawn.
+
+### Found, not fixed (a question for the next prompt)
+- The frame-rate runs in a visible window last 60 s from navigation start. In v1.2 the first apple comes at
+  40996.10000000894 ms, so only the rest of those 60 s is play (1162 to 1167 frames per run). From the first version
+  whose launch passes 60 s, they would measure no play at all.
+
+🎬 Maybe: "1,280 of 2,126 bytes", one piece per second, while the headers of those pieces outweigh the patch.
