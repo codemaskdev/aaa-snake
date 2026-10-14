@@ -152,3 +152,23 @@ Interactive" returned nothing. "Squarescale Studios" was dropped: the search fou
   the same apple on tick 3.
 
 🎬 Maybe: the counter climbing through three logos, a warning and an autosave notice, then the apple at 18.909 s.
+
+## 2026-10-14 — Prompt 3: expectations for v1.2, written before measuring
+
+v1.2 is built and tagged (998f1f7). Nothing has been measured yet. What each metric should do, and why
+(direction only):
+- **Time to first apple: up.** Four new screens come before the logos (the update notice, a download throttled to one
+  piece per second, the install, "preparing"), and a loading screen comes after the title. The walk to the apple
+  itself should not change: same seed, and the grass has its own generator, so the apple lands where it did.
+- **Load time: up.** The first screen that accepts a key is still the warning, and it now comes after the update
+  screens.
+- **Control share: down.** More of the fixed 3-minute session passes before play. After a game over the way back is
+  the same as in v1.1 (autosave only), so the extra loss is all at the start.
+- **Download bytes: up.** The patch body, plus the headers of every one of its small range requests, plus the new
+  script file.
+- **JS bytes and lines: up.** update.js, the loading screen, and the patch file itself (it is a .js file in the build).
+- **Asset bytes: unchanged (zero).** The grass is drawn in code, not loaded as an image.
+- **JS heap: up a little.** The patch pieces stay in memory and there is more code; the grass canvas's pixels are not
+  JS heap.
+- **Frame rate: unchanged or slightly down, within the budget.** The field is drawn once and copied each frame; the
+  shadows add blur work on a 480 × 512 canvas.
