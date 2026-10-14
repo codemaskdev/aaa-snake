@@ -403,3 +403,47 @@ every request).
 | Frame rate median | unchanged | the top bar and toasts are a few rectangles and text |
 | Frame rate 5th percentile | unchanged or slightly down | the same |
 | Requests to another origin | zero | SnakeNet is a stub; the rig checks every request |
+
+### v1.4, measured (`npm run measure v1.4`, medians of 5 runs) against the expectations written before measuring
+| Metric | Expected | v1.3 | v1.4 | Direction |
+|---|---|---|---|---|
+| Time to first apple | up | 87317.09999999404 ms | 102958.79999999702 ms | up, as expected (15641.70000000298 ms; the five online screens took 15628.09999999404 ms in the median run) |
+| Load time | unchanged | 30136 ms | 30145.70000000298 ms | unchanged, as expected (UPDATES.md had guessed up) |
+| Control share (first 180 s) | down | 0.07952611111121045 | 0.06027444444456034 | down, as expected |
+| Control share in play | down, a little | 0.14181426803644825 | 0.1390078500049561 | down a little, as expected |
+| Download | up, a little | 676755 bytes | 695136 bytes | up a little, as expected (18381 bytes) |
+| JS lines / bytes | up | 999 / 39996 | 1407 / 58144 | up, as expected |
+| Assets | unchanged | 629368 bytes | 629368 bytes | unchanged, as expected |
+| JS heap after GC | up, a little | 1639292 bytes | 1705008 bytes | up a little, as expected (65716 bytes) |
+| Frame rate median | unchanged | 60 fps | 60 fps | unchanged, as expected |
+| Frame rate 5th percentile | unchanged or slightly down | 54.34782608688775 fps | 54.64480874311725 fps | slightly up (0.2969826562295026 fps), which I did not expect; the five visible v1.4 runs alone range from 54.34782608688775 to 55.55555555555556 fps |
+| Requests to another origin | zero | 0 | 0 | zero, as expected |
+
+Checks: first apple on tick 3 in all 5 runs; 445 of 445 turns accepted; 0 requests outside the game's origin; 0 failed
+requests; 0 page errors. Budget: pass.
+- **Control share in play, measured apart from the launch:** in every run two drops fell in the first 60 s of control,
+  at moves 194 (4300 ms) and 375 (4200 ms); the third, at move 592, comes after the window. My guess of "two or three
+  (8500 to 14000 ms)" holds at its low end. In run 2 the window took 431630.3000000417 ms against 423217.90000005066 ms
+  in v1.3's run 2, 8412.39999999106 ms longer for 8500 ms of drops; I have not split the other 87.6000000089407 ms. The
+  launch screens are not in this number: before the first control frame the run had already lost 100325.79999999702 ms.
+- **Run 3 was slower to load:** 31194.79999999702 ms, because its patch download took 10049.79999999702 ms instead of
+  about 9016 ms. One run of five; I have not looked into it. The median is not from it.
+- **90 requests per run, not 87:** one more script (online.js), and two more `blob:` reads because the run is longer
+  (it goes on to 61 s of control now), so it reached 47 apples, not 45, and two more reflection lines played.
+- **3550 or 3551 frames per 60 s of play, not 3552 to 3555:** the two reconnect pauses cut play into two more pieces,
+  and each piece loses the frame that straddles the screen change (see v1.3).
+- The short (`npm run short v1.4`): the launch at 4.85x, 29800 ms in all. `npm run play-share` was run again and now
+  lists v1.4 too.
+
+### What broke
+- **The short cut the patch note:** "...even when you'd rather" with no "play." The card holds two lines of the note
+  and hid the rest, and the layout check looked at the card, not at the text inside it, so it passed. The card now
+  makes the note's font smaller, 1px at a time, until the whole note fits (v1.4's lands at 32px; the v1.0 to
+  v1.3 notes fit at 34px as before, so their shorts are unchanged), and the check now covers the note's own text.
+  tests/short.test.mjs puts every patch note in UPDATES.md through the layout; it failed without the fix.
+- **My own v1.4 test, three times:** it compared values from the game's sandbox with deepEqual, which also compares
+  their prototypes; it passed the screen name to the page as an undefined variable; and its own-origin check failed on
+  a `blob:` URL until it used the rig's own `offOrigin`.
+- **v1.3 run 1 had no control share in play** (its log stopped 37.90000003576279 ms short of the window); see the
+  rig changes above. Headless runs now go on to 61 s of control, and each v1.4 run is about 9 minutes long.
+- **The full `npm test` now takes about 11 minutes,** longer than one tool call can wait, so it runs in the background.

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, PLAN } from '../tools/short.mjs';
+import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, checkSafeArea, PLAN, WIDTH, HEIGHT } from '../tools/short.mjs';
+import { chromium } from 'playwright';
 import { measure } from '../tools/measure.mjs';
 import { ROOT, tempDir, pngSize } from './helpers.mjs';
 
@@ -21,6 +22,25 @@ test('every clip plan has a patch note in UPDATES.md; v1.0\'s own plan fits in 3
     if (version === 'about') continue;
     assert.ok(patchNote(md, version), `${version} has a patch note`);
     if (plan.segments) assert.ok(plan.segments.reduce((s, x) => s + x.clipMs, 0) <= 30000);
+  }
+});
+
+test('every patch note so far fits the card whole (v1.4\'s lost its last word)', async () => {
+  const md = fs.readFileSync(path.join(ROOT, 'UPDATES.md'), 'utf8');
+  const versions = [...md.matchAll(/^## (v\d+\.\d+)/gm)].map(m => m[1]).filter(v => patchNote(md, v));
+  assert.ok(versions.includes('v1.4'));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } });
+    await page.goto(`file://${path.join(ROOT, 'tools/short/layout.html')}`);
+    for (const version of versions) {
+      const note = patchNote(md, version);
+      await page.evaluate(([v, n]) => { window.layout.setCard(v, n); window.layout.setBigNote(v, n); }, [version, note]);
+      await checkSafeArea(page);
+      assert.equal(await page.evaluate(() => document.getElementById('note').textContent), note, version);
+    }
+  } finally {
+    await browser.close();
   }
 });
 

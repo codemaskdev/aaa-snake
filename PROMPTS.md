@@ -292,3 +292,11 @@ v1.5.
 Report as before: measure output as is, expected vs. measured, three
 frames, chart, DEVLOG quotes, git log.
 ````
+
+Built: v1.4 Always online, with SnakeNet as a stub that makes no request (connecting, a guest sign-in, a queue from the
+seed, terms to scroll before Accept, reconnect pauses from the seed), a top bar with an online indicator and Scales,
+toasts and spinners; voice files from src/voice/ for every build (`npm run voice`); control share in play as a new
+metric (also for v1.0 to v1.3, from their saved runs); expectations written before measuring, measured, its short, the
+chart with five versions.
+What broke: the short cut the last word of the patch note; three bugs in my own v1.4 test; v1.3 run 1 had no value
+for control share in play. See DEVLOG.md.

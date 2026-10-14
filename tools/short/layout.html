@@ -70,9 +70,13 @@
   window.layout = {
     load(id, src) { $(id).src = src; },
     // What the top card says: a version and its patch note (note may be empty).
+    // A note too long for two lines at 34px gets a smaller font, 1px at a time, until it fits.
     setCard(version, note) {
       $('version').textContent = version;
       $('note').textContent = note;
+      let size = 34;
+      $('note').style.fontSize = `${size}px`;
+      while ($('note').scrollHeight > $('note').clientHeight + 1 && size > 20) $('note').style.fontSize = `${--size}px`;
     },
     // Which of the middle panes shows: 'game', 'prev' or 'note'.
     show(which) {

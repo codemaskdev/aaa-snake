@@ -307,9 +307,9 @@ export function counterFor(seg, { cur, prev, runT, eaten }) {
   };
 }
 
-async function checkSafeArea(page) {
+export async function checkSafeArea(page) {
   // Every box must sit inside the safe area, and no text may spill out of its box.
-  const rects = await page.evaluate(({ right, bottom }) => ['card', 'game', 'prev', 'bignote', 'counter', 'speed'].map(id => {
+  const rects = await page.evaluate(({ right, bottom }) => ['card', 'note', 'game', 'prev', 'bignote', 'bignotetext', 'counter', 'speed'].map(id => {
     const el = document.getElementById(id);
     const r = el.getBoundingClientRect();
     const spills = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
