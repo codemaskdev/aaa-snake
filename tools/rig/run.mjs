@@ -178,6 +178,8 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
     }
     await sleep(pollMs);
   }
+  // A turn sent on the last look at the game can't be checked: the run ended before the next look.
+  if (check) steering.unchecked++;
 
   const end = await page.evaluate(() => performance.now());
   const raw = await page.evaluate(() => ({
