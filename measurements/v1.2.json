@@ -1,0 +1,2479 @@
+{
+  "version": "v1.2",
+  "command": "npm run measure v1.2",
+  "measuredAt": "2026-10-14T12:31:45.915Z",
+  "git": {
+    "head": "dc0a05f",
+    "tag": {
+      "name": "v1.2",
+      "commit": "998f1f7"
+    },
+    "buildSameAsTag": true,
+    "buildUncommitted": false
+  },
+  "machine": {
+    "model": "MacBook Air",
+    "modelIdentifier": "MacBookAir10,1",
+    "chip": "Apple M1",
+    "cores": 8,
+    "ramBytes": 17179869184,
+    "os": "macOS 26.3.1 (25D771280a)",
+    "node": "v24.15.0",
+    "ram": "16 GB"
+  },
+  "browser": {
+    "name": "Chromium",
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "headless": {
+      "mode": "new headless (Playwright channel \"chromium\")",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        800
+      ],
+      "devicePixelRatio": 2
+    },
+    "fpsWindow": {
+      "mode": "visible",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        700
+      ],
+      "devicePixelRatio": 2
+    }
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 5,
+    "sessionMs": 180000,
+    "playMsForMemory": 60000,
+    "fpsRuns": 5,
+    "fpsSessionMs": 60000
+  },
+  "method": {
+    "timeToFirstApple": "performance.now() in the page when the game logs its first apple; 0 is navigation start.",
+    "screensBeforeFirstApple": "Segments of the game's screen log between navigation start and the first apple. \"(page load)\" is the time before the game reports its first screen.",
+    "bot": "tools/rig/bot.mjs. Seed 1. It acts only on screens already drawn, presses the key a screen offers to leave it (skip/continue/restart) at once, and on control screens takes a shortest path to the apple (breadth-first search). Keys are real key presses (Playwright keyboard). It polls the game every 4 ms.",
+    "controlShare": "Time in control screens (ready, play) divided by the session, over the first sessionMs from navigation start. Control screens are those where arrow keys steer the snake; the list is fixed in tools/rig/stats.mjs.",
+    "steering": "In play, every turn key the bot sends is checked on the next look at the game: accepted means the game now heads that way. A turn sent just before the snake died cannot be checked and is counted as unchecked.",
+    "load": "performance.now() of the first drawn frame of a screen that accepts any key: the first frame of a control screen, or the game's first \"accepts\" log entry (the first drawn frame where another screen starts reacting to a key), whichever comes first.",
+    "memory": "CDP Runtime.getHeapUsage().usedSize of the page, read right after CDP HeapProfiler.collectGarbage, at the moment the bot has had playMsForMemory of control. The value before garbage collection is kept too.",
+    "origin": "Every request of every run must go to the page's own origin (scheme, host and port of the game); any other request is listed in checks.externalRequests and fails the checks (tools/rig/stats.mjs offOrigin).",
+    "download": "Sum of CDP Network.loadingFinished encodedDataLength over every request of the session (headers + body; no compression, browser cache disabled).",
+    "size": "Files in dist/<version>/. js = .js and .mjs; code = js + .html + .css; assets = every other file. Lines = newline characters, like wc -l (tools/rig/size.mjs).",
+    "frameRate": "Every requestAnimationFrame timestamp is recorded by a script injected before the game; only frames inside control screens count, and frames within the heap read (+500 ms) are left out. Per run: median = median of per-second frame counts (1-second windows, like an FPS counter); p5 = 5th percentile (nearest rank) of per-frame values, 1000 / interval between two frames. The version's figure is the median over runs. Per-frame values are not used for the median because rAF timestamps snap to the 60 Hz display: a 25 ms frame shows up as 16.7 and 33.3 ms intervals in turn.",
+    "frameRateWindow": "Frame rate is measured in a visible Chromium window, not headless: on this Mac, headless and visible medians agreed on CPU and GPU loads, but the 5th percentile did not (see measurements/fps-check.json). The headless runs' frame rate is kept as headlessFps for comparison.",
+    "medians": "Median over runs: the middle value of 5 (mean of the two middle values for an even count)."
+  },
+  "size": {
+    "tool": "tools/rig/size.mjs: newline characters per file, like wc -l",
+    "jsLines": 793,
+    "codeLines": 815,
+    "jsBytes": 29965,
+    "assetBytes": 0,
+    "buildBytes": 30749,
+    "files": [
+      {
+        "path": "game.js",
+        "bytes": 8220,
+        "lines": 236
+      },
+      {
+        "path": "index.html",
+        "bytes": 784,
+        "lines": 22
+      },
+      {
+        "path": "launch.js",
+        "bytes": 8261,
+        "lines": 194
+      },
+      {
+        "path": "patch/day-one.js",
+        "bytes": 2126,
+        "lines": 62
+      },
+      {
+        "path": "rules.js",
+        "bytes": 3407,
+        "lines": 96
+      },
+      {
+        "path": "update.js",
+        "bytes": 7951,
+        "lines": 205
+      }
+    ]
+  },
+  "median": {
+    "timeToFirstAppleMs": 40996.10000000894,
+    "loadMs": 30147.30000001192,
+    "controlShare": 0.7572477777778275,
+    "heapUsedAfterGcBytes": 1282896,
+    "downloadBytes": 34115,
+    "fpsMedian": 60,
+    "fpsP5": 56.49717514125223,
+    "headlessFpsMedian": 60,
+    "headlessFpsP5": 59.88023952091634
+  },
+  "checks": {
+    "firstAppleTicks": [
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "sameFirstAppleTickInAllRuns": true,
+    "sameApplesBeforeFirstDeathInAllRuns": true,
+    "externalRequests": [],
+    "failedRequests": [],
+    "pageErrors": [],
+    "steering": {
+      "sent": 885,
+      "accepted": 885,
+      "unchecked": 0
+    },
+    "incompleteRuns": [],
+    "pass": true
+  },
+  "runs": [
+    {
+      "run": 1,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 180007.90000000596,
+      "incomplete": false,
+      "timeToFirstAppleMs": 41012,
+      "firstAppleTick": 3,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 14.299999997019768
+        },
+        {
+          "screen": "update-required",
+          "ms": 2030.6000000089407
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9017.199999988079
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3016.9000000059605
+        },
+        {
+          "screen": "preparing",
+          "ms": 3016.7999999970198
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3014.9000000059605
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3017.8999999910593
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3017
+        },
+        {
+          "screen": "warning",
+          "ms": 4021.9000000059605
+        },
+        {
+          "screen": "title",
+          "ms": 2499.4000000059605
+        },
+        {
+          "screen": "loading",
+          "ms": 5019.29999999702
+        },
+        {
+          "screen": "autosave",
+          "ms": 3006.8999999910593
+        },
+        {
+          "screen": "ready",
+          "ms": 10.700000002980232
+        },
+        {
+          "screen": "play",
+          "ms": 308.20000000298023
+        }
+      ],
+      "loadMs": 30161.20000000298,
+      "sessionMs": 180000,
+      "controlMs": 136289.20000000298,
+      "controlShare": 0.7571622222222388,
+      "memory": {
+        "atMs": 100713.29999999702,
+        "controlMsAtRead": 60008.40000000596,
+        "usedSizeAfterGc": 1282896,
+        "totalSizeAfterGc": 3670016,
+        "usedSizeBeforeGc": 11607688,
+        "framesExcluded": [
+          100713.29999999702,
+          101241.09999999404
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 11607688,
+          "totalSize": 15466496,
+          "embedderHeapUsedSize": 33282320,
+          "backingStorageSize": 34456
+        },
+        "afterGc": {
+          "usedSize": 1282896,
+          "totalSize": 3670016,
+          "embedderHeapUsedSize": 1351944,
+          "backingStorageSize": 33455
+        }
+      },
+      "fps": {
+        "frames": 8143,
+        "seconds": 135,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.880239520968516,
+        "longestFrameMs": 16.800000000017462
+      },
+      "steering": {
+        "sent": 177,
+        "accepted": 177,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "loading": "Enter",
+        "gameover": "Enter"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 3
+        },
+        {
+          "score": 2,
+          "tick": 25
+        },
+        {
+          "score": 3,
+          "tick": 47
+        },
+        {
+          "score": 4,
+          "tick": 57
+        },
+        {
+          "score": 5,
+          "tick": 64
+        },
+        {
+          "score": 6,
+          "tick": 83
+        },
+        {
+          "score": 7,
+          "tick": 92
+        },
+        {
+          "score": 8,
+          "tick": 97
+        },
+        {
+          "score": 9,
+          "tick": 109
+        },
+        {
+          "score": 10,
+          "tick": 132
+        },
+        {
+          "score": 11,
+          "tick": 144
+        },
+        {
+          "score": 12,
+          "tick": 151
+        },
+        {
+          "score": 13,
+          "tick": 163
+        },
+        {
+          "score": 14,
+          "tick": 177
+        },
+        {
+          "score": 15,
+          "tick": 195
+        },
+        {
+          "score": 16,
+          "tick": 197
+        },
+        {
+          "score": 17,
+          "tick": 219
+        },
+        {
+          "score": 18,
+          "tick": 230
+        },
+        {
+          "score": 19,
+          "tick": 238
+        },
+        {
+          "score": 20,
+          "tick": 250
+        },
+        {
+          "score": 21,
+          "tick": 264
+        },
+        {
+          "score": 22,
+          "tick": 270
+        },
+        {
+          "score": 23,
+          "tick": 278
+        },
+        {
+          "score": 24,
+          "tick": 287
+        },
+        {
+          "score": 25,
+          "tick": 301
+        },
+        {
+          "score": 26,
+          "tick": 307
+        },
+        {
+          "score": 27,
+          "tick": 329
+        },
+        {
+          "score": 28,
+          "tick": 333
+        },
+        {
+          "score": 29,
+          "tick": 354
+        },
+        {
+          "score": 30,
+          "tick": 371
+        },
+        {
+          "score": 31,
+          "tick": 394
+        },
+        {
+          "score": 32,
+          "tick": 417
+        },
+        {
+          "score": 33,
+          "tick": 436
+        },
+        {
+          "score": 34,
+          "tick": 447
+        },
+        {
+          "score": 35,
+          "tick": 459
+        },
+        {
+          "score": 36,
+          "tick": 465
+        },
+        {
+          "score": 37,
+          "tick": 492
+        },
+        {
+          "score": 38,
+          "tick": 508
+        },
+        {
+          "score": 39,
+          "tick": 535
+        },
+        {
+          "score": 40,
+          "tick": 549
+        },
+        {
+          "score": 41,
+          "tick": 553
+        },
+        {
+          "score": 42,
+          "tick": 562
+        },
+        {
+          "score": 43,
+          "tick": 565
+        },
+        {
+          "score": 44,
+          "tick": 583
+        },
+        {
+          "score": 45,
+          "tick": 593
+        },
+        {
+          "score": 46,
+          "tick": 605
+        },
+        {
+          "score": 47,
+          "tick": 610
+        },
+        {
+          "score": 48,
+          "tick": 627
+        },
+        {
+          "score": 49,
+          "tick": 640
+        },
+        {
+          "score": 50,
+          "tick": 648
+        },
+        {
+          "score": 51,
+          "tick": 661
+        },
+        {
+          "score": 52,
+          "tick": 681
+        },
+        {
+          "score": 53,
+          "tick": 723
+        },
+        {
+          "score": 54,
+          "tick": 732
+        },
+        {
+          "score": 55,
+          "tick": 735
+        },
+        {
+          "score": 56,
+          "tick": 770
+        },
+        {
+          "score": 57,
+          "tick": 786
+        },
+        {
+          "score": 58,
+          "tick": 837
+        },
+        {
+          "score": 59,
+          "tick": 843
+        },
+        {
+          "score": 60,
+          "tick": 862
+        },
+        {
+          "score": 61,
+          "tick": 893
+        },
+        {
+          "score": 62,
+          "tick": 895
+        },
+        {
+          "score": 63,
+          "tick": 917
+        },
+        {
+          "score": 64,
+          "tick": 923
+        },
+        {
+          "score": 65,
+          "tick": 945
+        },
+        {
+          "score": 66,
+          "tick": 958
+        },
+        {
+          "score": 67,
+          "tick": 982
+        },
+        {
+          "score": 68,
+          "tick": 991
+        },
+        {
+          "score": 69,
+          "tick": 1028
+        },
+        {
+          "score": 70,
+          "tick": 1034
+        },
+        {
+          "score": 71,
+          "tick": 1066
+        },
+        {
+          "score": 72,
+          "tick": 1085
+        },
+        {
+          "score": 73,
+          "tick": 1099
+        },
+        {
+          "score": 74,
+          "tick": 1130
+        },
+        {
+          "score": 75,
+          "tick": 1164
+        },
+        {
+          "score": 76,
+          "tick": 1185
+        },
+        {
+          "score": 77,
+          "tick": 1199
+        },
+        {
+          "score": 78,
+          "tick": 1223
+        }
+      ],
+      "deathsInSession": 1,
+      "requests": {
+        "count": 15,
+        "bytes": 34115,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 2,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 180008.79999999702,
+      "incomplete": false,
+      "timeToFirstAppleMs": 40978.20000000298,
+      "firstAppleTick": 3,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 11.5
+        },
+        {
+          "screen": "update-required",
+          "ms": 2017.7000000029802
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9016.29999999702
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3016
+        },
+        {
+          "screen": "preparing",
+          "ms": 3001.2000000029802
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3015
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3018.0999999940395
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3016.6000000089407
+        },
+        {
+          "screen": "warning",
+          "ms": 4026.2999999970198
+        },
+        {
+          "screen": "title",
+          "ms": 2509.2000000029802
+        },
+        {
+          "screen": "loading",
+          "ms": 5016.0999999940395
+        },
+        {
+          "screen": "autosave",
+          "ms": 3013.4000000059605
+        },
+        {
+          "screen": "ready",
+          "ms": 10
+        },
+        {
+          "screen": "play",
+          "ms": 290.79999999701977
+        }
+      ],
+      "loadMs": 30128.59999999404,
+      "sessionMs": 180000,
+      "controlMs": 136305.70000000298,
+      "controlShare": 0.7572538888889054,
+      "memory": {
+        "atMs": 100696.90000000596,
+        "controlMsAtRead": 60007.90000000596,
+        "usedSizeAfterGc": 1277200,
+        "totalSizeAfterGc": 3670016,
+        "usedSizeBeforeGc": 10523844,
+        "framesExcluded": [
+          100696.90000000596,
+          101223.79999999702
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 10523844,
+          "totalSize": 15204352,
+          "embedderHeapUsedSize": 33282584,
+          "backingStorageSize": 34456
+        },
+        "afterGc": {
+          "usedSize": 1277200,
+          "totalSize": 3670016,
+          "embedderHeapUsedSize": 1349600,
+          "backingStorageSize": 33455
+        }
+      },
+      "fps": {
+        "frames": 8144,
+        "seconds": 135,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.880239520968516,
+        "longestFrameMs": 16.800000000017462
+      },
+      "steering": {
+        "sent": 177,
+        "accepted": 177,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "loading": "Enter",
+        "gameover": "Enter"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 3
+        },
+        {
+          "score": 2,
+          "tick": 25
+        },
+        {
+          "score": 3,
+          "tick": 47
+        },
+        {
+          "score": 4,
+          "tick": 57
+        },
+        {
+          "score": 5,
+          "tick": 64
+        },
+        {
+          "score": 6,
+          "tick": 83
+        },
+        {
+          "score": 7,
+          "tick": 92
+        },
+        {
+          "score": 8,
+          "tick": 97
+        },
+        {
+          "score": 9,
+          "tick": 109
+        },
+        {
+          "score": 10,
+          "tick": 132
+        },
+        {
+          "score": 11,
+          "tick": 144
+        },
+        {
+          "score": 12,
+          "tick": 151
+        },
+        {
+          "score": 13,
+          "tick": 163
+        },
+        {
+          "score": 14,
+          "tick": 177
+        },
+        {
+          "score": 15,
+          "tick": 195
+        },
+        {
+          "score": 16,
+          "tick": 197
+        },
+        {
+          "score": 17,
+          "tick": 219
+        },
+        {
+          "score": 18,
+          "tick": 230
+        },
+        {
+          "score": 19,
+          "tick": 238
+        },
+        {
+          "score": 20,
+          "tick": 250
+        },
+        {
+          "score": 21,
+          "tick": 264
+        },
+        {
+          "score": 22,
+          "tick": 270
+        },
+        {
+          "score": 23,
+          "tick": 278
+        },
+        {
+          "score": 24,
+          "tick": 287
+        },
+        {
+          "score": 25,
+          "tick": 301
+        },
+        {
+          "score": 26,
+          "tick": 307
+        },
+        {
+          "score": 27,
+          "tick": 329
+        },
+        {
+          "score": 28,
+          "tick": 333
+        },
+        {
+          "score": 29,
+          "tick": 354
+        },
+        {
+          "score": 30,
+          "tick": 371
+        },
+        {
+          "score": 31,
+          "tick": 394
+        },
+        {
+          "score": 32,
+          "tick": 417
+        },
+        {
+          "score": 33,
+          "tick": 436
+        },
+        {
+          "score": 34,
+          "tick": 447
+        },
+        {
+          "score": 35,
+          "tick": 459
+        },
+        {
+          "score": 36,
+          "tick": 465
+        },
+        {
+          "score": 37,
+          "tick": 492
+        },
+        {
+          "score": 38,
+          "tick": 508
+        },
+        {
+          "score": 39,
+          "tick": 535
+        },
+        {
+          "score": 40,
+          "tick": 549
+        },
+        {
+          "score": 41,
+          "tick": 553
+        },
+        {
+          "score": 42,
+          "tick": 562
+        },
+        {
+          "score": 43,
+          "tick": 565
+        },
+        {
+          "score": 44,
+          "tick": 583
+        },
+        {
+          "score": 45,
+          "tick": 593
+        },
+        {
+          "score": 46,
+          "tick": 605
+        },
+        {
+          "score": 47,
+          "tick": 610
+        },
+        {
+          "score": 48,
+          "tick": 627
+        },
+        {
+          "score": 49,
+          "tick": 640
+        },
+        {
+          "score": 50,
+          "tick": 648
+        },
+        {
+          "score": 51,
+          "tick": 661
+        },
+        {
+          "score": 52,
+          "tick": 681
+        },
+        {
+          "score": 53,
+          "tick": 723
+        },
+        {
+          "score": 54,
+          "tick": 732
+        },
+        {
+          "score": 55,
+          "tick": 735
+        },
+        {
+          "score": 56,
+          "tick": 770
+        },
+        {
+          "score": 57,
+          "tick": 786
+        },
+        {
+          "score": 58,
+          "tick": 837
+        },
+        {
+          "score": 59,
+          "tick": 843
+        },
+        {
+          "score": 60,
+          "tick": 862
+        },
+        {
+          "score": 61,
+          "tick": 893
+        },
+        {
+          "score": 62,
+          "tick": 895
+        },
+        {
+          "score": 63,
+          "tick": 917
+        },
+        {
+          "score": 64,
+          "tick": 923
+        },
+        {
+          "score": 65,
+          "tick": 945
+        },
+        {
+          "score": 66,
+          "tick": 958
+        },
+        {
+          "score": 67,
+          "tick": 982
+        },
+        {
+          "score": 68,
+          "tick": 991
+        },
+        {
+          "score": 69,
+          "tick": 1028
+        },
+        {
+          "score": 70,
+          "tick": 1034
+        },
+        {
+          "score": 71,
+          "tick": 1066
+        },
+        {
+          "score": 72,
+          "tick": 1085
+        },
+        {
+          "score": 73,
+          "tick": 1099
+        },
+        {
+          "score": 74,
+          "tick": 1130
+        },
+        {
+          "score": 75,
+          "tick": 1164
+        },
+        {
+          "score": 76,
+          "tick": 1185
+        },
+        {
+          "score": 77,
+          "tick": 1199
+        },
+        {
+          "score": 78,
+          "tick": 1223
+        }
+      ],
+      "deathsInSession": 1,
+      "requests": {
+        "count": 15,
+        "bytes": 34115,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 3,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 180008.70000000298,
+      "incomplete": false,
+      "timeToFirstAppleMs": 40981.40000000596,
+      "firstAppleTick": 3,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 14.400000005960464
+        },
+        {
+          "screen": "update-required",
+          "ms": 2018.699999988079
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9016.60000000894
+        },
+        {
+          "screen": "patch-install",
+          "ms": 2998.2000000029802
+        },
+        {
+          "screen": "preparing",
+          "ms": 3017.7999999970198
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3016.7999999970198
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016.5
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3014.5
+        },
+        {
+          "screen": "warning",
+          "ms": 4022.7999999970198
+        },
+        {
+          "screen": "title",
+          "ms": 2514.1000000089407
+        },
+        {
+          "screen": "loading",
+          "ms": 5019.79999999702
+        },
+        {
+          "screen": "autosave",
+          "ms": 3010.2999999970198
+        },
+        {
+          "screen": "ready",
+          "ms": 10.5
+        },
+        {
+          "screen": "play",
+          "ms": 290.40000000596046
+        }
+      ],
+      "loadMs": 30132.40000000596,
+      "sessionMs": 180000,
+      "controlMs": 136304.60000000894,
+      "controlShare": 0.7572477777778275,
+      "memory": {
+        "atMs": 100694.40000000596,
+        "controlMsAtRead": 60001.79999999702,
+        "usedSizeAfterGc": 1288488,
+        "totalSizeAfterGc": 3932160,
+        "usedSizeBeforeGc": 11086228,
+        "framesExcluded": [
+          100694.40000000596,
+          101221.59999999404
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 11086228,
+          "totalSize": 15204352,
+          "embedderHeapUsedSize": 33328912,
+          "backingStorageSize": 34456
+        },
+        "afterGc": {
+          "usedSize": 1288488,
+          "totalSize": 3932160,
+          "embedderHeapUsedSize": 1325272,
+          "backingStorageSize": 33455
+        }
+      },
+      "fps": {
+        "frames": 8145,
+        "seconds": 135,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.880239520968516,
+        "longestFrameMs": 16.800000000017462
+      },
+      "steering": {
+        "sent": 177,
+        "accepted": 177,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "loading": "Enter",
+        "gameover": "Enter"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 3
+        },
+        {
+          "score": 2,
+          "tick": 25
+        },
+        {
+          "score": 3,
+          "tick": 47
+        },
+        {
+          "score": 4,
+          "tick": 57
+        },
+        {
+          "score": 5,
+          "tick": 64
+        },
+        {
+          "score": 6,
+          "tick": 83
+        },
+        {
+          "score": 7,
+          "tick": 92
+        },
+        {
+          "score": 8,
+          "tick": 97
+        },
+        {
+          "score": 9,
+          "tick": 109
+        },
+        {
+          "score": 10,
+          "tick": 132
+        },
+        {
+          "score": 11,
+          "tick": 144
+        },
+        {
+          "score": 12,
+          "tick": 151
+        },
+        {
+          "score": 13,
+          "tick": 163
+        },
+        {
+          "score": 14,
+          "tick": 177
+        },
+        {
+          "score": 15,
+          "tick": 195
+        },
+        {
+          "score": 16,
+          "tick": 197
+        },
+        {
+          "score": 17,
+          "tick": 219
+        },
+        {
+          "score": 18,
+          "tick": 230
+        },
+        {
+          "score": 19,
+          "tick": 238
+        },
+        {
+          "score": 20,
+          "tick": 250
+        },
+        {
+          "score": 21,
+          "tick": 264
+        },
+        {
+          "score": 22,
+          "tick": 270
+        },
+        {
+          "score": 23,
+          "tick": 278
+        },
+        {
+          "score": 24,
+          "tick": 287
+        },
+        {
+          "score": 25,
+          "tick": 301
+        },
+        {
+          "score": 26,
+          "tick": 307
+        },
+        {
+          "score": 27,
+          "tick": 329
+        },
+        {
+          "score": 28,
+          "tick": 333
+        },
+        {
+          "score": 29,
+          "tick": 354
+        },
+        {
+          "score": 30,
+          "tick": 371
+        },
+        {
+          "score": 31,
+          "tick": 394
+        },
+        {
+          "score": 32,
+          "tick": 417
+        },
+        {
+          "score": 33,
+          "tick": 436
+        },
+        {
+          "score": 34,
+          "tick": 447
+        },
+        {
+          "score": 35,
+          "tick": 459
+        },
+        {
+          "score": 36,
+          "tick": 465
+        },
+        {
+          "score": 37,
+          "tick": 492
+        },
+        {
+          "score": 38,
+          "tick": 508
+        },
+        {
+          "score": 39,
+          "tick": 535
+        },
+        {
+          "score": 40,
+          "tick": 549
+        },
+        {
+          "score": 41,
+          "tick": 553
+        },
+        {
+          "score": 42,
+          "tick": 562
+        },
+        {
+          "score": 43,
+          "tick": 565
+        },
+        {
+          "score": 44,
+          "tick": 583
+        },
+        {
+          "score": 45,
+          "tick": 593
+        },
+        {
+          "score": 46,
+          "tick": 605
+        },
+        {
+          "score": 47,
+          "tick": 610
+        },
+        {
+          "score": 48,
+          "tick": 627
+        },
+        {
+          "score": 49,
+          "tick": 640
+        },
+        {
+          "score": 50,
+          "tick": 648
+        },
+        {
+          "score": 51,
+          "tick": 661
+        },
+        {
+          "score": 52,
+          "tick": 681
+        },
+        {
+          "score": 53,
+          "tick": 723
+        },
+        {
+          "score": 54,
+          "tick": 732
+        },
+        {
+          "score": 55,
+          "tick": 735
+        },
+        {
+          "score": 56,
+          "tick": 770
+        },
+        {
+          "score": 57,
+          "tick": 786
+        },
+        {
+          "score": 58,
+          "tick": 837
+        },
+        {
+          "score": 59,
+          "tick": 843
+        },
+        {
+          "score": 60,
+          "tick": 862
+        },
+        {
+          "score": 61,
+          "tick": 893
+        },
+        {
+          "score": 62,
+          "tick": 895
+        },
+        {
+          "score": 63,
+          "tick": 917
+        },
+        {
+          "score": 64,
+          "tick": 923
+        },
+        {
+          "score": 65,
+          "tick": 945
+        },
+        {
+          "score": 66,
+          "tick": 958
+        },
+        {
+          "score": 67,
+          "tick": 982
+        },
+        {
+          "score": 68,
+          "tick": 991
+        },
+        {
+          "score": 69,
+          "tick": 1028
+        },
+        {
+          "score": 70,
+          "tick": 1034
+        },
+        {
+          "score": 71,
+          "tick": 1066
+        },
+        {
+          "score": 72,
+          "tick": 1085
+        },
+        {
+          "score": 73,
+          "tick": 1099
+        },
+        {
+          "score": 74,
+          "tick": 1130
+        },
+        {
+          "score": 75,
+          "tick": 1164
+        },
+        {
+          "score": 76,
+          "tick": 1185
+        },
+        {
+          "score": 77,
+          "tick": 1199
+        },
+        {
+          "score": 78,
+          "tick": 1223
+        }
+      ],
+      "deathsInSession": 1,
+      "requests": {
+        "count": 15,
+        "bytes": 34115,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 4,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 180007.30000001192,
+      "incomplete": false,
+      "timeToFirstAppleMs": 41005,
+      "firstAppleTick": 3,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 14.5
+        },
+        {
+          "screen": "update-required",
+          "ms": 2024.7000000029802
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9016.5
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3016.4000000059605
+        },
+        {
+          "screen": "preparing",
+          "ms": 3015.2999999970198
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3016.7999999970198
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016.1000000089407
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3017.699999988079
+        },
+        {
+          "screen": "warning",
+          "ms": 4025.2000000029802
+        },
+        {
+          "screen": "title",
+          "ms": 2514.6000000089407
+        },
+        {
+          "screen": "loading",
+          "ms": 5015.79999999702
+        },
+        {
+          "screen": "autosave",
+          "ms": 3009.8999999910593
+        },
+        {
+          "screen": "ready",
+          "ms": 10.5
+        },
+        {
+          "screen": "play",
+          "ms": 291
+        }
+      ],
+      "loadMs": 30154.70000000298,
+      "sessionMs": 180000,
+      "controlMs": 136281.20000000298,
+      "controlShare": 0.7571177777777943,
+      "memory": {
+        "atMs": 100720.10000000894,
+        "controlMsAtRead": 60004.60000000894,
+        "usedSizeAfterGc": 1277272,
+        "totalSizeAfterGc": 3932160,
+        "usedSizeBeforeGc": 11563432,
+        "framesExcluded": [
+          100720.10000000894,
+          101246.90000000596
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 11563432,
+          "totalSize": 15204352,
+          "embedderHeapUsedSize": 33283240,
+          "backingStorageSize": 34456
+        },
+        "afterGc": {
+          "usedSize": 1277272,
+          "totalSize": 3932160,
+          "embedderHeapUsedSize": 1349616,
+          "backingStorageSize": 33455
+        }
+      },
+      "fps": {
+        "frames": 8143,
+        "seconds": 135,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.880239520968516,
+        "longestFrameMs": 16.800000000017462
+      },
+      "steering": {
+        "sent": 177,
+        "accepted": 177,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "loading": "Enter",
+        "gameover": "Enter"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 3
+        },
+        {
+          "score": 2,
+          "tick": 25
+        },
+        {
+          "score": 3,
+          "tick": 47
+        },
+        {
+          "score": 4,
+          "tick": 57
+        },
+        {
+          "score": 5,
+          "tick": 64
+        },
+        {
+          "score": 6,
+          "tick": 83
+        },
+        {
+          "score": 7,
+          "tick": 92
+        },
+        {
+          "score": 8,
+          "tick": 97
+        },
+        {
+          "score": 9,
+          "tick": 109
+        },
+        {
+          "score": 10,
+          "tick": 132
+        },
+        {
+          "score": 11,
+          "tick": 144
+        },
+        {
+          "score": 12,
+          "tick": 151
+        },
+        {
+          "score": 13,
+          "tick": 163
+        },
+        {
+          "score": 14,
+          "tick": 177
+        },
+        {
+          "score": 15,
+          "tick": 195
+        },
+        {
+          "score": 16,
+          "tick": 197
+        },
+        {
+          "score": 17,
+          "tick": 219
+        },
+        {
+          "score": 18,
+          "tick": 230
+        },
+        {
+          "score": 19,
+          "tick": 238
+        },
+        {
+          "score": 20,
+          "tick": 250
+        },
+        {
+          "score": 21,
+          "tick": 264
+        },
+        {
+          "score": 22,
+          "tick": 270
+        },
+        {
+          "score": 23,
+          "tick": 278
+        },
+        {
+          "score": 24,
+          "tick": 287
+        },
+        {
+          "score": 25,
+          "tick": 301
+        },
+        {
+          "score": 26,
+          "tick": 307
+        },
+        {
+          "score": 27,
+          "tick": 329
+        },
+        {
+          "score": 28,
+          "tick": 333
+        },
+        {
+          "score": 29,
+          "tick": 354
+        },
+        {
+          "score": 30,
+          "tick": 371
+        },
+        {
+          "score": 31,
+          "tick": 394
+        },
+        {
+          "score": 32,
+          "tick": 417
+        },
+        {
+          "score": 33,
+          "tick": 436
+        },
+        {
+          "score": 34,
+          "tick": 447
+        },
+        {
+          "score": 35,
+          "tick": 459
+        },
+        {
+          "score": 36,
+          "tick": 465
+        },
+        {
+          "score": 37,
+          "tick": 492
+        },
+        {
+          "score": 38,
+          "tick": 508
+        },
+        {
+          "score": 39,
+          "tick": 535
+        },
+        {
+          "score": 40,
+          "tick": 549
+        },
+        {
+          "score": 41,
+          "tick": 553
+        },
+        {
+          "score": 42,
+          "tick": 562
+        },
+        {
+          "score": 43,
+          "tick": 565
+        },
+        {
+          "score": 44,
+          "tick": 583
+        },
+        {
+          "score": 45,
+          "tick": 593
+        },
+        {
+          "score": 46,
+          "tick": 605
+        },
+        {
+          "score": 47,
+          "tick": 610
+        },
+        {
+          "score": 48,
+          "tick": 627
+        },
+        {
+          "score": 49,
+          "tick": 640
+        },
+        {
+          "score": 50,
+          "tick": 648
+        },
+        {
+          "score": 51,
+          "tick": 661
+        },
+        {
+          "score": 52,
+          "tick": 681
+        },
+        {
+          "score": 53,
+          "tick": 723
+        },
+        {
+          "score": 54,
+          "tick": 732
+        },
+        {
+          "score": 55,
+          "tick": 735
+        },
+        {
+          "score": 56,
+          "tick": 770
+        },
+        {
+          "score": 57,
+          "tick": 786
+        },
+        {
+          "score": 58,
+          "tick": 837
+        },
+        {
+          "score": 59,
+          "tick": 843
+        },
+        {
+          "score": 60,
+          "tick": 862
+        },
+        {
+          "score": 61,
+          "tick": 893
+        },
+        {
+          "score": 62,
+          "tick": 895
+        },
+        {
+          "score": 63,
+          "tick": 917
+        },
+        {
+          "score": 64,
+          "tick": 923
+        },
+        {
+          "score": 65,
+          "tick": 945
+        },
+        {
+          "score": 66,
+          "tick": 958
+        },
+        {
+          "score": 67,
+          "tick": 982
+        },
+        {
+          "score": 68,
+          "tick": 991
+        },
+        {
+          "score": 69,
+          "tick": 1028
+        },
+        {
+          "score": 70,
+          "tick": 1034
+        },
+        {
+          "score": 71,
+          "tick": 1066
+        },
+        {
+          "score": 72,
+          "tick": 1085
+        },
+        {
+          "score": 73,
+          "tick": 1099
+        },
+        {
+          "score": 74,
+          "tick": 1130
+        },
+        {
+          "score": 75,
+          "tick": 1164
+        },
+        {
+          "score": 76,
+          "tick": 1185
+        },
+        {
+          "score": 77,
+          "tick": 1199
+        },
+        {
+          "score": 78,
+          "tick": 1223
+        }
+      ],
+      "deathsInSession": 1,
+      "requests": {
+        "count": 15,
+        "bytes": 34115,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 5,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 180005.70000000298,
+      "incomplete": false,
+      "timeToFirstAppleMs": 40996.10000000894,
+      "firstAppleTick": 3,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 12.300000011920929
+        },
+        {
+          "screen": "update-required",
+          "ms": 2017.8999999910593
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9017.70000000298
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3015.5
+        },
+        {
+          "screen": "preparing",
+          "ms": 3017.4000000059605
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3016.199999988079
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3017
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3014.9000000059605
+        },
+        {
+          "screen": "warning",
+          "ms": 4025.2999999970198
+        },
+        {
+          "screen": "title",
+          "ms": 2511.7000000029802
+        },
+        {
+          "screen": "loading",
+          "ms": 5021.79999999702
+        },
+        {
+          "screen": "autosave",
+          "ms": 2990.1000000089407
+        },
+        {
+          "screen": "ready",
+          "ms": 5.5999999940395355
+        },
+        {
+          "screen": "play",
+          "ms": 312.70000000298023
+        }
+      ],
+      "loadMs": 30147.30000001192,
+      "sessionMs": 180000,
+      "controlMs": 136305.59999997914,
+      "controlShare": 0.7572533333332174,
+      "memory": {
+        "atMs": 100689.70000000298,
+        "controlMsAtRead": 60004.69999998808,
+        "usedSizeAfterGc": 1288484,
+        "totalSizeAfterGc": 3670016,
+        "usedSizeBeforeGc": 10671132,
+        "framesExcluded": [
+          100689.70000000298,
+          101226.5
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 10671132,
+          "totalSize": 15466496,
+          "embedderHeapUsedSize": 33284776,
+          "backingStorageSize": 34456
+        },
+        "afterGc": {
+          "usedSize": 1288484,
+          "totalSize": 3670016,
+          "embedderHeapUsedSize": 1352744,
+          "backingStorageSize": 33455
+        }
+      },
+      "fps": {
+        "frames": 8143,
+        "seconds": 135,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.880239520968516,
+        "longestFrameMs": 16.800000000017462
+      },
+      "steering": {
+        "sent": 177,
+        "accepted": 177,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "loading": "Enter",
+        "gameover": "Enter"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 3
+        },
+        {
+          "score": 2,
+          "tick": 25
+        },
+        {
+          "score": 3,
+          "tick": 47
+        },
+        {
+          "score": 4,
+          "tick": 57
+        },
+        {
+          "score": 5,
+          "tick": 64
+        },
+        {
+          "score": 6,
+          "tick": 83
+        },
+        {
+          "score": 7,
+          "tick": 92
+        },
+        {
+          "score": 8,
+          "tick": 97
+        },
+        {
+          "score": 9,
+          "tick": 109
+        },
+        {
+          "score": 10,
+          "tick": 132
+        },
+        {
+          "score": 11,
+          "tick": 144
+        },
+        {
+          "score": 12,
+          "tick": 151
+        },
+        {
+          "score": 13,
+          "tick": 163
+        },
+        {
+          "score": 14,
+          "tick": 177
+        },
+        {
+          "score": 15,
+          "tick": 195
+        },
+        {
+          "score": 16,
+          "tick": 197
+        },
+        {
+          "score": 17,
+          "tick": 219
+        },
+        {
+          "score": 18,
+          "tick": 230
+        },
+        {
+          "score": 19,
+          "tick": 238
+        },
+        {
+          "score": 20,
+          "tick": 250
+        },
+        {
+          "score": 21,
+          "tick": 264
+        },
+        {
+          "score": 22,
+          "tick": 270
+        },
+        {
+          "score": 23,
+          "tick": 278
+        },
+        {
+          "score": 24,
+          "tick": 287
+        },
+        {
+          "score": 25,
+          "tick": 301
+        },
+        {
+          "score": 26,
+          "tick": 307
+        },
+        {
+          "score": 27,
+          "tick": 329
+        },
+        {
+          "score": 28,
+          "tick": 333
+        },
+        {
+          "score": 29,
+          "tick": 354
+        },
+        {
+          "score": 30,
+          "tick": 371
+        },
+        {
+          "score": 31,
+          "tick": 394
+        },
+        {
+          "score": 32,
+          "tick": 417
+        },
+        {
+          "score": 33,
+          "tick": 436
+        },
+        {
+          "score": 34,
+          "tick": 447
+        },
+        {
+          "score": 35,
+          "tick": 459
+        },
+        {
+          "score": 36,
+          "tick": 465
+        },
+        {
+          "score": 37,
+          "tick": 492
+        },
+        {
+          "score": 38,
+          "tick": 508
+        },
+        {
+          "score": 39,
+          "tick": 535
+        },
+        {
+          "score": 40,
+          "tick": 549
+        },
+        {
+          "score": 41,
+          "tick": 553
+        },
+        {
+          "score": 42,
+          "tick": 562
+        },
+        {
+          "score": 43,
+          "tick": 565
+        },
+        {
+          "score": 44,
+          "tick": 583
+        },
+        {
+          "score": 45,
+          "tick": 593
+        },
+        {
+          "score": 46,
+          "tick": 605
+        },
+        {
+          "score": 47,
+          "tick": 610
+        },
+        {
+          "score": 48,
+          "tick": 627
+        },
+        {
+          "score": 49,
+          "tick": 640
+        },
+        {
+          "score": 50,
+          "tick": 648
+        },
+        {
+          "score": 51,
+          "tick": 661
+        },
+        {
+          "score": 52,
+          "tick": 681
+        },
+        {
+          "score": 53,
+          "tick": 723
+        },
+        {
+          "score": 54,
+          "tick": 732
+        },
+        {
+          "score": 55,
+          "tick": 735
+        },
+        {
+          "score": 56,
+          "tick": 770
+        },
+        {
+          "score": 57,
+          "tick": 786
+        },
+        {
+          "score": 58,
+          "tick": 837
+        },
+        {
+          "score": 59,
+          "tick": 843
+        },
+        {
+          "score": 60,
+          "tick": 862
+        },
+        {
+          "score": 61,
+          "tick": 893
+        },
+        {
+          "score": 62,
+          "tick": 895
+        },
+        {
+          "score": 63,
+          "tick": 917
+        },
+        {
+          "score": 64,
+          "tick": 923
+        },
+        {
+          "score": 65,
+          "tick": 945
+        },
+        {
+          "score": 66,
+          "tick": 958
+        },
+        {
+          "score": 67,
+          "tick": 982
+        },
+        {
+          "score": 68,
+          "tick": 991
+        },
+        {
+          "score": 69,
+          "tick": 1028
+        },
+        {
+          "score": 70,
+          "tick": 1034
+        },
+        {
+          "score": 71,
+          "tick": 1066
+        },
+        {
+          "score": 72,
+          "tick": 1085
+        },
+        {
+          "score": 73,
+          "tick": 1099
+        },
+        {
+          "score": 74,
+          "tick": 1130
+        },
+        {
+          "score": 75,
+          "tick": 1164
+        },
+        {
+          "score": 76,
+          "tick": 1185
+        },
+        {
+          "score": 77,
+          "tick": 1199
+        },
+        {
+          "score": 78,
+          "tick": 1223
+        }
+      ],
+      "deathsInSession": 1,
+      "requests": {
+        "count": 15,
+        "bytes": 34115,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    }
+  ],
+  "fpsRuns": [
+    {
+      "run": 1,
+      "mode": "visible",
+      "frames": 1162,
+      "seconds": 19,
+      "median": 60,
+      "p5": 56.49717514125223,
+      "medianPerFrame": 59.880239520968516,
+      "longestFrameMs": 17.80000000000291,
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 700,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 60005.79999999702,
+      "errors": []
+    },
+    {
+      "run": 2,
+      "mode": "visible",
+      "frames": 1162,
+      "seconds": 19,
+      "median": 60,
+      "p5": 56.81818181818652,
+      "medianPerFrame": 59.880239520968516,
+      "longestFrameMs": 17.700000000004366,
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 60007,
+      "errors": []
+    },
+    {
+      "run": 3,
+      "mode": "visible",
+      "frames": 1167,
+      "seconds": 19,
+      "median": 60,
+      "p5": 57.142857142857146,
+      "medianPerFrame": 59.880239520968516,
+      "longestFrameMs": 17.80000000000291,
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 60003,
+      "errors": []
+    },
+    {
+      "run": 4,
+      "mode": "visible",
+      "frames": 1165,
+      "seconds": 19,
+      "median": 60,
+      "p5": 54.64480874316071,
+      "medianPerFrame": 59.880239520968516,
+      "longestFrameMs": 18.700000000004366,
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 60001.29999999702,
+      "errors": []
+    },
+    {
+      "run": 5,
+      "mode": "visible",
+      "frames": 1163,
+      "seconds": 19,
+      "median": 60,
+      "p5": 53.76344086021926,
+      "medianPerFrame": 59.880239520968516,
+      "longestFrameMs": 18.799999999995634,
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.2",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 60007.60000000894,
+      "errors": []
+    }
+  ],
+  "medianRun": 5,
+  "budget": {
+    "fpsMedianMin": 50,
+    "fpsP5Min": 30,
+    "pass": true
+  }
+}
