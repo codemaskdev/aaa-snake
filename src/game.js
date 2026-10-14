@@ -1,9 +1,9 @@
-// AAA Snake v1.5: the screen, the keys and the game loop.
+// AAA Snake v1.6: the screen, the keys and the game loop.
 // The rules live in rules.js, the day-one update in update.js, the story in story.js,
-// SnakeNet in online.js, the open world in world.js, the launch experience in launch.js.
-// The shadows arrive in the day-one patch.
+// SnakeNet in online.js, the open world in world.js, XP and skills in progress.js,
+// the launch experience in launch.js. The shadows arrive in the day-one patch.
 
-const VERSION = 'v1.5';
+const VERSION = 'v1.6';
 const CELL = 24;        // each cell is 24 x 24 pixels
 const HUD = 32;         // a strip at the top for the score
 const BOARD = GRID * CELL;
@@ -39,6 +39,7 @@ let reflection = null;     // the line of the cutscene after an apple
 let best = 0;
 let screen = 'update-required'; // update and launch screens, then 'ready', 'play', the finishing move, 'gameover'
 let screenTime = 0;            // ms the current screen has been showing
+let dropPending = false;       // SnakeNet dropped while a level-up was due: it shows after the skill tree
 
 window.addEventListener('keydown', event => {
   const direction = KEYS[event.code];
@@ -47,6 +48,13 @@ window.addEventListener('keydown', event => {
   if (screen === 'terms' && TERMS_KEYS[event.code]) {
     event.preventDefault();
     scrollTerms(TERMS_KEYS[event.code]);
+  } else if (screen === 'level-up') {
+    if (event.code === 'Enter' && screenTime >= PROGRESS.levelUpListensAfter) setScreen('skill-tree');
+  } else if (screen === 'skill-tree') {
+    if (direction) event.preventDefault();
+    if (skillTreeKey(event.code, screenTime)) carryOn();
+  } else if ((screen === 'ready' || screen === 'play') && direction && turnLocked(game.turns.length > 0 ? game.turns[game.turns.length - 1] : game.direction, direction)) {
+    toast(lockedMessage()); // until "Turn left" is learned, only right turns work
   } else if (LAUNCH[screen]) {
     const key = LAUNCH[screen].key;
     if (launchListens(screen, screenTime) && (!key || event.code === key)) setScreen(LAUNCH[screen].then); // any key, or its own
@@ -92,10 +100,10 @@ function frame(now) {
   const next = launchTimeUp(screen, screenTime);
   if (next) setScreen(next);
   if (screen === 'finisher-bite' && screenTime >= FINISHER.biteMs) bite();
-  if (screen === 'reflection' && screenTime >= cutsceneMs([reflection])) setScreen('play');
+  if (screen === 'reflection' && screenTime >= cutsceneMs([reflection])) carryOn();
   if (screen === 'reconnecting' && screenTime >= online.dropMs) {
     reconnected();
-    setScreen('play');
+    carryOn();
   }
   if (screen === 'play') {
     waited += elapsed;
@@ -125,10 +133,23 @@ function tick() {
   } else {
     const found = visitCell(game.snake[0]); // a map marker on this cell
     if (found) toast(found);
-    if (connectionDrops()) { // the game pauses until SnakeNet "reconnects"
-      report('reconnect', { playTicks: online.playTicks, ms: online.dropMs });
-      setScreen('reconnecting');
-    }
+    gainXp(PROGRESS.xp.move);
+    if (connectionDrops()) dropPending = true; // the game pauses until SnakeNet "reconnects"
+    if (progression.pending > 0 || dropPending) carryOn();
+  }
+}
+
+// After anything that stops play: a level-up waiting comes first (LEVEL UP!, then the skill tree),
+// then a connection drop waiting, then play.
+function carryOn() {
+  if (progression.pending > 0) {
+    setScreen('level-up');
+  } else if (dropPending) {
+    dropPending = false;
+    report('reconnect', { playTicks: online.playTicks, ms: online.dropMs });
+    setScreen('reconnecting');
+  } else {
+    setScreen('play');
   }
 }
 
@@ -137,6 +158,7 @@ function bite() {
   before = copySnake();
   step(game, random);
   report('apple', { score: game.score, tick: game.tick });
+  gainXp(PROGRESS.xp.apple); // a level-up it makes waits for the reflection
   reflection = REFLECTIONS[(game.score - 1) % REFLECTIONS.length];
   setScreen('reflection');
 }
@@ -148,6 +170,7 @@ function setScreen(name) {
   voice.spoken = null;
   onlineScreen(name);
   worldScreen(name);
+  progressScreen(name);
   report('screen', { name });
 }
 
@@ -163,6 +186,12 @@ function draw() {
     reportFirstFrame();
     return;
   }
+  if (screen === 'skill-tree') {
+    drawSkillTree(ctx, screenTime, canvas.width, canvas.height);
+    drawToasts(ctx, canvas.width);
+    reportFirstFrame();
+    return;
+  }
   if (LAUNCH[screen] && screen !== 'opening') {
     drawLaunch(ctx, screen, screenTime, canvas.width, canvas.height);
     drawToasts(ctx, canvas.width);
@@ -172,7 +201,8 @@ function draw() {
   drawTopBar(ctx, canvas.width, `Score ${game.score}   Best ${best}`, VERSION);
 
   // How far the snake is between its last cell and its new one: 0 to 1.
-  const progress = screen === 'play' ? Math.min(waited / TICK_MS, 1) : 1;
+  // Until "Smooth movement" is learned again, the snake jumps from cell to cell.
+  const progress = screen === 'play' && progression.skills.smooth ? Math.min(waited / TICK_MS, 1) : 1;
   const path = snakePath(progress);
   let headAt = center(path[0]);
   let appleScale = 1;
@@ -194,7 +224,8 @@ function draw() {
   ctx.scale(cam.zoom, cam.zoom);
   ctx.translate(-cam.x, -cam.y);
   drawWorld(ctx, cam.view); // only the cells the camera sees
-  withShadow(ctx, () => drawSnake(path, headAt)); // soft shadows, from the day-one patch
+  if (progression.skills.shadow) withShadow(ctx, () => drawSnake(path, headAt)); // soft shadows, from the day-one patch
+  else drawSnake(path, headAt); // the shadow is a skill now
   if (game.apple) drawApple(game.apple, appleScale, true);
   drawClouds(ctx, cam.view);
   ctx.restore();
@@ -202,6 +233,7 @@ function draw() {
 
   if (['ready', 'play', 'reconnecting', 'gameover'].includes(screen) && game.apple) {
     drawWorldHud(ctx, questDistance(), HUD);
+    drawXpBar(ctx, 14, HUD + BOARD - 16, BOARD - WORLD.minimap.px - 50, world.time);
     drawMinimap(ctx, game.snake[0], game.apple, BOARD - WORLD.minimap.px - 10, HUD + BOARD - WORLD.minimap.px - 24);
     drawQuestMarker(ctx, toScreen(center(game.apple)), toScreen(headAt), { x: 0, y: HUD, w: BOARD, h: BOARD });
   }
@@ -220,6 +252,7 @@ function draw() {
   if (screen === 'ready') drawMessage('Press an arrow key or WASD', HUD + BOARD / 2 + 70); // below the head, which the camera keeps in the middle
   if (screen === 'gameover') drawMessage('Game over. Press Enter to play again');
   if (screen === 'reconnecting') drawReconnecting(ctx, screenTime, canvas.width, canvas.height);
+  if (screen === 'level-up') drawLevelUp(ctx, screenTime, canvas.width, canvas.height);
   drawToasts(ctx, canvas.width);
   reportFirstFrame();
 }
@@ -297,7 +330,8 @@ function drawSnake(path, headAt) {
   drawHead(headAt);
 }
 
-// The head, with two eyes that look the way the snake is about to go.
+// The head, with two eyes that look the way the snake is about to go
+// (since v1.6, only with "Eye contact"; until then they stare at you).
 function drawHead(p) {
   const heading = game.turns.length > 0 ? game.turns[0] : game.direction;
   const look = DIRECTIONS[heading];
@@ -305,18 +339,37 @@ function drawHead(p) {
   ctx.beginPath();
   ctx.arc(p.x, p.y, CELL / 2, 0, Math.PI * 2);
   ctx.fill();
+  if (progression.skills.tongue && Math.floor(world.time / 700) % 3 === 0) drawTongue(p, look);
   for (const side of [-1, 1]) {
     // Eyes sit a little forward, one on each side of the direction of travel.
-    const eye = { x: p.x + look.x * 4 - look.y * side * 5, y: p.y + look.y * 4 + look.x * side * 5 };
+    const eye = progression.skills.eyes
+      ? { x: p.x + look.x * 4 - look.y * side * 5, y: p.y + look.y * 4 + look.x * side * 5 }
+      : { x: p.x + side * 5, y: p.y - 1 };
+    const pupil = progression.skills.eyes ? look : { x: 0, y: 0 };
     ctx.fillStyle = COLORS.eye;
     ctx.beginPath();
     ctx.arc(eye.x, eye.y, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = COLORS.pupil;
     ctx.beginPath();
-    ctx.arc(eye.x + look.x * 2, eye.y + look.y * 2, 2, 0, Math.PI * 2);
+    ctx.arc(eye.x + pupil.x * 2, eye.y + pupil.y * 2, 2, 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+// The "Tongue" skill: a forked tongue, now and then. It does nothing.
+function drawTongue(p, look) {
+  const tip = { x: p.x + look.x * 20, y: p.y + look.y * 20 };
+  ctx.strokeStyle = '#d33';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(p.x + look.x * 10, p.y + look.y * 10);
+  ctx.lineTo(tip.x, tip.y);
+  ctx.moveTo(tip.x, tip.y);
+  ctx.lineTo(tip.x + look.x * 4 - look.y * 3, tip.y + look.y * 4 + look.x * 3);
+  ctx.moveTo(tip.x, tip.y);
+  ctx.lineTo(tip.x + look.x * 4 + look.y * 3, tip.y + look.y * 4 - look.x * 3);
+  ctx.stroke();
 }
 
 // The apple; in the dark it glows, so you can always find it.
@@ -357,6 +410,8 @@ function nextKey() {
   if (screen === 'terms' && !termsRead()) return 'PageDown'; // the terms must be scrolled to the bottom first
   if (launchListens(screen, screenTime)) return LAUNCH[screen].key || 'Enter';
   if (screen === 'gameover') return 'Enter';
+  if (screen === 'level-up' && screenTime >= PROGRESS.levelUpListensAfter) return 'Enter';
+  if (screen === 'skill-tree') return skillTreeNext(screenTime);
   if (screen === 'finisher' && screenTime >= FINISHER.slowMs) return FINISHER.key;
   return null;
 }
@@ -383,6 +438,11 @@ window.snakeGame = {
     apple: game.apple,
     score: game.score,
     grid: game.size, // since v1.5, the open world (the quest marker always shows where the apple is)
+    allowedTurns: allowedTurns(), // since v1.6: 'right' always, 'left' once learned (going straight is always allowed)
+    level: progression.level,
+    xp: progression.xp,
+    skills: screen === 'skill-tree' ? skillsForProbe() : null, // the skill tree's list, and where its cursor is
+    cursor: screen === 'skill-tree' ? progression.cursor : null,
   }),
 };
 

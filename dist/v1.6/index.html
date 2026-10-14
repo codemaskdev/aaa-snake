@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AAA Snake v1.6</title>
+  <link rel="icon" href="data:,"> <!-- no icon file, so the browser doesn't ask for one -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; }
+    body { display: flex; align-items: center; justify-content: center; }
+    /* Fill the window, keep the shape (480 x 512), keep the pixels sharp. */
+    canvas { width: min(100vw, calc(100vh * 480 / 512)); image-rendering: pixelated; }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <script src="rules.js"></script>
+  <script src="update.js"></script>
+  <script src="story.js"></script>
+  <script src="online.js"></script>
+  <script src="world.js"></script>
+  <script src="progress.js"></script>
+  <script src="launch.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

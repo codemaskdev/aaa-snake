@@ -24,5 +24,8 @@
   },
   "v1.5": {
     "start": "screen:update-required"
+  },
+  "v1.6": {
+    "start": "screen:update-required"
   }
 }
