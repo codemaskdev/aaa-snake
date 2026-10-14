@@ -549,3 +549,40 @@ every apple (the finishing move, the bite, the reflection), and the open world m
 or more instead of one every few. The reconnects still take their 3000 to 6000 ms every 150 to 300 moves, and the
 world map adds a screen before play, but neither is close to what the walk adds. If this holds, our proxy says v1.5 is
 "more of a game" than v1.3 or v1.4, and the video says so.
+
+### v1.5, measured (`npm run measure v1.5`, medians of 5 runs) against the expectations written before measuring
+| Metric | Expected | v1.4 | v1.5 | Direction |
+|---|---|---|---|---|
+| Time to first apple | up | 102958.79999999702 ms | 122037.29999999702 ms | up, as expected (19078.5 ms; in the median run the world map took 3018.699999988079 ms and the walk, `play`, 16315.09999999404 ms) |
+| Load time | unchanged | 30145.70000000298 ms | 30122.90000000596 ms | unchanged, as expected |
+| Control share (first 180 s) | up, by much | 0.06027444444456034 | 0.2858988888889551 | up by much, as expected |
+| Control share in play | up, by much | 0.1390078500049561 | 0.6613049530638593 | up by much, as expected |
+| Download | up | 695136 bytes | 723428 bytes | up, as expected (28292 bytes) |
+| JS lines / bytes | up | 1407 / 58144 | 2093 / 86204 | up, as expected |
+| Assets | unchanged | 629368 bytes | 629368 bytes | unchanged, as expected |
+| JS heap after GC | up | 1705008 bytes | 1717284 bytes | up, but only by 12276 bytes, much less than I thought: the ground, the props and the marker index are typed arrays of 196608 bytes in all; I have not looked into why they barely show in this number |
+| Frame rate median | unchanged | 60 fps | 60 fps | unchanged, as expected |
+| Frame rate 5th percentile | down a little | 54.64480874311725 fps | 54.64480874311725 fps | unchanged (the same value), not down as I expected; the five visible v1.5 runs range from 54.34782608697371 to 58.13953488368158 fps |
+| Requests to another origin | zero | 0 | 0 | zero, as expected |
+
+Checks: first apple on tick 163 in all 5 runs; 25 of 25 turns accepted; 0 requests outside the game's origin; 0 failed
+requests; 0 page errors. **Budget: pass** (median 60 fps, 5th percentile 54.64480874311725 fps, against 50 and 30).
+- **Control share went up, as UPDATES.md predicted and as I expected.** In play: 0.6613049530638593, against
+  0.14181426803644825 in v1.3 and 0.1390078500049561 in v1.4. In the first 180 s: 0.2858988888889551, against
+  0.07952611111121045 and 0.06027444444456034. By our proxy v1.5 is more of a game than v1.3 and v1.4; it is still
+  below v1.2 (0.7572433333333995 in the first 180 s, 1 in play).
+- **What the 60 s of control cost in play (run 3):** 90729.70000000298 ms in all, with two apples (each a finishing
+  move, a bite and a reflection) and three reconnects (4300, 4200 and 5500 ms, at moves 194, 375 and 592). In v1.4 the
+  same 60 s of control took 431964.7999999821 ms (run 3), with 45 apples and two reconnects.
+- **5 turns a run:** the walk to each apple is two straight lines, and the bot keeps its heading when that is as
+  short. 25 turns in 5 runs, all accepted.
+- **46 requests, not 90:** the server's 34 (the page, 7 scripts, 9 pieces of the patch, 17 voice files), plus 12
+  `blob:` reads instead of 57: the run ends at 60 s of control (193526 ms in run 3, against 547658 ms in v1.4), so it
+  has two apples and two reflection lines, not 47.
+- **3593 or 3594 frames per 60 s of play, not 3550 or 3551:** play is cut into fewer pieces (two apples and three
+  reconnects), and each piece loses the frame that straddles the screen change (see v1.3).
+- The short (`npm run short v1.5`): the launch and the walk at 5.75x, 29866.666666666668 ms in all.
+- **Noticed in the short, not fixed:** the recorder's speed label ("5.75x") sits over the left end of the game's top
+  bar, so during the walk it covers "Score". v1.5's is the first short whose sped-up part shows play (the walk), so the
+  first where it covers something that matters; moving it changes the fixed short layout, so I leave that for later.
+- Nothing broke while measuring. The full `npm test` after it: 75 of 75, exit 0.

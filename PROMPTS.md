@@ -324,3 +324,11 @@ Tag v1.5, run measure and short, update the chart, full npm test, STOP.
 Do not start v1.6.
 Report as before.
 ````
+
+Built: the plan for the world written before building (256 x 256 cells, the apple at least 128 moves away, only the
+cells in view drawn); v1.5 Open world with 600 markers, a minimap, a world map, a quest marker and fast travel
+"coming in a future update"; a rig fix for a turn sent on a run's last look; expectations written before measuring,
+measured, its short, the chart with six versions. The frame rate stayed inside the budget.
+What broke: world.js did not load (a variable declared twice); the quest arrow hid under the minimap; v1.0's bot test
+failed once (a turn sent on the run's last look counted as refused); an apostrophe broke tools/measure.mjs. See
+DEVLOG.md.
