@@ -271,3 +271,38 @@ Every visible run now has 3594 to 3599 frames of play. The median stays 60 fps f
 falls a little from version to version (57.47126436781129, 56.818181818163026, 54.64480874316071 fps); with method 1
 v1.1 was above v1.0, and v1.2's number came from about a third of the frames. Checks and budget pass for all three.
 summary.csv and out/bloat.png are redrawn from the new files.
+
+## Prompt 4, part 2: v1.3 Story mode, Warden Snek
+
+### v1.3, what was built
+As UPDATES.md says. Warden Snek is a retired orchard warden; src/story.js holds his 17 lines (9 in the opening, 8
+reflections, one after each apple, in turn) and voice/LINES.md lists them with their scene and emotion
+(`npm run voice` writes it from the game). No audio was generated: every line is a silent MP3 placeholder, no longer
+than the line's slot (its words at 2.5 per second, rounded to 0.1 s, plus 0.8 s). The game holds each line for its
+slot whether the sound plays or not, so recordings that fit their slots will not change any timing. The placeholders
+are committed (src/voice/, dist/v1.3/voice/): the build and the rig need them, and they weigh about what the
+recordings will, since they use the same format.
+- The loading screen after the title now also downloads the 17 voice files and waits for all of them ("Voice lines:
+  X of 17") as well as its 5000 ms.
+- The opening cutscene: letterbox, close-up on the head, subtitles under "WARDEN SNEK", 9 lines. It cannot be
+  skipped ("Skip available after your first playthrough"; there is no second playthrough).
+- The finishing move: when the next move would reach the apple, the game stops, the camera pushes in for 800 ms,
+  then "Press E to eat"; only E works. The bite lasts 1500 ms; the apple counts (and the rig logs it) when it ends.
+- After every apple, a reflection cutscene with one line, then play goes on.
+- Graphics: the field is dark, a soft light follows the head, the apple glows, the bars come in for every cutscene.
+- The guardrails hold: no bandana, eyepatch, box, radio calls, stealth or code name; tests/v1.3.test.mjs checks the
+  lines for a list of banned words and digits. The recording settings in voice/LINES.md ask for a voice designed from
+  a description that names no actor or character.
+
+### v1.3, expected direction of every metric (written before `npm run measure v1.3`)
+| Metric | Expected | Why |
+|---|---|---|
+| Time to first apple | up, by much | the unskippable opening (9 lines) before play, then 800 ms of push-in, the E, and 1500 ms of bite before the apple counts |
+| Load time | unchanged | the first screen that accepts a key is still the warning, and nothing before it changed |
+| Control share | down, by much | the opening, and every apple now costs a finishing move and a reflection, none of which is control |
+| Download | up, by much | 17 voice files and story.js |
+| JS lines / bytes | up | story.js and the cutscene and finisher code in game.js |
+| Assets | up, from 0 | the voice placeholders are the first asset files |
+| JS heap after GC | up a little | the story's lines and state; the audio is in blobs, which are not on the JS heap |
+| Frame rate median | unchanged | 60 fps; one more full-board draw per frame should still fit |
+| Frame rate 5th percentile | slightly down | the darkness is a full-board offscreen canvas redrawn every frame with a gradient, and the apple's glow is a blur |
