@@ -16,7 +16,7 @@ const C = { bg: '#0b0d13', panel: '#121622', grid: '#232a3a', axis: '#3a4357', t
 // Each panel: a column of the CSV, how to show it, and an optional budget line.
 export const PANELS = [
   { col: 'time_to_first_apple_ms', title: 'Time to first apple', unit: 's', scale: v => v / 1000, fmt: v => `${v.toFixed(2)} s` },
-  { col: 'control_share', title: 'Control share', unit: '%', scale: v => v * 100, fmt: v => `${v.toFixed(1)} %`, max: 100 },
+  { col: 'control_share', title: 'Control share', unit: '%', scale: v => v * 100, fmt: v => `${v.toFixed(2)} %`, max: 100 },
   { col: 'load_ms', title: 'Load time', unit: 'ms', scale: v => v, fmt: v => `${v.toFixed(0)} ms` },
   { col: 'download_bytes', title: 'Download', unit: 'KB', scale: v => v / 1000, fmt: v => `${v.toFixed(1)} KB` },
   { col: 'heap_used_after_gc_bytes', title: 'JS heap after 60 s of play', unit: 'MB', scale: v => v / 1e6, fmt: v => `${v.toFixed(2)} MB` },
@@ -84,7 +84,8 @@ export function renderSvg(rows) {
     if (lastIndex >= 0) {
       const [lx, ly] = pts[lastIndex];
       const anchor = versions.length > 1 && lastIndex === versions.length - 1 ? 'end' : 'middle';
-      out += `<text x="${anchor === 'end' ? lx + 8 : lx}" y="${ly - 16}" font-size="20" font-weight="700" fill="${C.text}" stroke="${C.panel}" stroke-width="6" paint-order="stroke" text-anchor="${anchor}">${esc(p.fmt(values[lastIndex]))}</text>`;
+      const labelY = ly - 16 - 20 < plot.y - 10 ? ly + 34 : ly - 16; // below the point if it would hit the title
+      out += `<text x="${anchor === 'end' ? lx + 8 : lx}" y="${labelY}" font-size="20" font-weight="700" fill="${C.text}" stroke="${C.panel}" stroke-width="6" paint-order="stroke" text-anchor="${anchor}">${esc(p.fmt(values[lastIndex]))}</text>`;
     }
   });
   return out + '</svg>';
