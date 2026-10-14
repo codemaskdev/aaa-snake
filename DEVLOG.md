@@ -534,7 +534,7 @@ its own generator, so the apples are the game's own.
 | Time to first apple | up | the world map (3000 ms before Enter works) comes before play, then 163 moves to seed 1's apple (16300 ms at one move a tick); no reconnect on the way, since the first comes at move 194 |
 | Load time | unchanged | the world map comes long after the warning, and the world is made inside "Preparing", a screen of fixed length (3000 ms of frames) |
 | Control share (first 180 s) | up, by much | play starts a few seconds later than in v1.4, but what follows is mostly walking, which is control: in v1.4 the rest of the 180 s went to finishing moves and reflections, one set every few moves |
-| Control share in play | up, by much | the apples are now at least 128 moves apart: each costs a walk of 12800 ms or more against one finishing move and one reflection (about 6500 to 8000 ms); the reconnects (3000 to 6000 ms every 150 to 300 moves) stay |
+| Control share in play | up, by much | the apples are now at least 128 moves apart: each costs a walk of 12800 ms or more against one finishing move (2300 ms before the bot's key presses) and one reflection (4000 to 6800 ms by story.js); the reconnects (3000 to 6000 ms every 150 to 300 moves) stay |
 | Download | up | world.js |
 | JS lines / bytes | up | world.js and the camera and HUD in game.js |
 | Assets | unchanged | everything in the world is made in code from the seed; no image files |
