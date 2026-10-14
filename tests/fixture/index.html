@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rig fixture</title>
+  <link rel="icon" href="data:,">
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<!--
+  A fake game with known timings, to test the measuring rig.
+  Screens: 'logo' (1500 ms, cannot be skipped) -> 'intro' (Escape skips it, else 5000 ms)
+  -> 'ready' -> 'play'. A 1-cell snake on a 10 x 10 board, edges wrap, no death.
+  The first apple is 3 cells straight ahead; one move every 100 ms.
+  URL options: burn=<ms> busy work per frame during play; gl=<n> heavy WebGL
+  shader loop size per frame; alloc=<MB> keep that much memory alive; asset=1
+  downloads blob.bin (65536 bytes).
+-->
+<canvas id="gl"></canvas>
+<canvas id="c" width="200" height="200"></canvas>
+<script>
+const params = new URLSearchParams(location.search);
+const BURN = Number(params.get('burn') || 0);
+const GL_LOOP = Number(params.get('gl') || 0);
+const ALLOC_MB = Number(params.get('alloc') || 0);
+if (params.get('asset') === '1') fetch('blob.bin').then(r => r.arrayBuffer()).then(b => { window.blobBytes = b.byteLength; });
+window.kept = [];
+for (let i = 0; i < ALLOC_MB; i++) window.kept.push(new Array(131072).fill(i + 0.5)); // 131072 doubles = 1 MiB
+
+const APPLES = [{ x: 7, y: 4 }, { x: 7, y: 8 }, { x: 2, y: 8 }, { x: 2, y: 2 }];
+const game = { snake: [{ x: 4, y: 4 }], direction: 'right', turns: [], apple: APPLES[0], score: 0, tick: 0 };
+const STEP = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+const KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+let screen = 'logo';
+let enteredAt = null;
+let lastDrawn = null;
+let waited = 0;
+let last = null;
+const log = [];
+const report = (type, data) => log.push({ t: performance.now(), type, ...data });
+function setScreen(name) { screen = name; enteredAt = null; waited = 0; report('screen', { name }); }
+
+addEventListener('keydown', e => {
+  const dir = KEYS[e.code];
+  if (screen === 'intro' && e.code === 'Escape') setScreen('ready');
+  else if (screen === 'ready' && dir) { game.turns.push(dir); setScreen('play'); }
+  else if (screen === 'play' && dir) game.turns.push(dir);
+});
+
+// Optional heavy WebGL work: a fragment shader that loops GL_LOOP times per pixel.
+let gl = null;
+if (GL_LOOP > 0) {
+  const canvas = document.getElementById('gl');
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  gl = canvas.getContext('webgl');
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }'));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, `precision highp float; uniform float t;
+    void main(){ vec2 u = gl_FragCoord.xy * 0.001; float a = 0.0;
+      for (int i = 0; i < ${GL_LOOP}; i++) { a += sin(u.x * float(i) + t) * cos(u.y * float(i) - t); }
+      gl_FragColor = vec4(0.0, a * 0.001, 0.1, 1.0); }`));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  window.glLocT = gl.getUniformLocation(prog, 't');
+}
+
+const ctx = document.getElementById('c').getContext('2d');
+function frame(now) {
+  if (enteredAt === null) enteredAt = now;
+  if (screen === 'logo' && now - enteredAt >= 1500) setScreen('intro');
+  else if (screen === 'intro' && now - enteredAt >= 5000) setScreen('ready');
+  if (screen === 'play' && last !== null) {
+    waited += now - last;
+    while (waited >= 100) {
+      waited -= 100;
+      if (game.turns.length) game.direction = game.turns.shift();
+      const [dx, dy] = STEP[game.direction];
+      const head = { x: (game.snake[0].x + dx + 10) % 10, y: (game.snake[0].y + dy + 10) % 10 };
+      game.snake = [head];
+      game.tick++;
+      if (head.x === game.apple.x && head.y === game.apple.y) {
+        game.score++;
+        game.apple = APPLES[game.score % APPLES.length];
+        report('apple', { score: game.score, tick: game.tick });
+      }
+    }
+  }
+  last = now;
+  if (screen === 'play' && BURN > 0) { const until = performance.now() + BURN; while (performance.now() < until) {} }
+  if (gl) { gl.uniform1f(glLocT, now * 0.001); gl.drawArrays(gl.TRIANGLES, 0, 3); }
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, 200, 200);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(screen, 10, 190);
+  ctx.fillStyle = '#e33';
+  ctx.fillRect(game.apple.x * 20, game.apple.y * 20, 20, 20);
+  ctx.fillStyle = '#3b3';
+  ctx.fillRect(game.snake[0].x * 20, game.snake[0].y * 20, 20, 20);
+  if (screen !== lastDrawn) report('frame', { name: screen });
+  lastDrawn = screen;
+  requestAnimationFrame(frame);
+}
+
+window.snakeGame = {
+  version: 'fixture',
+  log,
+  probe: () => ({
+    screen,
+    shown: screen === lastDrawn,
+    next: screen === 'intro' ? 'Escape' : null,
+    tick: game.tick,
+    heading: game.turns.length ? game.turns[game.turns.length - 1] : game.direction,
+    snake: game.snake,
+    apple: game.apple,
+    score: game.score,
+    grid: 10,
+  }),
+};
+report('screen', { name: screen });
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

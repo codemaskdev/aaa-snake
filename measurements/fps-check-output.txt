@@ -1,0 +1,16 @@
+$ npm run fps-check
+machine: MacBook Air (MacBookAir10,1), Apple M1, 17179869184 bytes RAM, macOS 26.3.1 (25D771280a)
+each cell: one run of tests/fixture, 12000 ms, frames during play only
+burn=0   headless-shell  median 60 fps, p5 59.88023952095548 fps, 628 frames, longest 16.80000000000109 ms  [ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)]
+burn=0   headless        median 60 fps, p5 59.88023952095548 fps, 628 frames, longest 16.80000000000109 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+burn=0   visible         median 60 fps, p5 56.49717514124642 fps, 628 frames, longest 17.800000000000182 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+burn=25  headless-shell  median 40 fps, p5 29.940119760478552 fps, 417 frames, longest 33.400000000001455 ms  [ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)]
+burn=25  headless        median 40 fps, p5 29.940119760478552 fps, 418 frames, longest 33.5 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+burn=25  visible         median 40 fps, p5 28.985507246376812 fps, 418 frames, longest 35.399999999999636 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+gl=100   headless-shell  median 6 fps, p5 5.998800239951984 fps, 66 frames, longest 166.79999999999927 ms  [ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)]
+gl=100   headless        median 60 fps, p5 59.88023952095548 fps, 627 frames, longest 16.80000000000109 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+gl=100   visible         median 60 fps, p5 53.76344086021532 fps, 626 frames, longest 18.800000000000182 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+gl=400   headless-shell  median 2 fps, p5 1.8751171948246792 fps, 21 frames, longest 566.7000000000007 ms  [ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)]
+gl=400   headless        median 18 fps, p5 14.992503748125978 fps, 191 frames, longest 66.70000000000073 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+gl=400   visible         median 20.5 fps, p5 19.34235976789175 fps, 213 frames, longest 66.70000000000073 ms  [ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)]
+wrote measurements/fps-check.json and measurements/fps-check-output.txt

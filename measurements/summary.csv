@@ -1,0 +1,2 @@
+version,time_to_first_apple_ms,control_share,load_ms,js_lines,code_lines,js_bytes,asset_bytes,build_bytes,download_bytes,heap_used_after_gc_bytes,fps_median,fps_p5,fps_window,runs,measured_at
+v1.0,320.6000000089407,0.9998805555555556,26,240,260,8130,0,8842,9423,929680,60,56.81818181818064,visible,5,2026-10-14T10:40:09.832Z

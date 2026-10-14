@@ -1,0 +1,35 @@
+$ npm run measure v1.0
+machine: MacBook Air (MacBookAir10,1), Apple M1, 17179869184 bytes RAM, macOS 26.3.1 (25D771280a), Node v24.15.0
+size: js 240 lines / 8130 bytes; code 260 lines; assets 0 bytes; build 8842 bytes (3 files)
+run 1/5 headless: first apple 320.6000000089407 ms (tick 3), load 25.600000008940697 ms, control 179974.19999998808 / 180000 ms = 0.9998566666666004, heap 929680 bytes after GC (7387072 before) at 60003.19999998808 ms of control, download 9423 bytes in 3 requests, headless fps median 60 p5 59.52380952385077, steering 225/225 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 16.400000005960464 ms -> ready 15.299999997019768 ms -> play 288.90000000596046 ms
+run 2/5 headless: first apple 329.20000000298023 ms (tick 3), load 16.799999997019768 ms, control 179981.90000000596 / 180000 ms = 0.9998994444444775, heap 929660 bytes after GC (6553656 before) at 60003.79999999702 ms of control, download 9423 bytes in 3 requests, headless fps median 60 p5 59.88023952091634, steering 225/225 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 12 ms -> ready 10.900000005960464 ms -> play 306.29999999701977 ms
+run 3/5 headless: first apple 334 ms (tick 3), load 32.599999994039536 ms, control 179973.69999998808 / 180000 ms = 0.9998538888888227, heap 930072 bytes after GC (6607940 before) at 60002.29999999702 ms of control, download 9423 bytes in 3 requests, headless fps median 60 p5 59.88023952091634, steering 225/225 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 14.200000002980232 ms -> ready 26.200000002980232 ms -> play 293.59999999403954 ms
+run 4/5 headless: first apple 320.1000000089407 ms (tick 3), load 26 ms, control 179978.79999999702 / 180000 ms = 0.9998822222222057, heap 930284 bytes after GC (6459580 before) at 60003.79999999702 ms of control, download 9423 bytes in 3 requests, headless fps median 60 p5 59.52380952385077, steering 225/225 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 12.5 ms -> ready 16.5 ms -> play 291.1000000089407 ms
+run 5/5 headless: first apple 318.59999999403954 ms (tick 3), load 27 ms, control 179978.5 / 180000 ms = 0.9998805555555556, heap 929680 bytes after GC (6302320 before) at 60001.30000001192 ms of control, download 9423 bytes in 3 requests, headless fps median 60 p5 59.52380952385077, steering 225/225 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 15.400000005960464 ms -> ready 16.69999998807907 ms -> play 286.5 ms
+fps run 1/5 visible: median 60 fps, p5 57.47126436781129 fps, 3597 frames, longest frame 17.80000000000291 ms
+fps run 2/5 visible: median 60 fps, p5 57.47126436781729 fps, 3598 frames, longest frame 17.80000000000291 ms
+fps run 3/5 visible: median 60 fps, p5 56.81818181818064 fps, 3598 frames, longest frame 17.799999999999272 ms
+fps run 4/5 visible: median 60 fps, p5 56.81818181818064 fps, 3598 frames, longest frame 17.80000000000291 ms
+fps run 5/5 visible: median 60 fps, p5 54.64480874317157 fps, 3598 frames, longest frame 18.80000000000291 ms
+
+median of 5 runs (v1.0):
+  time to first apple   320.6000000089407 ms (run 1)
+    (page load)      16.400000005960464 ms
+    ready            15.299999997019768 ms
+    play             288.90000000596046 ms
+  load time             26 ms
+  control share         0.9998805555555556 (of 180000 ms)
+  JS heap after GC      929680 bytes
+  download              9423 bytes
+  frame rate (visible)  median 60 fps, p5 56.81818181818064 fps
+  frame rate (headless) median 60 fps, p5 59.52380952385077 fps
+  js 240 lines, 8130 bytes; code 260 lines; assets 0 bytes; build 8842 bytes
+checks: first apple tick 3, 3, 3, 3, 3 (same in all runs: true); external requests 0; failed requests 0; page errors 0; steering 1125/1125 turns accepted (0 sent just before a death, not checkable); incomplete runs 0
+checks: PASS
+performance budget (median >= 50 fps, p5 >= 30 fps): PASS
+wrote measurements/v1.0.json, measurements/v1.0/ (raw runs and this output), measurements/summary.csv
