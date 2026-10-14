@@ -41,8 +41,30 @@ export function startServer(mounts, port = 0) {
           res.end('not found');
           return;
         }
+        const type = TYPES[path.extname(file)] || 'application/octet-stream';
+        // One byte range ("Range: bytes=from-to"), the way v1.2 downloads its day-one patch in pieces.
+        const range = /^bytes=(\d+)-(\d*)$/.exec(req.headers.range || '');
+        if (range) {
+          const from = Number(range[1]);
+          const to = Math.min(range[2] === '' ? body.length - 1 : Number(range[2]), body.length - 1);
+          if (from > to) {
+            res.writeHead(416, { 'content-range': `bytes */${body.length}` });
+            res.end();
+            return;
+          }
+          res.writeHead(206, {
+            'content-type': type,
+            'content-length': to - from + 1,
+            'content-range': `bytes ${from}-${to}/${body.length}`,
+            'accept-ranges': 'bytes',
+            'cache-control': 'no-store',
+          });
+          res.end(body.subarray(from, to + 1));
+          return;
+        }
+        // Headers unchanged since v1.0, so download bytes stay comparable across versions.
         res.writeHead(200, {
-          'content-type': TYPES[path.extname(file)] || 'application/octet-stream',
+          'content-type': type,
           'content-length': body.length,
           'cache-control': 'no-store',
         });

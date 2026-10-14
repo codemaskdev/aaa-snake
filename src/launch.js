@@ -1,16 +1,32 @@
-// AAA Snake v1.1: the launch experience.
-// Everything you sit through before the snake: three studio logos you cannot skip,
-// a health warning, a title screen and an autosave notice before every game.
+// AAA Snake v1.2: the launch experience.
+// Everything you sit through before the snake: the day-one update (update.js), three
+// studio logos you cannot skip, a health warning, a title screen, a loading screen
+// with tips, and an autosave notice before every game.
 // The studio names are invented. Times are in ms of animation frames, never the clock.
 
 const LAUNCH = {
-  'publisher-logo': { lasts: 3000, then: 'studio-logo' },  // cannot be skipped
-  'studio-logo':    { lasts: 3000, then: 'engine-logo' },  // cannot be skipped
-  'engine-logo':    { lasts: 3000, then: 'warning' },      // cannot be skipped
-  'warning':        { listensAfter: 4000, then: 'title' }, // any key, once it listens
-  'title':          { listensAfter: 2500, then: 'autosave' }, // after the title animation
-  'autosave':       { lasts: 3000, then: 'ready' },        // before every game
+  'update-required': { lasts: 2000, then: 'patch-download' },
+  'patch-download':  { lasts: 0, needs: patchDownloaded, then: 'patch-install' }, // until every byte is in
+  'patch-install':   { lasts: 3000, needs: patchInstalled, then: 'preparing' },
+  'preparing':       { lasts: 3000, then: 'publisher-logo' },
+  'publisher-logo':  { lasts: 3000, then: 'studio-logo' },  // cannot be skipped
+  'studio-logo':     { lasts: 3000, then: 'engine-logo' },  // cannot be skipped
+  'engine-logo':     { lasts: 3000, then: 'warning' },      // cannot be skipped
+  'warning':         { listensAfter: 4000, then: 'title' }, // any key, once it listens
+  'title':           { listensAfter: 2500, then: 'loading' }, // after the title animation
+  'loading':         { listensAfter: 5000, then: 'autosave' }, // tips, then "Press any key"
+  'autosave':        { lasts: 3000, then: 'ready' },        // before every game
 };
+
+const UPDATE_SCREENS = ['update-required', 'patch-download', 'patch-install', 'preparing'];
+
+const TIPS = [
+  'Tip: apples are food.',
+  'Tip: the snake goes where its eyes look.',
+  'Tip: walls do not move. Try not to move into them.',
+  'Tip: a longer snake is a bigger snake.',
+  'Tip: when asked to press any key, press any key.',
+];
 
 const GOLD = '#e8c66a';
 
@@ -20,10 +36,11 @@ function launchListens(screen, time) {
   return Boolean(step && step.listensAfter !== undefined && time >= step.listensAfter);
 }
 
-// The next screen, if this launch screen has run its time; otherwise null.
+// The next screen, if this launch screen has run its time (and done its work); otherwise null.
 function launchTimeUp(screen, time) {
   const step = LAUNCH[screen];
-  return step && step.lasts !== undefined && time >= step.lasts ? step.then : null;
+  if (!step || step.lasts === undefined || time < step.lasts) return null;
+  return !step.needs || step.needs(time) ? step.then : null;
 }
 
 // Fade in over the first half second and out over the last one.
@@ -37,11 +54,13 @@ function drawLaunch(ctx, screen, time, width, height) {
   ctx.save();
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  if (UPDATE_SCREENS.includes(screen)) drawUpdate(ctx, screen, time, width, height);
   if (screen === 'publisher-logo') drawPublisher(ctx, time, width, height);
   if (screen === 'studio-logo') drawStudio(ctx, time, width, height);
   if (screen === 'engine-logo') drawEngine(ctx, time, width, height);
   if (screen === 'warning') drawWarning(ctx, time, width, height);
   if (screen === 'title') drawTitle(ctx, time, width, height);
+  if (screen === 'loading') drawLoading(ctx, time, width, height);
   if (screen === 'autosave') drawAutosave(ctx, time, width, height);
   ctx.restore();
 }
@@ -124,6 +143,22 @@ function drawTitle(ctx, time, width, height) {
     ctx.fillStyle = '#fff';
     ctx.font = '18px Helvetica, Arial, sans-serif';
     ctx.fillText('Press any key', width / 2, height / 2 + 60);
+  }
+}
+
+// A loading screen: a new tip every 2.5 s, then "Press any key".
+function drawLoading(ctx, time, width, height) {
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 26px Helvetica, Arial, sans-serif';
+  ctx.fillText('LOADING', width / 2, height / 2 - 90);
+  drawStripes(ctx, 80, height / 2 - 60, width - 160, time);
+  ctx.font = 'italic 17px Helvetica, Arial, sans-serif';
+  ctx.fillStyle = '#ddd';
+  wrapText(ctx, TIPS[Math.floor(time / 2500) % TIPS.length], width / 2, height / 2 + 10, width - 100, 24);
+  if (launchListens('loading', time)) {
+    ctx.fillStyle = '#aaa';
+    ctx.font = '16px Helvetica, Arial, sans-serif';
+    ctx.fillText('Press any key to continue', width / 2, height - 70);
   }
 }
 

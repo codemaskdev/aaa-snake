@@ -1,11 +1,12 @@
-// AAA Snake v1.1: the screen, the keys and the game loop.
-// The rules live in rules.js, the launch experience in launch.js.
+// AAA Snake v1.2: the screen, the keys and the game loop.
+// The rules live in rules.js, the day-one update in update.js, the launch
+// experience in launch.js. The grass and the shadows arrive in the day-one patch.
 
-const VERSION = 'v1.1';
+const VERSION = 'v1.2';
 const CELL = 24;        // each cell is 24 x 24 pixels
 const HUD = 32;         // a strip at the top for the score
 const TICK_MS = 100;    // the snake moves one cell every 100 ms (10 per second)
-const COLORS = { board: '#111', hud: '#000', snake: '#3b3', head: '#8f8', apple: '#e33', text: '#fff', eye: '#fff', pupil: '#000' };
+const COLORS = { hud: '#000', snake: '#3b3', head: '#8f8', apple: '#e33', text: '#fff', eye: '#fff', pupil: '#000' };
 
 // Which key turns the snake which way. Arrow keys and WASD both work.
 const KEYS = {
@@ -27,7 +28,7 @@ let game = newGame(random);
 let before = copySnake();  // where the snake was before its last move, for smooth drawing
 let eaten = null;          // the apple just eaten, drawn until the head reaches it
 let best = 0;
-let screen = 'publisher-logo'; // the launch screens, then 'ready', 'play', 'gameover'
+let screen = 'update-required'; // the update and launch screens, then 'ready', 'play', 'gameover'
 let screenTime = 0;            // ms the current screen has been showing
 
 window.addEventListener('keydown', event => {
@@ -57,6 +58,7 @@ function frame(now) {
   const elapsed = lastFrame === null ? 0 : Math.min(now - lastFrame, 250); // after a long pause, don't jump ahead
   lastFrame = now;
   screenTime += elapsed;
+  updateWork(screen, screenTime, seed, canvas.width, GRID * CELL);
   const next = launchTimeUp(screen, screenTime);
   if (next) setScreen(next);
   if (screen === 'play') {
@@ -103,14 +105,15 @@ function draw() {
   }
   ctx.fillStyle = COLORS.hud;
   ctx.fillRect(0, 0, canvas.width, HUD);
-  ctx.fillStyle = COLORS.board;
-  ctx.fillRect(0, HUD, canvas.width, GRID * CELL);
+  drawField(ctx, 0, HUD); // the grass, from the day-one patch
 
   // How far the snake is between its last cell and its new one: 0 to 1.
   const progress = screen === 'play' ? Math.min(waited / TICK_MS, 1) : 1;
-  if (game.apple) drawApple(game.apple);
-  if (eaten && progress < 1) drawApple(eaten);
-  drawSnake(snakePath(progress));
+  withShadow(ctx, () => {           // soft shadows, from the day-one patch
+    if (game.apple) drawApple(game.apple);
+    if (eaten && progress < 1) drawApple(eaten);
+    drawSnake(snakePath(progress));
+  });
 
   ctx.fillStyle = COLORS.text;
   ctx.font = '16px monospace';
