@@ -1,7 +1,8 @@
 # AAA Snake: the update plan
 
-**Status: proposal, not approved.** Nothing below is built. Once approved, this file is frozen before v1.1; any later
-change to it is a new, logged decision.
+**Status: approved and frozen on 2026-10-14** (PROMPTS.md #2), with three changes to the proposal: the hero is
+Warden Snek, not Commander Snek; v1.2's patch comes only from the game's own origin; v1.5 keeps its note that control
+share may go up. Any later change to this file is a new, logged decision.
 
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
@@ -13,7 +14,7 @@ real games. Each one becomes a 30-second short; the long video comes last.
 | v1.0 | (the honest original) | plain squares | none | — |
 | v1.1 | Studio logos and an unskippable intro | smooth movement, a snake with eyes | none | keep |
 | v1.2 | Day-one patch and a loading screen | textured grass field, soft shadows | none | can skip (merge into v1.1) |
-| v1.3 | Story mode: Commander Snek, voiced cutscenes, a finishing move | lighting: a light around the head, letterbox | voice | keep |
+| v1.3 | Story mode: Warden Snek, voiced cutscenes, a finishing move | lighting: a light around the head, letterbox | voice | keep |
 | v1.4 | Always online (local stub) | UI chrome: toasts, spinners, currency bar | none | can skip |
 | v1.5 | Open world: hundreds of map markers, one apple | big world with culling, cloud shadows, minimap | none | keep |
 | v1.6 | Progression: XP, levels, "Turn left" is a skill | particles and glow | none | keep |
@@ -39,7 +40,7 @@ real games. Each one becomes a 30-second short; the long video comes last.
   the one inside the cabinet, in v1.0. If the rig agrees, time to first apple goes down for the first time in the
   series. That is a result, not a promise: we report what it measures.
 - **Not repeated from "Triple-A Minesweeper":** no paint marking where to climb, no hero who keeps repeating his task.
-  Commander Snek speaks in cutscenes, never as a nagging reminder during play.
+  Warden Snek speaks in cutscenes, never as a nagging reminder during play.
 
 ## Rules every update follows
 
@@ -51,8 +52,9 @@ real games. Each one becomes a 30-second short; the long video comes last.
   snake. A cutscene, popup, menu, loading screen or level-up screen gets its own name.
 - **The probe shows only what the player can see.** If the apple is hidden on screen, it is hidden from the bot.
 - **Parody:** every purchase screen carries a visible "PARODY" label; nothing can be bought; no payment code, no
-  network requests (the rig fails a version with any external request). Invented studio names only, checked against a
-  web search before use.
+  network requests for them. The game may load files only from its own origin (the same host as the game); the rig
+  fails a version with any request to another host. Invented studio names only, checked against a web search before
+  use.
 - **Patch notes carry no numbers** unless the number comes from the game itself.
 - **Metrics below are expected directions, not numbers.** The numbers come from `npm run measure` after each build.
 
@@ -82,8 +84,10 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 ## v1.2 — Day-one patch
 
 - **Cliché:** the patch you must download before you can play the thing you just got, then a loading screen with tips.
-- **What changes:** on start, "A required update is available". The game downloads its patch from its own server (a
-  real file: the code of this update's new features), with a progress bar showing the real bytes, throttled on purpose.
+- **What changes:** on start, "A required update is available". The game downloads its patch from its own origin, the
+  same host that served the game, and from nowhere else (a real file: the code of this update's new features), with a
+  progress bar showing the real bytes, throttled on purpose. The rig fails the version if any request goes to another
+  host.
   Then "Installing", then "Preparing your experience", then a loading screen with gameplay tips ("Tip: apples are food")
   that ends with "Press any key to continue". Patch notes scroll by on the side, and they are this file's patch notes.
 - **Metrics:** download bytes up (the patch is real); load time and time to first apple up by the throttled download
@@ -94,10 +98,10 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   and soft shadows under the snake and the apple.
 - **If time runs out:** can be skipped by moving the patch screen into v1.1.
 
-## v1.3 — Story mode: Commander Snek
+## v1.3 — Story mode: Warden Snek
 
 - **Cliché:** the gritty hero with a tragic backstory, voiced cutscenes, and the cinematic quick-time event.
-- **What changes:** the snake becomes Commander Snek (working name), a retired orchard guard: the apples were taken,
+- **What changes:** the snake becomes Warden Snek, a retired orchard warden: the apples were taken,
   the orchard is gone, and only Snek remembers. An opening cutscene, voiced, skippable only "after your first
   playthrough" (every run is a first playthrough). After each apple, a short cutscene where Snek reflects on what that
   apple meant. Eating an apple becomes a finishing move: when the head reaches the apple, the game slows down and asks
@@ -108,7 +112,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 - **Metrics:** time to first apple up by the opening cutscene and the finishing move; control share down sharply (a
   cutscene after every apple); asset bytes and download bytes up for the first time (the voice lines are the first
   real asset files); JS heap up (decoded audio is outside the JS heap, so the JS heap may move less than the download).
-- **Patch note:** "Commander Snek's story is now fully voiced, and every apple is now a cinematic moment."
+- **Patch note:** "Warden Snek's story is now fully voiced, and every apple is now a cinematic moment."
 - **Generated art / voice:** voice: yes (every line logged with tool name and version as shown in its UI, date and
   exact prompt). Art: none; the cutscenes are staged with the game's own squares.
 - **Graphics (budget):** lighting: the field goes dark, a soft light follows Snek's head, the apple glows; cutscenes
@@ -137,7 +141,8 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   world map (its own screen). Still exactly one apple, placed far away by the seed; a quest marker points to it. Fast
   travel "coming in a future update". The rules stay: one cell per tick.
 - **Metrics:** time to first apple up by the travel distance; control share likely **up** (walking across an empty
-  world is control), which is the honest twist: by our proxy it is "more of a game" than v1.3. Memory up (world
+  world is control), which is the honest twist: by our proxy it is "more of a game" than v1.3. If it happens, the video
+  says so: it is what our pre-registered proxy measures. Memory up (world
   tiles); frame rate is the risk (a big world must be culled to what is on screen).
 - **Patch note:** "The world is now bigger than ever. The apple is the same size as before."
 - **Generated art / voice:** none; terrain, markers and props are generated in code from the seed.
@@ -198,9 +203,8 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   first apple barely move (the remaster changes the look, not the game).
 - **Patch note:** "Remastered from the ground up with cinematic visuals. Gameplay faithfully preserved."
 - **Generated art / voice:** optional: one key-art image for the title screen (logged with tool, version, date, prompt).
-- **Graphics (budget):** the peak: 2D canvas plus the single WebGL post-processing pass, no more. If you want a
-  "this one is slow on purpose" joke (a "cinematic 30 fps" mode), it would go here, only with your explicit approval,
-  and never below 30 fps median.
+- **Graphics (budget):** the peak: 2D canvas plus the single WebGL post-processing pass, no more. No "slow on purpose"
+  mode: it must pass the normal budget (median at least 50 fps, 5th percentile at least 30 fps).
 - **If time runs out:** can merge into v2.0.
 
 ## v2.0 — Game of the Year Edition

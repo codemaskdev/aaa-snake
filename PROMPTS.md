@@ -159,3 +159,27 @@ Built: the repo and its rules; Snake v1.0 (tag v1.0, dist/v1.0/); the measuring 
 and the bloat chart; the short recorder; UPDATES.md as a proposal. No update built.
 What broke: the bot pressed before the first frame was drawn; headless WebGL ran in software; the per-frame frame-rate
 median jumped under load; the short's first frame was a title card; the replay lost a key on the fixture. All fixed; see DEVLOG.md.
+
+## 2. UPDATES.md approved with changes, answers, a longer v1.0 short, then build v1.1
+
+````text
+UPDATES.md is approved with these changes, then frozen before v1.1:
+1. Rename the hero: Commander Snek becomes Warden Snek (a retired orchard
+   warden). Keep every guardrail against imitating known characters.
+2. v1.2: the day-one patch may be fetched only from the page's own origin
+   (same host as the game). The rig keeps failing any request to another
+   host. Write this into UPDATES.md and the rig's checks.
+3. Keep the v1.5 note that control share may go up; it is an honest result
+   of our pre-registered proxy and we will say so.
+Answers: load time stays "first frame of a screen that accepts any key";
+the replay-on-virtual-clock recorder is accepted; no "cinematic 30 fps"
+mode in v1.9; 240 lines of v1.0 stay as they are.
+Short clip: make v1.0's clip 20-25 s (several apples), counter frozen at
+the measured median. Re-run `npm run short v1.0` and show the three frames.
+Git identity: use the same author/committer email as the ping-vtuber repo
+(codemask@codemask.invalid) for all future commits; do not rewrite history.
+Then build v1.1 exactly as UPDATES.md describes, tag it, run `npm run
+measure v1.1` and `npm run short v1.1`, update summary.csv and the bloat
+chart, and STOP. Report: the measure output as is, the three frames, the
+chart, DEVLOG quotes of anything that broke, git log as before.
+````
