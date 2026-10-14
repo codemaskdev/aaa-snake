@@ -16,6 +16,7 @@ const PATCH_NOTES = [
   ['v1.2', 'A day-one patch is now required to enjoy the day-one experience.'],
   ['v1.3', "Warden Snek's story is now fully voiced, and every apple is now a cinematic moment."],
   ['v1.4', "Always-online connectivity keeps you close to the Snake community, even when you'd rather play."],
+  ['v1.5', 'The world is now bigger than ever. The apple is the same size as before.'],
 ];
 
 const patch = { total: null, pieces: [], received: 0, requested: 0, installed: false, failed: null };

@@ -1,9 +1,9 @@
-// AAA Snake v1.4: the launch experience.
+// AAA Snake v1.5: the launch experience.
 // Everything you sit through before the snake: the day-one update (update.js), three
 // studio logos you cannot skip, a health warning, a title screen, the online screens
 // (online.js: connecting, signing in, the queue, the terms of service), a loading screen
-// with tips (it loads the voice lines), the opening cutscene (story.js), and an
-// autosave notice before every game.
+// with tips (it loads the voice lines), the opening cutscene (story.js), an autosave
+// notice before every game, and the world map with the quest (world.js).
 // The studio names are invented. Times are in ms of animation frames, never the clock.
 
 const LAUNCH = {
@@ -23,7 +23,8 @@ const LAUNCH = {
   'terms':           { listensAfter: 0, needs: termsRead, key: 'Enter', then: 'loading' }, // scrolled to the bottom
   'loading':         { listensAfter: 5000, needs: voiceLoaded, then: 'opening' }, // tips, then "Press any key"
   'opening':         { lasts: cutsceneMs(OPENING), then: 'autosave' }, // skippable "after your first playthrough"
-  'autosave':        { lasts: 3000, then: 'ready' },        // before every game
+  'autosave':        { lasts: 3000, then: 'world-map' },    // before every game
+  'world-map':       { listensAfter: WORLD.mapListensAfter, key: 'Enter', then: 'ready' }, // the quest; also on M
 };
 
 const UPDATE_SCREENS = ['update-required', 'patch-download', 'patch-install', 'preparing'];

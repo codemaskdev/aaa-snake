@@ -1,9 +1,9 @@
-// AAA Snake v1.4: the screen, the keys and the game loop.
+// AAA Snake v1.5: the screen, the keys and the game loop.
 // The rules live in rules.js, the day-one update in update.js, the story in story.js,
-// SnakeNet in online.js, the launch experience in launch.js. The grass and the shadows
-// arrive in the day-one patch.
+// SnakeNet in online.js, the open world in world.js, the launch experience in launch.js.
+// The shadows arrive in the day-one patch.
 
-const VERSION = 'v1.4';
+const VERSION = 'v1.5';
 const CELL = 24;        // each cell is 24 x 24 pixels
 const HUD = 32;         // a strip at the top for the score
 const BOARD = GRID * CELL;
@@ -11,6 +11,7 @@ const TICK_MS = 100;    // the snake moves one cell every 100 ms (10 per second)
 const COLORS = { snake: '#3b3', head: '#8f8', apple: '#e33', text: '#fff', eye: '#fff', pupil: '#000' };
 const DARKNESS = 'rgba(0, 0, 0, 0.82)'; // the field at night
 const LIGHT = 110;                     // radius of the light around Warden Snek's head, in pixels
+                                       // (the opening is at night; the world after it is in daylight)
 
 // Which key turns the snake which way. Arrow keys and WASD both work.
 const KEYS = {
@@ -31,7 +32,7 @@ const darkCtx = dark.getContext('2d');
 // The seed picks the apples. Add ?seed=7 to the address for a different game.
 const seed = Number(new URLSearchParams(location.search).get('seed') || 1) >>> 0;
 const random = makeRandom(seed);
-let game = newGame(random);
+let game = newGame(random, WORLD.size, WORLD.appleFar);
 startOnline(seed);
 let before = copySnake();  // where the snake was before its last move, for smooth drawing
 let reflection = null;     // the line of the cutscene after an apple
@@ -54,10 +55,14 @@ window.addEventListener('keydown', event => {
     setScreen('play');
   } else if (screen === 'play' && direction) {
     queueTurn(game, direction);
+  } else if (screen === 'play' && event.code === 'KeyM') {
+    setScreen('world-map'); // Enter closes it, then an arrow key carries on
+  } else if ((screen === 'play' || screen === 'ready') && event.code === 'KeyF') {
+    toast('Fast travel is coming in a future update.');
   } else if (screen === 'finisher' && event.code === FINISHER.key && screenTime >= FINISHER.slowMs) {
     setScreen('finisher-bite');
   } else if (screen === 'gameover' && (event.code === 'Enter' || event.code === 'Space')) {
-    game = newGame(random);
+    game = newGame(random, WORLD.size, WORLD.appleFar);
     before = copySnake();
     setScreen('autosave'); // the notice comes back before every game
   }
@@ -79,6 +84,8 @@ function frame(now) {
   screenTime += elapsed;
   updateWork(screen, screenTime, seed, canvas.width, BOARD);
   onlineWork(screen, screenTime, elapsed);
+  worldWork(elapsed);
+  if (screen === 'preparing' && !world.ready) prepareWorld(seed); // "Preparing your experience" makes the world
   if (screen === 'loading' && !voice.started) loadVoice();
   if (screen === 'opening') speak(lineAt(OPENING, screenTime));
   if (screen === 'reflection') speak(lineAt([reflection], screenTime));
@@ -115,9 +122,13 @@ function tick() {
   if (!game.alive) {
     best = Math.max(best, game.score);
     setScreen('gameover');
-  } else if (connectionDrops()) { // the game pauses until SnakeNet "reconnects"
-    report('reconnect', { playTicks: online.playTicks, ms: online.dropMs });
-    setScreen('reconnecting');
+  } else {
+    const found = visitCell(game.snake[0]); // a map marker on this cell
+    if (found) toast(found);
+    if (connectionDrops()) { // the game pauses until SnakeNet "reconnects"
+      report('reconnect', { playTicks: online.playTicks, ms: online.dropMs });
+      setScreen('reconnecting');
+    }
   }
 }
 
@@ -136,6 +147,7 @@ function setScreen(name) {
   waited = 0;
   voice.spoken = null;
   onlineScreen(name);
+  worldScreen(name);
   report('screen', { name });
 }
 
@@ -144,6 +156,13 @@ function copySnake() {
 }
 
 function draw() {
+  if (screen === 'world-map') {
+    const head = game.snake[0];
+    drawWorldMap(ctx, screenTime, canvas.width, canvas.height, head, game.apple, questDistance());
+    drawToasts(ctx, canvas.width);
+    reportFirstFrame();
+    return;
+  }
   if (LAUNCH[screen] && screen !== 'opening') {
     drawLaunch(ctx, screen, screenTime, canvas.width, canvas.height);
     drawToasts(ctx, canvas.width);
@@ -165,17 +184,27 @@ function draw() {
     appleScale = 1 - share;
   }
 
+  const cam = camera(headAt);
+  const toScreen = p => ({ x: BOARD / 2 + (p.x - cam.x) * cam.zoom, y: HUD + BOARD / 2 + (p.y - cam.y) * cam.zoom });
   ctx.save();
   ctx.beginPath();
   ctx.rect(0, HUD, BOARD, BOARD);
   ctx.clip();
-  const zoom = applyCamera(headAt);
-  drawField(ctx, 0, HUD); // the grass, from the day-one patch
+  ctx.translate(BOARD / 2, HUD + BOARD / 2);
+  ctx.scale(cam.zoom, cam.zoom);
+  ctx.translate(-cam.x, -cam.y);
+  drawWorld(ctx, cam.view); // only the cells the camera sees
   withShadow(ctx, () => drawSnake(path, headAt)); // soft shadows, from the day-one patch
-  drawDarkness(headAt, LIGHT / zoom); // the light stays the same size on screen in a close-up
   if (game.apple) drawApple(game.apple, appleScale, true);
+  drawClouds(ctx, cam.view);
   ctx.restore();
+  if (screen === 'opening') drawDarkness(toScreen(headAt), LIGHT); // the opening is still at night
 
+  if (['ready', 'play', 'reconnecting', 'gameover'].includes(screen) && game.apple) {
+    drawWorldHud(ctx, questDistance(), HUD);
+    drawMinimap(ctx, game.snake[0], game.apple, BOARD - WORLD.minimap.px - 10, HUD + BOARD - WORLD.minimap.px - 24);
+    drawQuestMarker(ctx, toScreen(center(game.apple)), toScreen(headAt), { x: 0, y: HUD, w: BOARD, h: BOARD });
+  }
   if (screen === 'opening' || screen === 'reflection') {
     const lines = screen === 'opening' ? OPENING : [reflection];
     drawLetterbox(ctx, letterbox(lines, screenTime), canvas.width, canvas.height);
@@ -188,27 +217,41 @@ function draw() {
     }
   }
   if (screen === 'finisher' && screenTime >= FINISHER.slowMs) drawMessage('Press E to eat', HUD + BOARD - 50); // below the close-up of the head
-  if (screen === 'ready') drawMessage('Press an arrow key or WASD');
+  if (screen === 'ready') drawMessage('Press an arrow key or WASD', HUD + BOARD / 2 + 70); // below the head, which the camera keeps in the middle
   if (screen === 'gameover') drawMessage('Game over. Press Enter to play again');
   if (screen === 'reconnecting') drawReconnecting(ctx, screenTime, canvas.width, canvas.height);
   drawToasts(ctx, canvas.width);
   reportFirstFrame();
 }
 
-// Cutscenes and the finishing move are shot in close-up on Warden Snek's head.
-function applyCamera(headAt) {
+// Moves from the head to the apple (a cell is a metre, as open worlds go).
+function questDistance() {
+  const head = game.snake[0];
+  return game.apple ? Math.abs(game.apple.x - head.x) + Math.abs(game.apple.y - head.y) : 0;
+}
+
+// The camera follows Warden Snek, stopping at the edges of the world. Cutscenes and the
+// finishing move are shot in close-up on the head. Returns where it looks, its zoom,
+// and the rectangle of the world it sees (in world px), which is all that gets drawn.
+function camera(headAt) {
   let zoom = 1;
   if (screen === 'opening' || screen === 'reflection') zoom = 2.5;
   if (screen === 'finisher') zoom = 1 + 1.5 * Math.min(1, screenTime / FINISHER.slowMs); // the slow push-in
   if (screen === 'finisher-bite') zoom = 2.5;
-  if (zoom === 1) return zoom;
-  ctx.translate(canvas.width / 2, HUD + BOARD / 2);
-  ctx.scale(zoom, zoom);
-  ctx.translate(-headAt.x, -headAt.y);
-  return zoom;
+  const half = BOARD / 2;
+  const edge = v => Math.max(half, Math.min(WORLD.size * CELL - half, v));
+  const close = (zoom - 1) / 1.5; // 0 at normal zoom, 1 in a close-up, which centres on the head
+  let x = edge(headAt.x) + (headAt.x - edge(headAt.x)) * close;
+  let y = edge(headAt.y) + (headAt.y - edge(headAt.y)) * close;
+  if (zoom === 1) {
+    x = Math.round(x);
+    y = Math.round(y);
+  }
+  const seen = half / zoom;
+  return { x, y, zoom, view: { x0: x - seen, y0: y - seen, x1: x + seen, y1: y + seen } };
 }
 
-// The field at night: darkness everywhere except a soft light around the head.
+// The field at night: darkness everywhere except a soft light around the head (on screen).
 function drawDarkness(headAt, radius) {
   darkCtx.globalCompositeOperation = 'source-over';
   darkCtx.clearRect(0, 0, BOARD, BOARD);
@@ -237,8 +280,9 @@ function snakePath(progress) {
   return path;
 }
 
+// The middle of a cell, in world px.
 function center(cell) {
-  return { x: cell.x * CELL + CELL / 2, y: HUD + cell.y * CELL + CELL / 2 };
+  return { x: cell.x * CELL + CELL / 2, y: cell.y * CELL + CELL / 2 };
 }
 
 function drawSnake(path, headAt) {
@@ -338,7 +382,7 @@ window.snakeGame = {
     snake: game.snake,
     apple: game.apple,
     score: game.score,
-    grid: GRID,
+    grid: game.size, // since v1.5, the open world (the quest marker always shows where the apple is)
   }),
 };
 

@@ -22,8 +22,8 @@ test('no Math.random anywhere in the game (src and every build)', () => {
   }
 });
 
-test('rules.js, launch.js, update.js, story.js, online.js and the patch never read a clock', () => {
-  for (const name of ['rules.js', 'launch.js', 'update.js', 'story.js', 'online.js', 'patch/day-one.js']) {
+test('rules.js, launch.js, update.js, story.js, online.js, world.js and the patch never read a clock', () => {
+  for (const name of ['rules.js', 'launch.js', 'update.js', 'story.js', 'online.js', 'world.js', 'patch/day-one.js']) {
     const file = path.join(ROOT, 'src', name);
     if (!fs.existsSync(file)) continue;
     const text = fs.readFileSync(file, 'utf8');

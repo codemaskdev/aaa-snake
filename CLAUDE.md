@@ -49,7 +49,8 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
   first `accepts` entry, whichever comes first (approved in prompt 2).
 - `probe()`: `{screen, shown, next, tick, heading, snake, apple, score, grid}`. `next` is the key that moves the current
   screen on (skip, continue, restart; on v1.4's terms of service, Page Down until they are scrolled to the bottom, then
-  Enter), or null. `apple` is only what the player can see (null if hidden).
+  Enter), or null. `apple` is only what the player can see (null if hidden). `grid` is the board's size: 20 until
+  v1.4, the open world's 256 since v1.5 (where the quest marker always shows the apple, so the probe reports it).
 - Screen names `ready` and `play` mean "arrow keys steer the snake right now" and are the only control screens
   (tools/rig/stats.mjs, pre-registered). Never use them for a screen where input does not steer the snake. Every other
   screen gets its own honest name.
