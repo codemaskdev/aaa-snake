@@ -1,5 +1,5 @@
 {
-  "about": "How each version's short is cut from its median measured run. start: 'first-key' (the bot's first key press: the game starts moving) or 'screen:<name>' (the first time that screen appears), optionally afterMs later (for a screen that fades in). segments: clip time in ms and the playback speed of the run during it (1 = real time). The whole clip is at most 30000 ms and must include the first apple.",
+  "about": "How a version's action start is found in its median measured run. start: 'first-key' (the first frame after the bot's first key press) or 'screen:<name>' (the first frame of that screen), optionally afterMs later (for a screen that fades in). v1.0 has its own segments (clip time in ms, playback speed). Every later version follows the fixed plan in tools/short.mjs, compared with the version before it.",
   "v1.0": {
     "start": "first-key",
     "segments": [
@@ -11,12 +11,6 @@
   },
   "v1.1": {
     "start": "screen:publisher-logo",
-    "afterMs": 500,
-    "segments": [
-      {
-        "clipMs": 25000,
-        "speed": 1
-      }
-    ]
+    "afterMs": 500
   }
 }

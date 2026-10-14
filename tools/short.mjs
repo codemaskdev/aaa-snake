@@ -1,12 +1,19 @@
-// `npm run short <version>`: the 30-second vertical short of one version.
+// `npm run short <version>`: the vertical short of one version.
 //
-// It replays the version's median measured run (the run whose time to first apple
-// is the median, from measurements/<version>.json): same build, same seed, the
-// bot's own key presses at their recorded times, on a virtual clock, one
-// screenshot per video frame. Layout (tools/short/layout.html), the same for
-// every version: the patch note card from UPDATES.md at the top, the game in the
-// middle, and the "time to first apple" counter at the bottom. The counter shows
-// the run's own clock and freezes on the measured median when the apple is eaten.
+// Every short replays measured runs: the median run of a version (the run whose time
+// to first apple is the median, from measurements/<version>.json), same build, same
+// seed, the bot's own key presses on the screens and ticks where it pressed them, on
+// a virtual clock, one screenshot per video frame. The counter shows the run's own
+// clock and freezes on the measured median when the apple is eaten.
+//
+// v1.0 has its own plan (tools/short/plans.json). Every later version follows one
+// fixed plan, compared with the version before it (compareTimeline below):
+//   A  0-3 s    the previous version reaches its first apple at real speed; its counter
+//               freezes on its median, then the new median appears next to it.
+//   B  3-6 s    the new version's patch note, large.
+//   C  6-~22 s  the new version from launch to 2 s before its first apple, sped up so it
+//               fits (see compressSpeed); the speed is shown in small type.
+//   D  last 3 s the new version eats its first apple at real speed.
 //
 // Output in out/shorts/<version>/: frames/00001.png..., short-<version>.mp4
 // (1080x1920, 30 fps, H.264), first/middle/last.png and clip.json.
@@ -16,6 +23,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { startServer } from './serve.mjs';
+import { listVersions } from './build.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 export const WIDTH = 1080;
@@ -25,6 +33,8 @@ export const MAX_CLIP_MS = 30000;
 // Safe area: nothing important in the bottom 25 % or the right 15 % of the frame.
 export const SAFE = { right: WIDTH * 0.85, bottom: HEIGHT * 0.75 };
 const MAX_APPLE_DRIFT_MS = 50;
+// The fixed plan for every version after v1.0 (ms of clip time).
+export const PLAN = { prevMs: 3000, noteMs: 3000, launchMs: 16000, launchMaxMs: 21000, appleMs: 3000, beforeAppleMs: 2000 };
 
 // The one-line patch note of a version, from its section in UPDATES.md:
 // a "## <version> ..." heading and a "**Patch note:** ..." line under it.
@@ -47,9 +57,9 @@ export function formatTime(ms) {
 // The first 60 Hz animation frame at or after t: the first frame that can show what happened at t.
 export const nextFrame = t => Math.ceil(t / (1000 / 60)) * (1000 / 60);
 
-// Where the clip starts in the run, in ms of the run's clock: the first frame drawn after
-// the bot's first key press ('first-key') or after a screen first appears ('screen:<name>'),
-// plus plan.afterMs for a screen that fades in.
+// Where a version's action starts in its run, in ms of the run's clock: the first frame
+// drawn after the bot's first key press ('first-key') or after a screen first appears
+// ('screen:<name>'), plus plan.afterMs for a screen that fades in.
 export function startTime(plan, raw) {
   if (plan.start === 'first-key') {
     if (!raw.keys.length) throw new Error('the run has no key presses');
@@ -64,28 +74,49 @@ export function startTime(plan, raw) {
   throw new Error(`unknown clip start '${plan.start}'`);
 }
 
-// Clip time (ms) -> run time (ms), through the plan's speed segments.
-export function clipToRun(plan, start) {
-  return clipMs => {
-    let run = start;
-    let left = clipMs;
-    for (const seg of plan.segments) {
-      const part = Math.min(left, seg.clipMs);
-      run += part * seg.speed;
-      left -= part;
-      if (left <= 0) break;
-    }
-    return run;
-  };
+// How much to speed up the launch part (C) so the short lands at 25-30 s.
+// C gets 16 s at the largest speed (a multiple of 0.05) that does not make it shorter;
+// above 4x it keeps 4x while C fits in 21 s, and only then goes faster.
+// Never slower than real time: a launch shorter than 16 s plays at 1x, and the short is
+// then shorter than 25 s.
+export function compressSpeed(runMs) {
+  let speed = Math.max(1, Math.floor((runMs / PLAN.launchMs) * 20) / 20);
+  if (speed > 4) speed = runMs / 4 <= PLAN.launchMaxMs ? 4 : Math.ceil((runMs / PLAN.launchMaxMs) * 20) / 20;
+  return speed;
 }
 
-export function speedAt(plan, clipMs) {
-  let at = 0;
-  for (const seg of plan.segments) {
-    at += seg.clipMs;
-    if (clipMs < at) return seg.speed;
-  }
-  return plan.segments[plan.segments.length - 1].speed;
+// One measured version: its median run and what the short shows of it.
+export function loadVersion(measurementsDir, version, plan, note) {
+  const result = JSON.parse(fs.readFileSync(path.join(measurementsDir, `${version}.json`), 'utf8'));
+  const median = result.median.timeToFirstAppleMs;
+  if (result.medianRun === null || median === null) throw new Error(`${version}: no median run with a first apple in the measurements`);
+  const raw = JSON.parse(fs.readFileSync(path.join(measurementsDir, version, `run-${result.medianRun}.json`), 'utf8'));
+  const apple = raw.log.find(e => e.type === 'apple');
+  return { version, note, plan, result, raw, median, apple: apple.t, start: startTime(plan, raw), runs: result.settings.runs, seed: result.settings.seed };
+}
+
+// v1.0's own clip: its plan's segments, all on the version's own pane.
+export function singleTimeline(cur) {
+  let from = cur.start;
+  return cur.plan.segments.map(seg => {
+    const s = { name: 'single', kind: 'game', who: 'cur', runFrom: from, clipMs: seg.clipMs, speed: seg.speed, counter: 'run', card: 'cur' };
+    from += seg.clipMs * seg.speed;
+    return s;
+  });
+}
+
+// The fixed plan for every version after v1.0 (see the top of this file).
+export function compareTimeline(prev, cur) {
+  const aFrom = Math.max(prev.start, prev.apple - PLAN.beforeAppleMs);
+  const dFrom = cur.apple - PLAN.beforeAppleMs;
+  if (dFrom <= cur.start) throw new Error(`${cur.version}: the first apple comes too soon after the start for this plan`);
+  const speed = compressSpeed(dFrom - cur.start);
+  return [
+    { name: 'A previous version', kind: 'game', who: 'prev', runFrom: aFrom, clipMs: PLAN.prevMs, speed: 1, counter: 'compare', card: 'prev' },
+    { name: 'B patch note', kind: 'note', clipMs: PLAN.noteMs, counter: 'compare-done', card: 'cur-version' },
+    { name: 'C launch', kind: 'game', who: 'cur', runFrom: cur.start, clipMs: (dFrom - cur.start) / speed, speed, counter: 'run', card: 'cur' },
+    { name: 'D first apple', kind: 'game', who: 'cur', runFrom: dFrom, clipMs: PLAN.appleMs, speed: 1, counter: 'run', card: 'cur' },
+  ];
 }
 
 function ffmpegVersion() {
@@ -96,95 +127,132 @@ function ffmpegVersion() {
   }
 }
 
-export async function recordShort({ version, distDir, measurementsDir, outDir, plan, note, frameLimit = Infinity, encode = true, log = console.log }) {
-  const result = JSON.parse(fs.readFileSync(path.join(measurementsDir, `${version}.json`), 'utf8'));
-  const median = result.median.timeToFirstAppleMs;
-  if (result.medianRun === null || median === null) throw new Error('no median run with a first apple in the measurements');
-  const raw = JSON.parse(fs.readFileSync(path.join(measurementsDir, version, `run-${result.medianRun}.json`), 'utf8'));
-  const clipMs = plan.segments.reduce((s, x) => s + x.clipMs, 0);
+const speedText = s => `${Number(s.toFixed(2))}x`;
+
+export async function recordShort({ cur, prev = null, distDirs, outDir, frameLimit = Infinity, encode = true, log = console.log }) {
+  const timeline = prev ? compareTimeline(prev, cur) : singleTimeline(cur);
+  const clipMs = timeline.reduce((s, x) => s + x.clipMs, 0);
   if (clipMs > MAX_CLIP_MS) throw new Error(`clip is ${clipMs} ms, more than ${MAX_CLIP_MS}`);
-  const start = startTime(plan, raw);
-  const toRun = clipToRun(plan, start);
-  const recordedApple = raw.log.find(e => e.type === 'apple');
-  if (recordedApple.t > toRun(clipMs)) throw new Error(`the first apple (${recordedApple.t} ms) is after the clip ends (${toRun(clipMs)} ms of the run): raise the speed`);
+  let at = 0;
+  for (const seg of timeline) {
+    seg.clipFrom = at;
+    at += seg.clipMs;
+    if (seg.kind === 'game') seg.runTo = seg.runFrom + seg.clipMs * seg.speed;
+  }
+  const lastCur = timeline.filter(s => s.who === 'cur').pop();
+  if (cur.apple > lastCur.runTo) throw new Error(`the first apple (${cur.apple} ms) is after the clip ends (${lastCur.runTo} ms of the run)`);
 
   const framesDir = path.join(outDir, 'frames');
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(framesDir, { recursive: true });
 
-  const server = await startServer({ '/game': distDir, '/_short': path.join(ROOT, 'tools/short') });
+  const mounts = { '/cur': distDirs.cur, '/_short': path.join(ROOT, 'tools/short') };
+  if (prev) mounts['/prev'] = distDirs.prev;
+  const server = await startServer(mounts);
   const browser = await chromium.launch({ headless: true, channel: 'chromium' });
   const frames = Math.min(Math.round((clipMs * FPS) / 1000), frameLimit);
-  let replayApple = null;
-  let replayLog = [];
+  const panes = { cur: { id: 'game', v: cur, now: 0, apple: null }, prev: prev && { id: 'prev', v: prev, now: 0, apple: null } };
   let safeArea;
   try {
     const context = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
     await context.addInitScript({ path: path.join(ROOT, 'tools/short/vclock.js') });
     const page = await context.newPage();
     await page.goto(`${server.url}/_short/layout.html`);
-    await page.evaluate(args => window.layout.setup(args), {
-      version,
-      note,
-      src: `/game/index.html?seed=${result.settings.seed}`,
-      source: `median of ${result.settings.runs} measured runs`,
-    });
-    await page.waitForFunction(() => {
-      const w = document.getElementById('game').contentWindow;
-      return w && w.__vclock && w.snakeGame;
-    });
-    await page.evaluate(keys => document.getElementById('game').contentWindow.__vclock.replay(keys), raw.keys);
-
-    safeArea = await page.evaluate(({ right, bottom }) => ['card', 'game', 'counter', 'speed'].map(id => {
-      const r = document.getElementById(id).getBoundingClientRect();
-      return { id, right: r.right, bottom: r.bottom, inside: r.right <= right && r.bottom <= bottom };
-    }), SAFE);
-    const outside = safeArea.filter(r => !r.inside);
-    if (outside.length) throw new Error(`layout outside the safe area: ${outside.map(r => r.id).join(', ')}`);
-
-    // Advance the game to time t; tell the layout what the counter shows.
-    const advance = t => page.evaluate(({ t, median }) => {
-      const w = document.getElementById('game').contentWindow;
-      w.__vclock.advanceTo(t);
-      const apple = w.snakeGame.log.find(e => e.type === 'apple');
-      const eaten = Boolean(apple && apple.t <= t);
-      return { now: w.__vclock.now(), apple: apple ? apple.t : null, eaten, counterMs: eaten ? median : Math.min(t, median) };
-    }, { t, median });
-
-    await advance(start); // fast-forward to the start of the clip, no frames
-    for (let f = 0; f < frames; f++) {
-      const clipAt = (f * 1000) / FPS;
-      const speed = speedAt(plan, clipAt);
-      const state = await advance(toRun(clipAt));
-      if (state.apple !== null) replayApple = state.apple;
-      await page.evaluate(({ text, frozen, speed }) => {
-        window.layout.setCounter(text, frozen);
-        window.layout.setSpeed(speed === 1 ? '' : `x${speed}`);
-      }, { text: formatTime(state.counterMs), frozen: state.eaten, speed });
-      await page.screenshot({ path: path.join(framesDir, `${String(f + 1).padStart(5, '0')}.png`) });
-      if ((f + 1) % 60 === 0 || f === frames - 1) log(`  frame ${f + 1}/${frames}`);
+    for (const pane of Object.values(panes).filter(Boolean)) {
+      const dir = pane.id === 'game' ? '/cur' : '/prev';
+      await page.evaluate(({ id, src }) => window.layout.load(id, src), { id: pane.id, src: `${dir}/index.html?seed=${pane.v.seed}` });
+      await page.waitForFunction(id => {
+        const w = document.getElementById(id).contentWindow;
+        return w && w.__vclock && w.snakeGame;
+      }, pane.id);
+      await page.evaluate(({ id, keys }) => document.getElementById(id).contentWindow.__vclock.replay(keys), { id: pane.id, keys: pane.v.raw.keys });
     }
-    replayLog = await page.evaluate(() => document.getElementById('game').contentWindow.snakeGame.log);
+
+    // Move a pane's game to run time t, at most 100 ms of virtual time per step, so the
+    // page gets to handle anything real in between (like a download it asked for).
+    const advance = async (pane, t) => {
+      while (pane.now < t) {
+        const to = Math.min(t, pane.now + 100);
+        const state = await page.evaluate(({ id, to }) => {
+          const w = document.getElementById(id).contentWindow;
+          w.__vclock.advanceTo(to);
+          const apple = w.snakeGame.log.find(e => e.type === 'apple');
+          return { now: w.__vclock.now(), apple: apple ? apple.t : null };
+        }, { id: pane.id, to });
+        pane.now = to;
+        if (state.apple !== null) pane.apple = state.apple;
+      }
+      return { eaten: pane.apple !== null && pane.apple <= t };
+    };
+
+    // Fast-forward each pane to where it first shows, no frames.
+    for (const seg of timeline.filter(s => s.kind === 'game')) {
+      const pane = panes[seg.who];
+      if (pane.now === 0) await advance(pane, seg.runFrom);
+    }
+
+    for (let f = 0; f < frames; f++) {
+      const t = (f * 1000) / FPS;
+      const seg = timeline.find(s => t >= s.clipFrom && t < s.clipFrom + s.clipMs) || timeline[timeline.length - 1];
+      let runT = null;
+      let eaten = false;
+      if (seg.kind === 'game') {
+        runT = seg.runFrom + (t - seg.clipFrom) * seg.speed;
+        ({ eaten } = await advance(panes[seg.who], runT));
+        panes[seg.who].shownUntil = runT;
+      }
+      const counter = counterFor(seg, { cur, prev, runT, eaten });
+      const card = seg.card === 'prev' ? [prev.version, prev.note] : seg.card === 'cur-version' ? [cur.version, ''] : [cur.version, cur.note];
+      await page.evaluate(({ which, card, counter, speed, big }) => {
+        window.layout.show(which);
+        window.layout.setCard(card[0], card[1]);
+        window.layout.setBigNote(big[0], big[1]);
+        window.layout.setCounter(counter);
+        window.layout.setSpeed(speed);
+      }, {
+        which: seg.kind === 'note' ? 'note' : panes[seg.who].id,
+        card,
+        counter,
+        speed: seg.kind === 'game' && prev && seg.name.startsWith('C') ? speedText(seg.speed) : '',
+        big: [cur.version, cur.note],
+      });
+      const rects = await checkSafeArea(page); // every frame: text changes from frame to frame
+      if (f === 0) safeArea = rects;
+      await page.screenshot({ path: path.join(framesDir, `${String(f + 1).padStart(5, '0')}.png`) });
+      if ((f + 1) % 90 === 0 || f === frames - 1) log(`  frame ${f + 1}/${frames}`);
+    }
+    for (const pane of Object.values(panes).filter(Boolean)) {
+      pane.log = await page.evaluate(id => document.getElementById(id).contentWindow.snakeGame.log, pane.id);
+    }
   } finally {
     await browser.close();
     await server.close();
   }
 
-  const endRun = toRun((frames * 1000) / FPS);
-  const applesIn = l => l.filter(e => e.type === 'apple' && e.t <= endRun).map(e => `${e.score}@${e.tick}`);
-  const check = {
-    recordedFirstAppleMs: recordedApple.t,
-    replayFirstAppleMs: replayApple,
-    medianFirstAppleMs: median,
-    replayMinusMedianMs: replayApple === null ? null : replayApple - median,
-    applesRecorded: applesIn(raw.log),
-    applesReplayed: applesIn(replayLog),
-  };
-  check.sameApplesAsRecordedRun = JSON.stringify(check.applesRecorded) === JSON.stringify(check.applesReplayed);
-  if (replayApple === null || Math.abs(replayApple - median) > MAX_APPLE_DRIFT_MS) {
-    throw new Error(`the replayed first apple (${replayApple} ms) is more than ${MAX_APPLE_DRIFT_MS} ms from the median (${median} ms)`);
+  // Checks: each pane ate the same apples as its recorded run, and its first apple came
+  // within MAX_APPLE_DRIFT_MS of the measured median.
+  const checks = {};
+  for (const [who, pane] of Object.entries(panes).filter(([, p]) => p)) {
+    const end = pane.shownUntil;
+    const applesIn = l => l.filter(e => e.type === 'apple' && e.t <= end).map(e => `${e.score}@${e.tick}`);
+    const c = {
+      version: pane.v.version,
+      medianRun: pane.v.result.medianRun,
+      shownUntilMs: end,
+      recordedFirstAppleMs: pane.v.apple,
+      replayFirstAppleMs: pane.apple,
+      medianFirstAppleMs: pane.v.median,
+      replayMinusMedianMs: pane.apple === null ? null : pane.apple - pane.v.median,
+      applesRecorded: applesIn(pane.v.raw.log),
+      applesReplayed: applesIn(pane.log),
+    };
+    c.sameApplesAsRecordedRun = JSON.stringify(c.applesRecorded) === JSON.stringify(c.applesReplayed);
+    if (c.replayFirstAppleMs === null || Math.abs(c.replayMinusMedianMs) > MAX_APPLE_DRIFT_MS) {
+      throw new Error(`${c.version}: the replayed first apple (${c.replayFirstAppleMs} ms) is more than ${MAX_APPLE_DRIFT_MS} ms from the median (${c.medianFirstAppleMs} ms)`);
+    }
+    if (!c.sameApplesAsRecordedRun) throw new Error(`${c.version}: the replay ate different apples than the recorded run: ${c.applesReplayed.join(' ')} vs ${c.applesRecorded.join(' ')}`);
+    checks[who] = c;
   }
-  if (!check.sameApplesAsRecordedRun) throw new Error(`the replay ate different apples than the recorded run: ${check.applesReplayed.join(' ')} vs ${check.applesRecorded.join(' ')}`);
 
   const names = fs.readdirSync(framesDir).sort();
   const pickFrame = (i, name) => fs.copyFileSync(path.join(framesDir, names[i]), path.join(outDir, name));
@@ -192,22 +260,22 @@ export async function recordShort({ version, distDir, measurementsDir, outDir, p
   pickFrame(Math.floor((names.length - 1) / 2), 'middle.png');
   pickFrame(names.length - 1, 'last.png');
 
-  const mp4 = path.join(outDir, `short-${version}.mp4`);
+  const mp4 = path.join(outDir, `short-${cur.version}.mp4`);
   if (encode) {
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(framesDir, '%05d.png'),
       '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-movflags', '+faststart', mp4]);
   }
   const clip = {
-    version,
-    note,
-    plan,
+    version: cur.version,
+    comparedWith: prev ? prev.version : null,
+    note: cur.note,
     size: [WIDTH, HEIGHT],
     fps: FPS,
     frames,
     clipMs: (frames * 1000) / FPS,
-    run: { measurements: `measurements/${version}.json`, medianRun: result.medianRun, startMs: start, endMs: endRun },
-    counter: 'run clock (virtual time of the replay) until the first apple, then the measured median',
-    check,
+    timeline: timeline.map(({ name, kind, who, runFrom, runTo, clipFrom, clipMs, speed }) => ({ name, kind, who: who ? panes[who].v.version : null, runFrom, runTo, clipFrom, clipMs, speed })),
+    counter: 'run clock (virtual time of the replay) until the first apple, then the measured median; in A, the new version\'s median appears once the previous one freezes',
+    checks,
     safeArea: { ...SAFE, elements: safeArea },
     browser: browser.version(),
     encoder: encode ? ffmpegVersion() : null,
@@ -217,6 +285,41 @@ export async function recordShort({ version, distDir, measurementsDir, outDir, p
   return clip;
 }
 
+// What the counter at the bottom shows for this frame.
+export function counterFor(seg, { cur, prev, runT, eaten }) {
+  if (seg.counter === 'compare' || seg.counter === 'compare-done') {
+    const done = seg.counter === 'compare-done' || eaten;
+    return {
+      compare: true,
+      label: `${prev.version} -> ${cur.version}`,
+      sub: `time to first apple, measured medians`,
+      value: formatTime(done ? prev.median : Math.min(runT, prev.median)),
+      newValue: done ? formatTime(cur.median) : '',
+      frozen: done,
+    };
+  }
+  return {
+    compare: false,
+    label: 'Time to first apple',
+    sub: prev ? `${cur.version}, median of ${cur.runs} measured runs` : `median of ${cur.runs} measured runs`,
+    value: formatTime(eaten ? cur.median : Math.min(runT, cur.median)),
+    frozen: eaten,
+  };
+}
+
+async function checkSafeArea(page) {
+  // Every box must sit inside the safe area, and no text may spill out of its box.
+  const rects = await page.evaluate(({ right, bottom }) => ['card', 'game', 'prev', 'bignote', 'counter', 'speed'].map(id => {
+    const el = document.getElementById(id);
+    const r = el.getBoundingClientRect();
+    const spills = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+    return { id, right: r.right, bottom: r.bottom, spills, inside: r.right <= right && r.bottom <= bottom && !spills };
+  }), SAFE);
+  const outside = rects.filter(r => !r.inside);
+  if (outside.length) throw new Error(`layout outside the safe area or text spilling out: ${outside.map(r => r.id).join(', ')}`);
+  return rects;
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const version = process.argv[2];
   if (!/^v\d+\.\d+$/.test(version || '')) {
@@ -224,21 +327,33 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(1);
   }
   const plans = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/short/plans.json'), 'utf8'));
-  if (!plans[version]) throw new Error(`no clip plan for ${version} in tools/short/plans.json`);
-  const note = patchNote(fs.readFileSync(path.join(ROOT, 'UPDATES.md'), 'utf8'), version);
-  if (!note) throw new Error(`no "**Patch note:**" line for ${version} in UPDATES.md`);
+  const updates = fs.readFileSync(path.join(ROOT, 'UPDATES.md'), 'utf8');
+  const measurements = path.join(ROOT, 'measurements');
+  const load = v => {
+    if (!plans[v]) throw new Error(`no clip plan for ${v} in tools/short/plans.json`);
+    const note = patchNote(updates, v);
+    if (!note) throw new Error(`no "**Patch note:**" line for ${v} in UPDATES.md`);
+    return loadVersion(measurements, v, plans[v], note);
+  };
+  const versions = listVersions();
+  const prevVersion = versions[versions.indexOf(version) - 1] || null;
+  const cur = load(version);
+  const prev = prevVersion ? load(prevVersion) : null;
   console.log(`$ npm run short ${version}`);
-  console.log(`patch note: ${note}`);
+  console.log(`patch note: ${cur.note}`);
   const clip = await recordShort({
-    version,
-    note,
-    plan: plans[version],
-    distDir: path.join(ROOT, 'dist', version),
-    measurementsDir: path.join(ROOT, 'measurements'),
+    cur,
+    prev,
+    distDirs: { cur: path.join(ROOT, 'dist', version), prev: prevVersion && path.join(ROOT, 'dist', prevVersion) },
     outDir: path.join(ROOT, 'out/shorts', version),
   });
-  console.log(`clip: ${clip.frames} frames, ${clip.clipMs} ms, run ${clip.run.medianRun} from ${clip.run.startMs} ms to ${clip.run.endMs} ms`);
-  console.log(`first apple: replay ${clip.check.replayFirstAppleMs} ms, recorded ${clip.check.recordedFirstAppleMs} ms, median ${clip.check.medianFirstAppleMs} ms (counter freezes on the median)`);
-  console.log(`apples in the clip: ${clip.check.applesReplayed.length}, same as the recorded run: ${clip.check.sameApplesAsRecordedRun}`);
+  console.log(`clip: ${clip.frames} frames, ${clip.clipMs} ms${clip.comparedWith ? `, after ${clip.comparedWith}` : ''}`);
+  for (const s of clip.timeline) {
+    console.log(`  ${s.name.padEnd(18)} clip ${s.clipFrom} ms + ${s.clipMs} ms${s.kind === 'game' ? `: ${s.who} run ${s.runFrom} -> ${s.runTo} ms at ${s.speed}x` : ''}`);
+  }
+  for (const c of Object.values(clip.checks)) {
+    console.log(`${c.version}: first apple replayed at ${c.replayFirstAppleMs} ms, recorded ${c.recordedFirstAppleMs} ms, median ${c.medianFirstAppleMs} ms (counter freezes on the median); ${c.applesReplayed.length} apples shown, same as the recorded run: ${c.sameApplesAsRecordedRun}`);
+  }
+  if (clip.clipMs < 25000 && clip.comparedWith) console.log(`note: the clip is shorter than 25 s because ${version}'s launch is shorter than ${PLAN.launchMs} ms at 1x`);
   console.log(`wrote out/shorts/${version}/short-${version}.mp4, frames/, first.png, middle.png, last.png, clip.json`);
 }

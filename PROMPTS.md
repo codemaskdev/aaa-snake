@@ -188,3 +188,43 @@ Built: UPDATES.md frozen with the three changes; the rig's own-origin check and 
 short; v1.1 Launch experience (tag v1.1), measured, its short, the chart with two versions.
 What broke: a black first frame in the v1.1 short, chart labels under the line, two test bugs, and one commit made
 while a test was failing (fixed in a later commit). See DEVLOG.md.
+
+## 3. One fixed plan for every short; then build v1.2
+
+````text
+v1.1 is accepted. Two things, in this order.
+
+## 1. Short clips: new fixed plan for every version
+A short must open on the result, never on what the update added. From
+now on every clip (including a re-render of v1.1) follows this plan:
+- 0-3 s: the previous version reaches its first apple at real speed; its
+  counter freezes at its measured median. Next to it, the new version's
+  counter value appears, with the label "v<prev> -> v<new>".
+- 3-6 s: the patch note, large.
+- 6-22 s: the new version's screens from launch to the first apple, time-
+  compressed (3x to 4x, whatever fits), the counter running at the
+  bottom and freezing at the measured median.
+- last 3 s: the new version eats its first apple at real speed.
+Total 25-30 s. The counter always shows measured numbers; the speed-up
+factor is shown on screen in small type ("4x"). Keep the safe margins.
+Re-render v1.1 with this plan and show its first, middle and last frames.
+v1.0 keeps its own clip (there is no previous version).
+
+## 2. Build v1.2
+Exactly as the frozen UPDATES.md describes: the day-one patch fetched from
+the page's own origin only (the offOrigin rule must pass), the throttled
+progress bar showing real bytes, "Installing", "Preparing your
+experience", the loading screen with tips, patch notes scrolling by, then
+"Press any key". Graphics step: the textured grass field drawn once
+offscreen from the seed, soft shadows under the snake and the apple. Stay
+inside the performance budget.
+Before measuring, write in DEVLOG what you expect each metric to do and
+why (direction only, no numbers). Then tag v1.2, run `npm run measure
+v1.2` and `npm run short v1.2`, update summary.csv and the chart, run the
+full npm test, and STOP. Do not start v1.3.
+
+## Report
+- The measure output as is; expected vs. measured direction per metric
+- Three frames each for the re-rendered v1.1 and for v1.2
+- The chart; DEVLOG quotes of anything that broke; git log as before
+````
