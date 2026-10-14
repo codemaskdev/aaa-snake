@@ -1,0 +1,4 @@
+{
+  "about": "How each version's short is cut from its median measured run. start: 'first-key' (the bot's first key press: the game starts moving) or 'screen:<name>' (the first time that screen appears). segments: clip time in ms and the playback speed of the run during it (1 = real time). The whole clip is at most 30000 ms and must include the first apple.",
+  "v1.0": { "start": "first-key", "segments": [{ "clipMs": 10000, "speed": 1 }] }
+}
