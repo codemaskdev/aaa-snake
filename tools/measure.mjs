@@ -28,7 +28,7 @@ export const DEFAULTS = {
   sessionMs: 180000,       // control share window: 3 minutes from navigation start
   playMsForMemory: 60000,  // heap is read after 60 s of control
   fpsRuns: 5,
-  fpsSessionMs: 60000,     // each visible run: 60 s from navigation start
+  fpsPlayMs: 60000,        // frame rate: over the first 60 s of control (the heap's window)
   fpsMode: 'visible',
 };
 
@@ -61,7 +61,7 @@ const METHOD = {
   origin: 'Every request of every run must go to the page\'s own origin (scheme, host and port of the game); any other request is listed in checks.externalRequests and fails the checks (tools/rig/stats.mjs offOrigin).',
   download: 'Sum of CDP Network.loadingFinished encodedDataLength over every request of the session (headers + body; no compression, browser cache disabled).',
   size: 'Files in dist/<version>/. js = .js and .mjs; code = js + .html + .css; assets = every other file. Lines = newline characters, like wc -l (tools/rig/size.mjs).',
-  frameRate: 'Every requestAnimationFrame timestamp is recorded by a script injected before the game; only frames inside control screens count, and frames within the heap read (+500 ms) are left out. Per run: median = median of per-second frame counts (1-second windows, like an FPS counter); p5 = 5th percentile (nearest rank) of per-frame values, 1000 / interval between two frames. The version\'s figure is the median over runs. Per-frame values are not used for the median because rAF timestamps snap to the 60 Hz display: a 25 ms frame shows up as 16.7 and 33.3 ms intervals in turn.',
+  frameRate: 'Method 2 (since 2026-10-14, prompt 4): over the first 60 s of play, the same window as the heap. Every requestAnimationFrame timestamp is recorded by a script injected before the game; only frames inside control screens count, taken in order from navigation start until 60000 ms of control (by the game\'s screen log), and frames within the heap read (+500 ms) are left out. Per run: median = median of per-second frame counts (1-second windows, like an FPS counter); p5 = 5th percentile (nearest rank) of per-frame values, 1000 / interval between two frames. The version\'s figure is the median over runs. Per-frame values are not used for the median because rAF timestamps snap to the 60 Hz display: a 25 ms frame shows up as 16.7 and 33.3 ms intervals in turn. Method 1 took the control frames of the first 60 s from navigation start; its files are in measurements/old-method/.',
   frameRateWindow: 'Frame rate is measured in a visible Chromium window, not headless: on this Mac, headless and visible medians agreed on CPU and GPU loads, but the 5th percentile did not (see measurements/fps-check.json). The headless runs\' frame rate is kept as headlessFps for comparison.',
   medians: 'Median over runs: the middle value of 5 (mean of the two middle values for an even count).',
 };
@@ -99,11 +99,11 @@ export async function measure(opts) {
       say(`  screens before the first apple: ${(s.screensBeforeFirstApple || []).map(x => `${x.screen} ${x.ms} ms`).join(' -> ')}`);
     }
     for (let i = 1; i <= o.fpsRuns; i++) {
-      const { summary, raw } = await runOnce({ url, mode: o.fpsMode, sessionMs: o.fpsSessionMs, playMsForMemory: Infinity, maxMs: o.fpsSessionMs });
+      const { summary, raw } = await runOnce({ url, mode: o.fpsMode, playMsForMemory: Infinity, fpsPlayMs: o.fpsPlayMs, stopAfterControlMs: o.fpsPlayMs + 1000 });
       const fps = { run: i, mode: o.fpsMode, ...summary.fps, page: summary.page, endMs: summary.endMs, errors: summary.errors };
       fpsRuns.push(fps);
       fpsRaw.push({ frames: raw.frames, log: raw.log });
-      say(`fps run ${i}/${o.fpsRuns} ${o.fpsMode}: median ${fps.median} fps, p5 ${fps.p5} fps, ${fps.frames} frames, longest frame ${fps.longestFrameMs} ms`);
+      say(`fps run ${i}/${o.fpsRuns} ${o.fpsMode}: median ${fps.median} fps, p5 ${fps.p5} fps, ${fps.frames} frames over ${fps.window.controlMs} ms of play, longest frame ${fps.longestFrameMs} ms`);
     }
   } finally {
     await server.close();
@@ -123,7 +123,7 @@ export async function measure(opts) {
       headless: { mode: 'new headless (Playwright channel "chromium")', userAgent: runs[0]?.page.userAgent, webglRenderer: runs[0]?.page.webglRenderer, viewport: [runs[0]?.page.innerWidth, runs[0]?.page.innerHeight], devicePixelRatio: runs[0]?.page.devicePixelRatio },
       fpsWindow: fpsRuns[0] ? { mode: o.fpsMode, userAgent: fpsRuns[0].page.userAgent, webglRenderer: fpsRuns[0].page.webglRenderer, viewport: [fpsRuns[0].page.innerWidth, fpsRuns[0].page.innerHeight], devicePixelRatio: fpsRuns[0].page.devicePixelRatio } : null,
     },
-    settings: { seed: o.seed, runs: o.runs, sessionMs: o.sessionMs, playMsForMemory: o.playMsForMemory, fpsRuns: o.fpsRuns, fpsSessionMs: o.fpsSessionMs },
+    settings: { seed: o.seed, runs: o.runs, sessionMs: o.sessionMs, playMsForMemory: o.playMsForMemory, fpsRuns: o.fpsRuns, fpsPlayMs: o.fpsPlayMs, frameRateMethod: 2 },
     method: METHOD,
     size,
     median: {

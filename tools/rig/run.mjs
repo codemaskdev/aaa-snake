@@ -2,7 +2,7 @@
 import { chromium } from 'playwright';
 import { decide, KEY_FOR } from './bot.mjs';
 import {
-  CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin,
+  CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin, firstMs,
 } from './stats.mjs';
 
 // Injected before any game code. It records the time of every animation frame
@@ -60,10 +60,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
  *   mode         'headless' | 'visible'
  *   sessionMs    control share window, from navigation start (180000)
  *   playMsForMemory  heap is read once the bot has had this much control (60000)
+ *   fpsPlayMs    frame rate is taken over the first this-much of control (60000)
+ *   stopAfterControlMs  if set, end the run once the bot has had this much control
  *   maxMs        give up after this long (page time)
  *   pollMs       pause between two looks at the game
  */
-export async function runOnce({ url, mode = 'headless', sessionMs = 180000, playMsForMemory = 60000, maxMs = 1200000, pollMs = 4 }) {
+export async function runOnce({ url, mode = 'headless', sessionMs = 180000, playMsForMemory = 60000, fpsPlayMs = 60000, stopAfterControlMs = null, maxMs = 1200000, pollMs = 4 }) {
   const browser = await launch(mode);
   const browserVersion = browser.version();
   const context = await newContext(browser, mode);
@@ -166,7 +168,8 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
     }
 
     if (!memory && controlSoFar >= playMsForMemory) memory = await readHeap();
-    if (t >= sessionMs && memory && sawApple) break;
+    if (stopAfterControlMs !== null && controlSoFar >= stopAfterControlMs) break;
+    if (stopAfterControlMs === null && t >= sessionMs && memory && sawApple) break;
     if (t >= maxMs) {
       incomplete = true;
       break;
@@ -193,7 +196,12 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
   const requestList = [...requests.values()];
   const apple = firstApple(raw.log);
   const session = Math.min(sessionMs, end);
-  const fps = frameRate(raw.frames, controlIntervals(raw.log, end), memory ? [memory.framesExcluded] : []);
+  // Frame rate over the first fpsPlayMs of control (by the game's screen log): the same 60 s of play as the heap.
+  const fpsWindow = firstMs(controlIntervals(raw.log, end), fpsPlayMs);
+  const fps = {
+    ...frameRate(raw.frames, fpsWindow, memory ? [memory.framesExcluded] : []),
+    window: { controlMs: fpsWindow.reduce((sum, [a, b]) => sum + b - a, 0), from: fpsWindow.length ? fpsWindow[0][0] : null, to: fpsWindow.length ? fpsWindow[fpsWindow.length - 1][1] : null },
+  };
   const firstDeath = raw.log.find(e => e.type === 'screen' && e.name === 'gameover');
 
   return {

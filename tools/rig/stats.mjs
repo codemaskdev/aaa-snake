@@ -70,6 +70,19 @@ export function offOrigin(urls, origin) {
   });
 }
 
+// The first `amount` ms of the given intervals, in order: the window "the first 60 s of play".
+export function firstMs(intervals, amount) {
+  const out = [];
+  let left = amount;
+  for (const [a, b] of intervals) {
+    if (left <= 0) break;
+    const take = Math.min(b - a, left);
+    out.push([a, a + take]);
+    left -= take;
+  }
+  return out;
+}
+
 export function firstApple(log) {
   return log.find(e => e.type === 'apple') || null;
 }

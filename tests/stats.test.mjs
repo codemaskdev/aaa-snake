@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { median, percentile, segments, controlMs, loadMs, frameRate, firstApple, offOrigin, PAGE_LOAD } from '../tools/rig/stats.mjs';
+import { median, percentile, segments, controlMs, loadMs, frameRate, firstApple, offOrigin, firstMs, PAGE_LOAD } from '../tools/rig/stats.mjs';
 
 const log = [
   { t: 10, type: 'screen', name: 'logo' },
@@ -103,4 +103,10 @@ test('only the game\'s own origin is allowed', () => {
     'https://cdn.example.com/patch.js',
     'blob:https://example.com/1234',
   ]);
+});
+
+test('the first 60 s of play: control intervals taken in order until the amount is reached', () => {
+  assert.deepEqual(firstMs([[100, 30100], [40000, 80000]], 60000), [[100, 30100], [40000, 70000]]);
+  assert.deepEqual(firstMs([[0, 10000]], 60000), [[0, 10000]], 'less play than asked: all of it');
+  assert.deepEqual(firstMs([[0, 10000], [20000, 30000]], 10000), [[0, 10000]]);
 });
