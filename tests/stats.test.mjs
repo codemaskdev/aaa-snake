@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { median, percentile, segments, controlMs, loadMs, frameRate, firstApple, PAGE_LOAD } from '../tools/rig/stats.mjs';
+import { median, percentile, segments, controlMs, loadMs, frameRate, firstApple, offOrigin, PAGE_LOAD } from '../tools/rig/stats.mjs';
 
 const log = [
   { t: 10, type: 'screen', name: 'logo' },
@@ -41,10 +41,17 @@ test('control share counts ready and play only, inside the window', () => {
   assert.equal(controlMs([], 1000), 0);
 });
 
-test('load time is the first drawn frame of a screen that accepts input', () => {
-  assert.equal(loadMs(log, new Set(['ready', 'play'])), 1540);
-  assert.equal(loadMs(log, new Set(['ready', 'play', 'intro'])), 1525);
-  assert.equal(loadMs(log, new Set(['nothing'])), null);
+test('load time: the first frame of a control screen or the first accepts entry', () => {
+  assert.equal(loadMs(log), 1540, 'no accepts entries: the first ready frame');
+  const withWarning = [
+    { t: 5, type: 'screen', name: 'warning' },
+    { t: 20, type: 'frame', name: 'warning' },
+    { t: 4020, type: 'accepts', name: 'warning' },
+    { t: 4500, type: 'screen', name: 'ready' },
+    { t: 4510, type: 'frame', name: 'ready' },
+  ];
+  assert.equal(loadMs(withWarning), 4020, 'the warning counts from the frame it starts listening, not its first frame');
+  assert.equal(loadMs([]), null);
 });
 
 test('frame rate: median of per-second frame counts, p5 of per-frame values', () => {
@@ -75,4 +82,25 @@ test('frame rate: a 25 ms frame snapped to a 60 Hz display reads as 40 fps', () 
   const r = frameRate(frames, [[0, 6000]]);
   assert.equal(r.median, 40);
   assert.equal(Math.round(r.p5), 30);
+});
+
+test('only the game\'s own origin is allowed', () => {
+  const origin = 'http://127.0.0.1:5000';
+  assert.deepEqual(offOrigin([
+    'http://127.0.0.1:5000/index.html',
+    'http://127.0.0.1:5000/patch/v1.2.js',
+    'data:image/png;base64,AAAA',
+    'blob:http://127.0.0.1:5000/1234-5678',
+    'http://localhost:5000/index.html',
+    'http://127.0.0.1:5001/patch.js',
+    'https://127.0.0.1:5000/patch.js',
+    'https://cdn.example.com/patch.js',
+    'blob:https://example.com/1234',
+  ], origin), [
+    'http://localhost:5000/index.html',
+    'http://127.0.0.1:5001/patch.js',
+    'https://127.0.0.1:5000/patch.js',
+    'https://cdn.example.com/patch.js',
+    'blob:https://example.com/1234',
+  ]);
 });

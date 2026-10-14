@@ -55,15 +55,31 @@ export function controlIntervals(log, end, control = CONTROL_SCREENS) {
   return segments(log, end).filter(s => control.has(s.name)).map(s => [s.from, s.to]);
 }
 
+// Requests that left the game's own origin (scheme + host + port of the page).
+// Inline data: URLs are not requests to anyone; a blob: URL carries the origin that made it.
+// Anything else (another host, another port, another scheme) is off-origin, and the rig fails the version.
+export function offOrigin(urls, origin) {
+  return urls.filter(url => {
+    if (url.startsWith('data:')) return false;
+    const inner = url.startsWith('blob:') ? url.slice(5) : url;
+    try {
+      return new URL(inner).origin !== origin;
+    } catch {
+      return true;
+    }
+  });
+}
+
 export function firstApple(log) {
   return log.find(e => e.type === 'apple') || null;
 }
 
-// Load time: the first drawn frame of a screen that accepts input
-// (a control screen, or a screen that told the bot a key to leave it).
-export function loadMs(log, acceptsInput) {
-  const frame = log.find(e => e.type === 'frame' && acceptsInput.has(e.name));
-  return frame ? frame.t : null;
+// Load time: the first drawn frame of a screen that accepts any key. That is the first
+// 'frame' entry of a control screen, or the first 'accepts' entry (logged by the game on
+// the first drawn frame where another screen starts reacting to a key), whichever is first.
+export function loadMs(log, control = CONTROL_SCREENS) {
+  const entry = log.find(e => (e.type === 'frame' && control.has(e.name)) || e.type === 'accepts');
+  return entry ? entry.t : null;
 }
 
 // Frame rate from rAF timestamps, counting only frames inside the given intervals

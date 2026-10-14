@@ -41,7 +41,10 @@ measurements/ are the raw material for the video.
 Every version exposes `window.snakeGame = { version, log, probe() }`:
 - `log`: events the game pushes, each with `t` = performance.now() (ms since navigation start):
   `{type: 'screen', name}` when the screen changes, `{type: 'frame', name}` on the first drawn frame of a screen,
+  `{type: 'accepts', name}` on the first drawn frame where a non-control screen starts reacting to a key,
   `{type: 'apple', score, tick}` when an apple is eaten.
+- Load time = the first drawn frame of a screen that accepts any key: the first `frame` of a control screen or the
+  first `accepts` entry, whichever comes first (approved in prompt 2).
 - `probe()`: `{screen, shown, next, tick, heading, snake, apple, score, grid}`. `next` is the key that leaves the current
   screen (skip, continue, restart), or null. `apple` is only what the player can see (null if hidden).
 - Screen names `ready` and `play` mean "arrow keys steer the snake right now" and are the only control screens
@@ -62,7 +65,9 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
 ## Parody only
 - Purchase buttons, loot boxes and "premium currency" are fake. No payment SDKs, no network requests for them, no real
   prices charged. Every purchase screen carries a visible "parody" label. The rig fails a version that makes an
-  external request (checks.externalRequests).
+  request to another host (checks.externalRequests).
+- The game loads files only from its own origin (the same host that served it), including v1.2's day-one patch. The rig
+  fails a version with any request to another origin (tools/rig/stats.mjs offOrigin).
 - No real game, studio, brand or character names, logos or art, and no hero that imitates a known game character.
 
 ## Disclosure
@@ -75,9 +80,10 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
   the session, quoted as it happened. Never invent or polish it. If nothing broke, say so.
 
 ## Commits and anonymity
-- Commits are authored as CodeMask (user.name CodeMask, user.email codemask@users.noreply.github.com, set in this repo's
-  local git config, copied from the bug-driver repo; never the global git config). Every commit and tag with TZ=UTC:
-  `TZ=UTC git commit ...`.
+- Commits are authored as CodeMask (user.name CodeMask, user.email codemask@codemask.invalid, the email the
+  ping-vtuber repo commits with; set in this repo's local git config, never the global git config). Commits before
+  2026-10-14's prompt 2 used codemask@users.noreply.github.com; history is never rewritten. Every commit and tag with
+  TZ=UTC: `TZ=UTC git commit ...`.
 - No local paths, no usernames, no .DS_Store, no personal data in the repo, including measurement files (they record
   machine model, chip, RAM, OS and browser only; never serial numbers or hardware IDs).
 - Never commit generated media: out/ (shorts, frames, the chart) is ignored and can be re-made.

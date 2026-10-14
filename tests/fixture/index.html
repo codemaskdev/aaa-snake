@@ -106,6 +106,7 @@ function frame(now) {
   ctx.fillStyle = '#3b3';
   ctx.fillRect(game.snake[0].x * 20, game.snake[0].y * 20, 20, 20);
   if (screen !== lastDrawn) report('frame', { name: screen });
+  if (screen !== lastDrawn && screen === 'intro') report('accepts', { name: screen }); // Escape works from the first frame
   lastDrawn = screen;
   requestAnimationFrame(frame);
 }

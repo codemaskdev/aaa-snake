@@ -2,7 +2,7 @@
 import { chromium } from 'playwright';
 import { decide, KEY_FOR } from './bot.mjs';
 import {
-  CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate,
+  CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin,
 } from './stats.mjs';
 
 // Injected before any game code. It records the time of every animation frame
@@ -192,7 +192,6 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
   const origin = new URL(url).origin;
   const requestList = [...requests.values()];
   const apple = firstApple(raw.log);
-  const accepts = new Set([...CONTROL_SCREENS, ...Object.keys(nextKeys)]);
   const session = Math.min(sessionMs, end);
   const fps = frameRate(raw.frames, controlIntervals(raw.log, end), memory ? [memory.framesExcluded] : []);
   const firstDeath = raw.log.find(e => e.type === 'screen' && e.name === 'gameover');
@@ -207,7 +206,7 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
       timeToFirstAppleMs: apple ? apple.t : null,
       firstAppleTick: apple ? apple.tick : null,
       screensBeforeFirstApple: apple ? segments(raw.log, apple.t).map(s => ({ screen: s.name, ms: s.ms })) : null,
-      loadMs: loadMs(raw.log, accepts),
+      loadMs: loadMs(raw.log),
       sessionMs: session,
       controlMs: controlMs(raw.log, session),
       controlShare: controlMs(raw.log, session) / session,
@@ -221,7 +220,7 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
       requests: {
         count: requestList.length,
         bytes: requestList.reduce((s, r) => s + r.bytes, 0),
-        external: requestList.filter(r => !r.url.startsWith(origin) && !r.url.startsWith('data:')).map(r => r.url),
+        external: offOrigin(requestList.map(r => r.url), origin),
         failed: requestList.filter(r => r.failed).map(r => `${r.url} (${r.failed})`),
       },
       errors,
