@@ -483,3 +483,69 @@ so far, so the world is 12.8 screens wide and 163.84 screens in all.
   256 x 256 image, scaled up, with the markers on top.
 - What I cannot know before measuring: whether 441 tile copies a frame, plus the sprites, keep the 5th percentile
   above 30 fps in the visible window on the M1. If it does not, I stop and report, and do not make the world smaller.
+
+### v1.5, what was built
+As planned above: a world of 256 x 256 cells, made from the seed on "Preparing your experience" (src/world.js), with
+its own generator, so the apples are the game's own.
+- **Ground:** four kinds (grass, forest floor, meadow, dry grass) from smooth noise, eight tiles of each in an atlas;
+  blades of grass that cross a tile's edge are drawn again on the other side, so tiles join without a seam.
+- **Trees and rocks:** sprites with their shadows drawn once; forests are dense, rocks are sparse. They are scenery:
+  the snake goes over them.
+- **600 markers:** 120 question marks ("Location discovered: a rock."), 24 viewpoints ("The view: more markers."),
+  40 camps ("Nobody was there."), 160 chests ("It was empty."), 256 acorns with a running total ("Acorn collected:
+  1 / 256"). The head finds a marker by reaching its cell; a toast says what was in it.
+- **The apple:** the rules take a board size and a distance: `newGame(random, 256, 128)` puts the apple on a free
+  cell at least 128 moves from the head, and so does every apple after it. With no size and no distance the rules
+  are v1.0's (tests/rules.test.mjs is unchanged and passes). With seed 1 the first apple is at (228, 191), 163 moves
+  from the start (128, 128).
+- **The quest:** a tracker (top left) with the distance in moves ("a cell is a metre"), an arrow circling the head
+  that points to the apple while it is out of view, a marker over it once it is in view; the minimap and the world
+  map show it too. Since the quest marker always shows where the apple is, the probe reports it, and the bot walks to
+  it by its usual rule (the shortest path to the apple it can see), now on a 256-cell grid. The bot did not change.
+- **The world map** is a new screen, `world-map`, after the autosave notice before every game: the whole world with
+  every marker, "You", "The last apple", a legend, and "Fast travel: coming in a future update". Enter works after
+  3000 ms; the screen offers Enter (probe `next`) and the bot presses it, as on every screen. During play, M opens it
+  (the bot never presses M) and F says "Fast travel is coming in a future update."
+- **The camera** follows the head and stops at the edges of the world; the close-ups of v1.3 centre on the head.
+- **Night and day (a decision):** the opening is still at night, with v1.3's darkness and the light around the head.
+  After it the world is in daylight: in v1.3 and v1.4 the darkness covered play too, but over a world of trees and
+  cloud shadows it would hide this update's graphics step. The darkness is now drawn in the opening only.
+- **UI:** the top bar of v1.4, the quest tracker with the acorn count, the minimap (72 x 72 cells around the head in
+  112 px, bottom right), toasts.
+- A trial visible run before tagging (a scratch script, not `npm run measure`, not kept) stayed inside the budget;
+  the numbers that count are the measured ones below.
+
+### What broke while building
+- **world.js did not load at all:** I declared `lx` twice in the world map's drawing (a label and the legend), a
+  SyntaxError that takes the whole file down. tests/v1.5.test.mjs caught it before the tag; my first trial frame-rate
+  run had started on that file and was stopped.
+- **The quest arrow hid under the minimap** in the first screenshots (it sat on the edge of the view, where the minimap
+  is), and "Press an arrow key" covered the head (the camera now keeps the head in the middle, where the message was).
+  The arrow now circles the head; the message sits below it.
+- **The full `npm test` failed once, 74 of 75:** v1.0's bot test saw 87 of 88 turns accepted. The 88th was sent on the
+  run's last look at the game, so nothing ever checked it, and it counted as refused. Three more v1.0 runs gave 87 of
+  87. The rig now counts such a turn as unchecked, like one sent just before a death (commit 21037e1). This only
+  showed up now because since prompt 5 a headless run, v1.0's test too, goes on to 61 s of control. Then I broke
+  tools/measure.mjs with an apostrophe inside a quoted string ("run's"), which the rig test caught.
+
+### v1.5, expected direction of every metric (written before `npm run measure v1.5`)
+| Metric | Expected | Why |
+|---|---|---|
+| Time to first apple | up | the world map (3000 ms before Enter works) comes before play, then 163 moves to seed 1's apple (16300 ms at one move a tick); no reconnect on the way, since the first comes at move 194 |
+| Load time | unchanged | the world map comes long after the warning, and the world is made inside "Preparing", a screen of fixed length (3000 ms of frames) |
+| Control share (first 180 s) | up, by much | play starts a few seconds later than in v1.4, but what follows is mostly walking, which is control: in v1.4 the rest of the 180 s went to finishing moves and reflections, one set every few moves |
+| Control share in play | up, by much | the apples are now at least 128 moves apart: each costs a walk of 12800 ms or more against one finishing move and one reflection (about 6500 to 8000 ms); the reconnects (3000 to 6000 ms every 150 to 300 moves) stay |
+| Download | up | world.js |
+| JS lines / bytes | up | world.js and the camera and HUD in game.js |
+| Assets | unchanged | everything in the world is made in code from the seed; no image files |
+| JS heap after GC | up | the world: ground, props and the marker index (65536 cells each) and 600 marker objects; the canvases (atlas, sprites, minimap) are not on the JS heap |
+| Frame rate median | unchanged (60 fps) | a frame draws one screen of tiles and sprites wherever the snake is |
+| Frame rate 5th percentile | down a little | about 450 to 550 small images a frame (441 tiles, props, markers, clouds) against v1.4's one copy of the field; inside the budget |
+| Requests to another origin | zero | nothing in the world is loaded from anywhere |
+
+**Does control share go up, as UPDATES.md predicted? Yes, I still expect both numbers to go up, and by much.** The
+walk is control: the arrow keys steer the snake the whole way. What took control away in v1.3 and v1.4 came with
+every apple (the finishing move, the bite, the reflection), and the open world makes apples rare: one every 128 moves
+or more instead of one every few. The reconnects still take their 3000 to 6000 ms every 150 to 300 moves, and the
+world map adds a screen before play, but neither is close to what the walk adds. If this holds, our proxy says v1.5 is
+"more of a game" than v1.3 or v1.4, and the video says so.
