@@ -48,7 +48,8 @@ export function formatTime(ms) {
 export const nextFrame = t => Math.ceil(t / (1000 / 60)) * (1000 / 60);
 
 // Where the clip starts in the run, in ms of the run's clock: the first frame drawn after
-// the bot's first key press ('first-key') or after a screen first appears ('screen:<name>').
+// the bot's first key press ('first-key') or after a screen first appears ('screen:<name>'),
+// plus plan.afterMs for a screen that fades in.
 export function startTime(plan, raw) {
   if (plan.start === 'first-key') {
     if (!raw.keys.length) throw new Error('the run has no key presses');
@@ -58,7 +59,7 @@ export function startTime(plan, raw) {
   if (screen) {
     const entry = raw.log.find(e => e.type === 'screen' && e.name === screen[1]);
     if (!entry) throw new Error(`the run never shows screen '${screen[1]}'`);
-    return nextFrame(entry.t);
+    return nextFrame(entry.t + (plan.afterMs || 0));
   }
   throw new Error(`unknown clip start '${plan.start}'`);
 }

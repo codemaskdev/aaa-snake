@@ -44,6 +44,7 @@ test('clip start: the first frame after the first key, or after a screen first a
   const raw = { keys: [{ t: 40, code: 'ArrowUp' }], log: [{ t: 5, type: 'screen', name: 'ready' }] };
   assert.equal(startTime({ start: 'first-key' }, raw), 50);
   assert.equal(startTime({ start: 'screen:ready' }, raw), 1000 / 60);
+  assert.equal(startTime({ start: 'screen:ready', afterMs: 500 }, raw), 31000 / 60);
   assert.throws(() => startTime({ start: 'screen:intro' }, raw));
 });
 
