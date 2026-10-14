@@ -51,7 +51,7 @@ export function renderSvg(rows) {
   PANELS.forEach((p, i) => {
     const x0 = pad.outer + (i % cols) * (pw + gap);
     const y0 = pad.top + Math.floor(i / cols) * (ph + gap);
-    const plot = { x: x0 + 70, y: y0 + 70, w: pw - 100, h: ph - 120 };
+    const plot = { x: x0 + 70, y: y0 + 104, w: pw - 100, h: ph - 150 };
     const values = rows.map(r => (r[p.col] === '' || r[p.col] === undefined ? null : p.scale(Number(r[p.col]))));
     const known = values.filter(v => v !== null);
     const top = p.max ?? niceMax(Math.max(...known, p.ref ?? 0, p.min60 ? 60 : 0, 0));
@@ -80,12 +80,10 @@ export function renderSvg(rows) {
     pts.forEach(pt => {
       if (pt) out += `<circle cx="${pt[0]}" cy="${pt[1]}" r="6" fill="${C.line}" stroke="${C.panel}" stroke-width="2"/>`;
     });
+    // The latest value goes under the title, clear of the line.
     const lastIndex = values.map(v => v !== null).lastIndexOf(true);
     if (lastIndex >= 0) {
-      const [lx, ly] = pts[lastIndex];
-      const anchor = versions.length > 1 && lastIndex === versions.length - 1 ? 'end' : 'middle';
-      const labelY = ly - 16 - 20 < plot.y - 10 ? ly + 34 : ly - 16; // below the point if it would hit the title
-      out += `<text x="${anchor === 'end' ? lx + 8 : lx}" y="${labelY}" font-size="20" font-weight="700" fill="${C.text}" stroke="${C.panel}" stroke-width="6" paint-order="stroke" text-anchor="${anchor}">${esc(p.fmt(values[lastIndex]))}</text>`;
+      out += `<text x="${x0 + 22}" y="${y0 + 74}" font-size="26" font-weight="700" fill="${C.text}">${esc(p.fmt(values[lastIndex]))} <tspan font-size="16" font-weight="400" fill="${C.muted}">${esc(versions[lastIndex])}</tspan></text>`;
     }
   });
   return out + '</svg>';
