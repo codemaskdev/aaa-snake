@@ -183,3 +183,8 @@ measure v1.1` and `npm run short v1.1`, update summary.csv and the bloat
 chart, and STOP. Report: the measure output as is, the three frames, the
 chart, DEVLOG quotes of anything that broke, git log as before.
 ````
+
+Built: UPDATES.md frozen with the three changes; the rig's own-origin check and `accepts`-based load time; a 24 s v1.0
+short; v1.1 Launch experience (tag v1.1), measured, its short, the chart with two versions.
+What broke: a black first frame in the v1.1 short, chart labels under the line, two test bugs, and one commit made
+while a test was failing (fixed in a later commit). See DEVLOG.md.

@@ -82,3 +82,73 @@ No update was built; UPDATES.md waits for approval.
   throttling, but a minimized window was not tried).
 
 🎬 Maybe: "Time to first apple: 0.321 s." The number every later short is measured against.
+
+## 2026-10-14 — Prompt 2: UPDATES.md frozen, v1.1 Launch experience built and measured
+
+Commits: b1d6864 (UPDATES.md approved and frozen), be976f4 (rig: own origin only, `accepts` load time), 2ff5609 (v1.0
+short 24 s), 6a96093 (v1.1, tag v1.1), db0b90d (v1.1 measured), 219a23f (v1.1 short plan), 0453a06 (chart labels),
+fe9ca9d (test fix). From this prompt on, commits use codemask@codemask.invalid; earlier ones keep the old address.
+
+### Decisions recorded
+- The hero is Warden Snek, a retired orchard warden; every guardrail stays. v1.2's patch may come only from the game's
+  own origin. v1.5 keeps its note that control share may go up. No "cinematic 30 fps" mode. UPDATES.md is frozen.
+- Load time stays "first frame of a screen that accepts any key". The replay recorder is accepted. v1.0 stays at 240
+  lines of JS.
+- The rig's request check is now a named rule (tools/rig/stats.mjs `offOrigin`): any request whose origin (scheme,
+  host, port) differs from the game's fails the version. Inline data: URLs pass; a blob: URL is judged by the origin
+  inside it.
+
+### v1.1, what was built
+Exactly the UPDATES.md entry: three unskippable studio logos of 3000 ms each (publisher, studio, engine), a
+photosensitivity warning that listens for a key only after 4000 ms, a title screen that listens only after its
+2500 ms title animation, and a 3000 ms autosave notice before every game, including after a game over. The snake now
+glides between cells (rules unchanged: one cell per 100 ms tick) and its eyes look the way it is about to go.
+New file src/launch.js (159 lines); game.js grew from 144 to 233 lines.
+
+Studio names were searched on the web before use. "Very Large Publisher", "Overbudget Interactive" and "Grid & Bones
+Interactive" returned nothing. "Squarescale Studios" was dropped: the search found an indie jam game called
+"Mr SquareScale". The engine logo says "GRID & BONES".
+
+### v1.1, measured (`npm run measure v1.1`, medians of 5 runs, measurements/v1.1.json)
+- Time to first apple: 18908.79999999702 ms (run 4), up from 320.6000000089407 ms. On the way: (page load)
+  13.400000005960464 ms, publisher-logo 3029.199999988079 ms, studio-logo 3000.2000000029802 ms, engine-logo
+  3016.7000000029802 ms, warning 4021.2999999970198 ms, title 2514.2999999970198 ms, autosave 3013.4000000059605 ms,
+  ready 7.4000000059604645 ms, play 292.8999999910593 ms.
+- Load time: 13089.39999999106 ms, up from 26 ms (the first frame where the warning listens).
+- Control share: 0.8798588888888558, down from 0.9998805555555556.
+- JS heap after GC: 1048108 bytes, up from 929680. Download: 19454 bytes, up from 9423.
+- JS: 488 lines, 17929 bytes (v1.0: 240 lines, 8130 bytes). Assets: 0 bytes.
+- Frame rate in a visible window: median 60 fps, 5th percentile 57.142857142857146 fps. Budget: pass.
+- Checks: first apple on tick 3 in all 5 runs; 1005 of 1005 turns accepted; 0 external requests; 0 page errors.
+
+### Shorts
+- v1.0 re-recorded at 24 s: 19 apples, all the same as the recorded run; counter frozen at 0.321 s.
+- v1.1, 25 s from the publisher logo: 5 apples, the same as the recorded run; the replay's first apple came at
+  18900 ms against 18908.79999999702 ms recorded; the counter froze on the median.
+
+### What broke
+- **The load-time rule would have been wrong for v1.1.** The old rule took the first frame of any screen that ever
+  offered a key, which would have counted the warning from its first frame, 4 s before it listens. Found while
+  designing v1.1, before any measurement: the game now logs an `accepts` entry on the frame a screen starts listening,
+  and load time uses that. v1.0's value does not change (its first listening frame is its first `ready` frame).
+- **My screenshot script got skipped by the warning.** While checking the new screens I timed key presses by the
+  clock; the script pressed Enter while the warning was still not listening, the game ignored it, and three of my
+  screenshots in a row came out as the same warning. Working as designed.
+- **The v1.1 short opened on a black frame.** It started on the publisher logo's first frame, which is at the start
+  of its fade-in. Clip plans now take `afterMs`; v1.1 starts 500 ms in, when the logo is fully visible.
+- **Chart labels under the line.** The rising lines ran through the value labels "18.91 s" and "19.5 KB". Each panel
+  now shows its latest value under its title.
+- **A test assumed v1.0's file list:** `✖ sizes: js, code and assets are split by file type` once launch.js existed.
+- **I committed with a failing test.** Commit 219a23f went in while `✖ clip start: the first frame after the first
+  key, or after a screen first appears` was failing: my command chain checked grep's exit code instead of npm test's.
+  The test compared 31 × (1000 / 60) with 31000 / 60 bit for bit. Fixed in fe9ca9d; history not rewritten.
+- **Email note:** the ping-vtuber repo's local git config still says codemask@users.noreply.github.com, but its
+  commits are made as codemask@codemask.invalid. This repo now uses the address its commits show, as asked.
+
+### Surprising, as it happened
+- Every "3000 ms" logo lasted between 3000.2000000029802 and 3029.199999988079 ms in the median run: a screen ends on
+  the first animation frame after its time is up.
+- v1.1 doubled the JavaScript (240 to 488 lines) to add 18588.19999998808 ms (median minus median) of waiting before the same 3-cell walk to
+  the same apple on tick 3.
+
+🎬 Maybe: the counter climbing through three logos, a warning and an autosave notice, then the apple at 18.909 s.
