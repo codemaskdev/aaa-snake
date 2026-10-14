@@ -2,14 +2,20 @@
 // Pure functions, no browser, so the tests can check every choice.
 //
 // Rules the bot follows in every version:
-//   - On a control screen it takes the shortest path to the apple it can see.
+//   - On a control screen it takes the shortest path to the apple it can see,
+//     using only the turns the probe says are allowed (v1.6: right only, until "Turn left").
 //   - On any other screen it presses the key the screen offers to leave it
 //     (skip, continue, restart) as soon as it is offered.
+//   - On v1.6's skill tree it spends the point on "Turn left" first, then on whatever
+//     comes first in the list (skillKey).
 //   - It only sees what the probe reports and only acts through key presses.
 
 export const KEY_FOR = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const STEP = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
+const RIGHT_OF = { up: 'right', right: 'down', down: 'left', left: 'up' }; // a quarter turn clockwise
+const LEFT_OF = { up: 'left', left: 'down', down: 'right', right: 'up' };  // counter-clockwise
+const DIRS = ['up', 'right', 'down', 'left'];
 
 const key = (x, y) => x * 100003 + y;
 
@@ -18,6 +24,14 @@ const key = (x, y) => x * 100003 + y;
 function moves(heading) {
   const all = ['up', 'right', 'down', 'left'].filter(d => d !== OPPOSITE[heading]);
   return [heading, ...all.filter(d => d !== heading)];
+}
+
+// Moves the snake may make next when the probe limits its turns: straight, then right, then left if allowed.
+function allowedMoves(heading, allowedTurns) {
+  const out = [heading];
+  if (allowedTurns.includes('right')) out.push(RIGHT_OF[heading]);
+  if (allowedTurns.includes('left')) out.push(LEFT_OF[heading]);
+  return out;
 }
 
 // When each body cell becomes free: segment i (0 = head) leaves after (length - i) moves.
@@ -54,6 +68,53 @@ export function pathToApple({ snake, apple, grid, heading }) {
   return null;
 }
 
+// The same search when the probe limits the turns (v1.6). Which way the snake faces now matters
+// for where it can go next, so a state is a cell and a heading: up to 4 x grid x grid states,
+// searched with flat number arrays so a 256-cell world takes a few ms per move.
+export function pathWithTurns({ snake, apple, grid, heading, allowedTurns }) {
+  if (!apple) return null;
+  const cells = grid * grid;
+  const freeAt = new Int32Array(cells); // the move from which a body cell is free (0: free now)
+  snake.forEach((part, i) => { freeAt[part.y * grid + part.x] = snake.length - i; });
+  const dx = DIRS.map(d => STEP[d][0]);
+  const dy = DIRS.map(d => STEP[d][1]);
+  const next = DIRS.map(d => allowedMoves(d, allowedTurns).map(n => DIRS.indexOf(n))); // straight, right, left
+  const firstOf = new Int8Array(cells * 4).fill(-1); // the first move of the path that reached a state; -1: not yet
+  const depth = new Int32Array(cells * 4);
+  const queue = new Int32Array(cells * 4);
+  const target = apple.y * grid + apple.x;
+  let tail = 0;
+  // Enter cell (x, y) on move k facing d, by a path that began with `first`. Returns true at the apple.
+  const enter = (x, y, d, k, first) => {
+    if (x < 0 || y < 0 || x >= grid || y >= grid) return false;
+    const cell = y * grid + x;
+    if (freeAt[cell] > k) return false;
+    const state = cell * 4 + d;
+    if (firstOf[state] !== -1) return false;
+    if (cell === target) return true;
+    firstOf[state] = first;
+    depth[state] = k;
+    queue[tail++] = state;
+    return false;
+  };
+  const h = snake[0];
+  for (const d of next[DIRS.indexOf(heading)]) {
+    if (enter(h.x + dx[d], h.y + dy[d], d, 1, d)) return DIRS[d];
+  }
+  for (let at = 0; at < tail; at++) {
+    const state = queue[at];
+    const cell = state >> 2;
+    const x = cell % grid;
+    const y = (cell - x) / grid;
+    const k = depth[state] + 1;
+    const first = firstOf[state];
+    for (const d of next[state & 3]) {
+      if (enter(x + dx[d], y + dy[d], d, k, first)) return DIRS[first];
+    }
+  }
+  return null;
+}
+
 // How many cells the head could still reach after moving one step this way.
 function roomAfter({ snake, grid }, dir) {
   const head = snake[0];
@@ -80,11 +141,12 @@ function roomAfter({ snake, grid }, dir) {
 // The direction the bot wants next on a control screen.
 // Shortest path to the apple if there is one; otherwise the move with the most room.
 export function decide(probe) {
-  const toApple = pathToApple(probe);
+  const limited = Array.isArray(probe.allowedTurns);
+  const toApple = limited ? pathWithTurns(probe) : pathToApple(probe);
   if (toApple) return toApple;
   let best = probe.heading;
   let bestRoom = -1;
-  for (const d of moves(probe.heading)) {
+  for (const d of limited ? allowedMoves(probe.heading, probe.allowedTurns) : moves(probe.heading)) {
     const room = roomAfter(probe, d);
     if (room > bestRoom) {
       best = d;
@@ -92,4 +154,14 @@ export function decide(probe) {
     }
   }
   return best;
+}
+
+// The key the bot presses on v1.6's skill tree (UPDATES.md, v1.6): it moves the cursor to "Turn left"
+// if that can be learned, otherwise to the first skill in the list that can, then presses the key
+// the screen offers (Enter). If nothing can be learned, it presses what the screen offers to go on.
+export function skillKey({ skills, cursor, next }) {
+  let target = skills.findIndex(s => s.id === 'left' && s.learnable);
+  if (target === -1) target = skills.findIndex(s => s.learnable);
+  if (target === -1 || target === cursor) return next;
+  return target > cursor ? 'ArrowDown' : 'ArrowUp';
 }

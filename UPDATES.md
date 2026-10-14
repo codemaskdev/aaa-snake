@@ -4,7 +4,8 @@
 Warden Snek, not Commander Snek; v1.2's patch comes only from the game's own origin; v1.5 keeps its note that control
 share may go up. Any later change to this file is a new, logged decision.
 
-Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10-14, PROMPTS.md #5).
+Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10-14, PROMPTS.md #5); the keys of
+v1.6's skill-tree rule (2026-10-15, PROMPTS.md #7).
 
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
@@ -165,6 +166,12 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   then on whatever comes first in the list.
 - **Metrics:** time to first apple up (right-turn-only paths are longer); control share down (level-up screens and the
   skill tree); code up. The bot's path search respects the turns the probe says are allowed.
+- **Bot rule, keys (logged change, 2026-10-15, PROMPTS.md #7, written before v1.6 was measured):** the rule above,
+  in key presses. The skill tree lists the skills top to bottom; Up and Down move a cursor, Enter learns the skill
+  under it (the screen offers Enter, probe `next`, when that skill can be learned). The bot presses Down or Up toward
+  "Turn left" if it can be learned, otherwise toward the first skill in the list that can, then Enter; if none can,
+  it presses what the screen offers to go on. At most one key every 250 ms on the same screen, as on every screen.
+  Its path search uses only the turns in the probe's `allowedTurns`.
 - **Patch note:** "Turning left is now a skill. Progression is now a feature."
 - **Generated art / voice:** none.
 - **Graphics (budget):** particles on level-up, a glowing XP bar, a skill tree with animated links. 2D canvas.

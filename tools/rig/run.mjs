@@ -1,6 +1,6 @@
 // One measured run: open a build in Chromium, let the bot play, collect the raw data.
 import { chromium } from 'playwright';
-import { decide, KEY_FOR } from './bot.mjs';
+import { decide, KEY_FOR, skillKey } from './bot.mjs';
 import {
   CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin, firstMs, playShare,
 } from './stats.mjs';
@@ -161,9 +161,13 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
             }
           }
         }
-      } else if (probe.next && (changed || t - lastNextPress > 250)) {
-        await page.keyboard.press(probe.next);
-        lastNextPress = t;
+      } else {
+        // On v1.6's skill tree the bot also steers the cursor (skillKey); elsewhere it presses what is offered.
+        const press = probe.screen === 'skill-tree' && probe.skills ? skillKey(probe) : probe.next;
+        if (press && (changed || t - lastNextPress > 250)) {
+          await page.keyboard.press(press);
+          lastNextPress = t;
+        }
       }
     }
 
