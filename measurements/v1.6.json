@@ -1,0 +1,1473 @@
+{
+  "version": "v1.6",
+  "command": "npm run measure v1.6",
+  "measuredAt": "2026-10-14T23:22:07.310Z",
+  "git": {
+    "head": "d74daf1",
+    "tag": {
+      "name": "v1.6",
+      "commit": "efe7ce2"
+    },
+    "buildSameAsTag": true,
+    "buildUncommitted": false
+  },
+  "machine": {
+    "model": "MacBook Air",
+    "modelIdentifier": "MacBookAir10,1",
+    "chip": "Apple M1",
+    "cores": 8,
+    "ramBytes": 17179869184,
+    "os": "macOS 26.3.1 (25D771280a)",
+    "node": "v24.15.0",
+    "ram": "16 GB"
+  },
+  "browser": {
+    "name": "Chromium",
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "headless": {
+      "mode": "new headless (Playwright channel \"chromium\")",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        800
+      ],
+      "devicePixelRatio": 2
+    },
+    "fpsWindow": {
+      "mode": "visible",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        700
+      ],
+      "devicePixelRatio": 2
+    }
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 5,
+    "sessionMs": 180000,
+    "playMsForMemory": 60000,
+    "fpsRuns": 5,
+    "fpsPlayMs": 60000,
+    "frameRateMethod": 2
+  },
+  "method": {
+    "timeToFirstApple": "performance.now() in the page when the game logs its first apple; 0 is navigation start.",
+    "screensBeforeFirstApple": "Segments of the game's screen log between navigation start and the first apple. \"(page load)\" is the time before the game reports its first screen.",
+    "bot": "tools/rig/bot.mjs. Seed 1. It acts only on screens already drawn, presses the key a screen offers to leave it (skip/continue/restart) at once, and on control screens takes a shortest path to the apple (breadth-first search). Keys are real key presses (Playwright keyboard). It polls the game every 4 ms.",
+    "controlShareInPlay": "Since prompt 5: from the first drawn frame of a control screen until the bot has had 60000 ms of control (the heap's and the frame rate's window), control time divided by the time that passed. The launch screens are left out; what stops play after the first control frame (finishing moves, cutscenes, deaths, reconnects) counts against it (tools/rig/stats.mjs playShare).",
+    "controlShare": "Time in control screens (ready, play) divided by the session, over the first sessionMs from navigation start. Control screens are those where arrow keys steer the snake; the list is fixed in tools/rig/stats.mjs.",
+    "steering": "In play, every turn key the bot sends is checked on the next look at the game: accepted means the game now heads that way. A turn sent just before the snake died, or on the last look at the game in a run, cannot be checked and is counted as unchecked.",
+    "load": "performance.now() of the first drawn frame of a screen that accepts any key: the first frame of a control screen, or the game's first \"accepts\" log entry (the first drawn frame where another screen starts reacting to a key), whichever comes first.",
+    "memory": "CDP Runtime.getHeapUsage().usedSize of the page, read right after CDP HeapProfiler.collectGarbage, at the moment the bot has had playMsForMemory of control. The value before garbage collection is kept too.",
+    "origin": "Every request of every run must go to the page's own origin (scheme, host and port of the game); any other request is listed in checks.externalRequests and fails the checks (tools/rig/stats.mjs offOrigin).",
+    "download": "Sum of CDP Network.loadingFinished encodedDataLength over every request of the session (headers + body; no compression, browser cache disabled).",
+    "size": "Files in dist/<version>/. js = .js and .mjs; code = js + .html + .css; assets = every other file. Lines = newline characters, like wc -l (tools/rig/size.mjs).",
+    "frameRate": "Method 2 (since 2026-10-14, prompt 4): over the first 60 s of play, the same window as the heap. Every requestAnimationFrame timestamp is recorded by a script injected before the game; only frames inside control screens count, taken in order from navigation start until 60000 ms of control (by the game's screen log), and frames within the heap read (+500 ms) are left out. Per run: median = median of per-second frame counts (1-second windows, like an FPS counter); p5 = 5th percentile (nearest rank) of per-frame values, 1000 / interval between two frames. The version's figure is the median over runs. Per-frame values are not used for the median because rAF timestamps snap to the 60 Hz display: a 25 ms frame shows up as 16.7 and 33.3 ms intervals in turn. Method 1 took the control frames of the first 60 s from navigation start; its files are in measurements/old-method/.",
+    "frameRateWindow": "Frame rate is measured in a visible Chromium window, not headless: on this Mac, headless and visible medians agreed on CPU and GPU loads, but the 5th percentile did not (see measurements/fps-check.json). The headless runs' frame rate is kept as headlessFps for comparison.",
+    "medians": "Median over runs: the middle value of 5 (mean of the two middle values for an even count)."
+  },
+  "size": {
+    "tool": "tools/rig/size.mjs: newline characters per file, like wc -l",
+    "jsLines": 2445,
+    "codeLines": 2471,
+    "jsBytes": 101353,
+    "assetBytes": 629368,
+    "buildBytes": 731649,
+    "files": [
+      {
+        "path": "game.js",
+        "bytes": 19060,
+        "lines": 450
+      },
+      {
+        "path": "index.html",
+        "bytes": 928,
+        "lines": 26
+      },
+      {
+        "path": "launch.js",
+        "bytes": 9586,
+        "lines": 208
+      },
+      {
+        "path": "online.js",
+        "bytes": 16306,
+        "lines": 380
+      },
+      {
+        "path": "patch/day-one.js",
+        "bytes": 2126,
+        "lines": 62
+      },
+      {
+        "path": "progress.js",
+        "bytes": 11985,
+        "lines": 291
+      },
+      {
+        "path": "rules.js",
+        "bytes": 3888,
+        "lines": 101
+      },
+      {
+        "path": "story.js",
+        "bytes": 5292,
+        "lines": 109
+      },
+      {
+        "path": "update.js",
+        "bytes": 8323,
+        "lines": 209
+      },
+      {
+        "path": "voice/01.mp3",
+        "bytes": 25540,
+        "lines": null
+      },
+      {
+        "path": "voice/02.mp3",
+        "bytes": 44766,
+        "lines": null
+      },
+      {
+        "path": "voice/03.mp3",
+        "bytes": 38288,
+        "lines": null
+      },
+      {
+        "path": "voice/04.mp3",
+        "bytes": 38288,
+        "lines": null
+      },
+      {
+        "path": "voice/05.mp3",
+        "bytes": 32018,
+        "lines": null
+      },
+      {
+        "path": "voice/06.mp3",
+        "bytes": 35153,
+        "lines": null
+      },
+      {
+        "path": "voice/07.mp3",
+        "bytes": 41631,
+        "lines": null
+      },
+      {
+        "path": "voice/08.mp3",
+        "bytes": 35153,
+        "lines": null
+      },
+      {
+        "path": "voice/09.mp3",
+        "bytes": 51245,
+        "lines": null
+      },
+      {
+        "path": "voice/10.mp3",
+        "bytes": 38288,
+        "lines": null
+      },
+      {
+        "path": "voice/11.mp3",
+        "bytes": 38288,
+        "lines": null
+      },
+      {
+        "path": "voice/12.mp3",
+        "bytes": 38288,
+        "lines": null
+      },
+      {
+        "path": "voice/13.mp3",
+        "bytes": 38288,
+        "lines": null
+      },
+      {
+        "path": "voice/14.mp3",
+        "bytes": 38288,
+        "lines": null
+      },
+      {
+        "path": "voice/15.mp3",
+        "bytes": 28675,
+        "lines": null
+      },
+      {
+        "path": "voice/16.mp3",
+        "bytes": 22405,
+        "lines": null
+      },
+      {
+        "path": "voice/17.mp3",
+        "bytes": 44766,
+        "lines": null
+      },
+      {
+        "path": "world.js",
+        "bytes": 24787,
+        "lines": 635
+      }
+    ]
+  },
+  "median": {
+    "timeToFirstAppleMs": 128380.70000000298,
+    "loadMs": 30141.60000000894,
+    "controlShare": 0.2537455555555721,
+    "controlShareInPlay": 0.5746840195698081,
+    "heapUsedAfterGcBytes": 1811332,
+    "downloadBytes": 738812,
+    "fpsMedian": 60,
+    "fpsP5": 56.818181818163026,
+    "headlessFpsMedian": 60,
+    "headlessFpsP5": 59.88023952091634
+  },
+  "checks": {
+    "firstAppleTicks": [
+      163,
+      163,
+      163,
+      163,
+      163
+    ],
+    "sameFirstAppleTickInAllRuns": true,
+    "sameApplesBeforeFirstDeathInAllRuns": true,
+    "externalRequests": [],
+    "failedRequests": [],
+    "pageErrors": [],
+    "steering": {
+      "sent": 25,
+      "accepted": 25,
+      "unchecked": 0
+    },
+    "incompleteRuns": [],
+    "pass": true
+  },
+  "runs": [
+    {
+      "run": 1,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 223228.40000000596,
+      "incomplete": false,
+      "timeToFirstAppleMs": 128370.30000001192,
+      "firstAppleTick": 163,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 32.6000000089407
+        },
+        {
+          "screen": "update-required",
+          "ms": 2016
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9015.79999999702
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3015.4000000059605
+        },
+        {
+          "screen": "preparing",
+          "ms": 3017.5
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3016.3999999910593
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016.7000000029802
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3016.7000000029802
+        },
+        {
+          "screen": "warning",
+          "ms": 4031.0999999940395
+        },
+        {
+          "screen": "title",
+          "ms": 2505.6000000089407
+        },
+        {
+          "screen": "connecting",
+          "ms": 3012.199999988079
+        },
+        {
+          "screen": "sign-in",
+          "ms": 1505.1000000089407
+        },
+        {
+          "screen": "signing-in",
+          "ms": 2011.5999999940395
+        },
+        {
+          "screen": "queue",
+          "ms": 7316.79999999702
+        },
+        {
+          "screen": "terms",
+          "ms": 1778.6000000089407
+        },
+        {
+          "screen": "loading",
+          "ms": 5013.70000000298
+        },
+        {
+          "screen": "opening",
+          "ms": 44004.69999998808
+        },
+        {
+          "screen": "autosave",
+          "ms": 3003.4000000059605
+        },
+        {
+          "screen": "world-map",
+          "ms": 3018.7000000029802
+        },
+        {
+          "screen": "ready",
+          "ms": 39.599999994039536
+        },
+        {
+          "screen": "play",
+          "ms": 5005.5
+        },
+        {
+          "screen": "level-up",
+          "ms": 2021.7000000029802
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1003.2000000029802
+        },
+        {
+          "screen": "play",
+          "ms": 10008
+        },
+        {
+          "screen": "level-up",
+          "ms": 2020.7000000029802
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1285
+        },
+        {
+          "screen": "play",
+          "ms": 1293.5
+        },
+        {
+          "screen": "finisher",
+          "ms": 819.0999999940395
+        },
+        {
+          "screen": "finisher-bite",
+          "ms": 1525.4000000059605
+        }
+      ],
+      "loadMs": 30164,
+      "sessionMs": 180000,
+      "controlMs": 45659.4999999851,
+      "controlShare": 0.2536638888888061,
+      "controlInPlay": {
+        "controlMs": 60000,
+        "fromMs": 103348.60000000894,
+        "toMs": 222102.90000002086,
+        "share": 0.505244862712289
+      },
+      "memory": {
+        "atMs": 222231.20000000298,
+        "controlMsAtRead": 60003.4999999851,
+        "usedSizeAfterGc": 1820488,
+        "totalSizeAfterGc": 2621440,
+        "usedSizeBeforeGc": 5526720,
+        "framesExcluded": [
+          222231.20000000298,
+          222748.20000000298
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 5526720,
+          "totalSize": 19136512,
+          "embedderHeapUsedSize": 3862424,
+          "backingStorageSize": 371961
+        },
+        "afterGc": {
+          "usedSize": 1820488,
+          "totalSize": 2621440,
+          "embedderHeapUsedSize": 1641560,
+          "backingStorageSize": 371949
+        }
+      },
+      "fps": {
+        "frames": 3587,
+        "seconds": 57,
+        "median": 60,
+        "p5": 59.52380952385077,
+        "medianPerFrame": 59.8802395210207,
+        "longestFrameMs": 16.800000000017462,
+        "window": {
+          "controlMs": 60000,
+          "from": 103348.60000000894,
+          "to": 222102.90000002086
+        }
+      },
+      "steering": {
+        "sent": 5,
+        "accepted": 5,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "sign-in": "Enter",
+        "terms": "Enter",
+        "loading": "Enter",
+        "world-map": "Enter",
+        "level-up": "Enter",
+        "skill-tree": "Enter",
+        "finisher": "KeyE",
+        "gameover": "Enter"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 163
+        },
+        {
+          "score": 2,
+          "tick": 456
+        }
+      ],
+      "deathsInSession": 0,
+      "requests": {
+        "count": 48,
+        "bytes": 738812,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 2,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208815.39999999106,
+      "incomplete": false,
+      "timeToFirstAppleMs": 128359.59999999404,
+      "firstAppleTick": 163,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 17
+        },
+        {
+          "screen": "update-required",
+          "ms": 2018.0999999940395
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9016.59999999404
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3000.6000000089407
+        },
+        {
+          "screen": "preparing",
+          "ms": 3015.5
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3017.5
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016.2999999970198
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3016.7000000029802
+        },
+        {
+          "screen": "warning",
+          "ms": 4023.3999999910593
+        },
+        {
+          "screen": "title",
+          "ms": 2517.7000000029802
+        },
+        {
+          "screen": "connecting",
+          "ms": 3008.7000000029802
+        },
+        {
+          "screen": "sign-in",
+          "ms": 1504.5
+        },
+        {
+          "screen": "signing-in",
+          "ms": 2011.9000000059605
+        },
+        {
+          "screen": "queue",
+          "ms": 7315.79999999702
+        },
+        {
+          "screen": "terms",
+          "ms": 1777.7000000029802
+        },
+        {
+          "screen": "loading",
+          "ms": 5009.0999999940395
+        },
+        {
+          "screen": "opening",
+          "ms": 44012.70000000298
+        },
+        {
+          "screen": "autosave",
+          "ms": 3020.3999999910593
+        },
+        {
+          "screen": "world-map",
+          "ms": 3018.1000000089407
+        },
+        {
+          "screen": "ready",
+          "ms": 46.29999999701977
+        },
+        {
+          "screen": "play",
+          "ms": 5013.70000000298
+        },
+        {
+          "screen": "level-up",
+          "ms": 2023.7000000029802
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 996.3999999910593
+        },
+        {
+          "screen": "play",
+          "ms": 10012.40000000596
+        },
+        {
+          "screen": "level-up",
+          "ms": 2007.7000000029802
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1277.2999999970198
+        },
+        {
+          "screen": "play",
+          "ms": 1314.8999999910593
+        },
+        {
+          "screen": "finisher",
+          "ms": 805.5
+        },
+        {
+          "screen": "finisher-bite",
+          "ms": 1523.4000000059605
+        }
+      ],
+      "loadMs": 30134.5,
+      "sessionMs": 180000,
+      "controlMs": 45688.69999997318,
+      "controlShare": 0.2538261111109621,
+      "controlInPlay": {
+        "controlMs": 60000,
+        "fromMs": 103338.29999999702,
+        "toMs": 207743.5000000149,
+        "share": 0.5746840195698081
+      },
+      "memory": {
+        "atMs": 207815.69999998808,
+        "controlMsAtRead": 60003.9999999851,
+        "usedSizeAfterGc": 1809580,
+        "totalSizeAfterGc": 2359296,
+        "usedSizeBeforeGc": 6976800,
+        "framesExcluded": [
+          207815.69999998808,
+          208330.19999998808
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 6976800,
+          "totalSize": 18612224,
+          "embedderHeapUsedSize": 5622496,
+          "backingStorageSize": 372217
+        },
+        "afterGc": {
+          "usedSize": 1809580,
+          "totalSize": 2359296,
+          "embedderHeapUsedSize": 1501792,
+          "backingStorageSize": 372205
+        }
+      },
+      "fps": {
+        "frames": 3593,
+        "seconds": 57,
+        "median": 60,
+        "p5": 59.52380952385077,
+        "medianPerFrame": 59.8802395210207,
+        "longestFrameMs": 16.800000000017462,
+        "window": {
+          "controlMs": 60000,
+          "from": 103338.29999999702,
+          "to": 207743.5000000149
+        }
+      },
+      "steering": {
+        "sent": 5,
+        "accepted": 5,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "sign-in": "Enter",
+        "terms": "Enter",
+        "loading": "Enter",
+        "world-map": "Enter",
+        "level-up": "Enter",
+        "skill-tree": "Enter",
+        "finisher": "KeyE"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 163
+        },
+        {
+          "score": 2,
+          "tick": 456
+        }
+      ],
+      "deathsInSession": 0,
+      "requests": {
+        "count": 47,
+        "bytes": 738812,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 3,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208800.5,
+      "incomplete": false,
+      "timeToFirstAppleMs": 128386.60000000894,
+      "firstAppleTick": 163,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 17.5
+        },
+        {
+          "screen": "update-required",
+          "ms": 1997.800000011921
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9016.29999999702
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3017.3999999910593
+        },
+        {
+          "screen": "preparing",
+          "ms": 3015
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3017.2000000029802
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3017.2000000029802
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3015.4000000059605
+        },
+        {
+          "screen": "warning",
+          "ms": 4027.2999999970198
+        },
+        {
+          "screen": "title",
+          "ms": 2509.8999999910593
+        },
+        {
+          "screen": "connecting",
+          "ms": 3013.800000011921
+        },
+        {
+          "screen": "sign-in",
+          "ms": 1524
+        },
+        {
+          "screen": "signing-in",
+          "ms": 2008.199999988079
+        },
+        {
+          "screen": "queue",
+          "ms": 7315.800000011921
+        },
+        {
+          "screen": "terms",
+          "ms": 1790.3999999910593
+        },
+        {
+          "screen": "loading",
+          "ms": 5013.600000008941
+        },
+        {
+          "screen": "opening",
+          "ms": 44011.19999998808
+        },
+        {
+          "screen": "autosave",
+          "ms": 3019.7000000029802
+        },
+        {
+          "screen": "world-map",
+          "ms": 3018.5
+        },
+        {
+          "screen": "ready",
+          "ms": 40.1000000089407
+        },
+        {
+          "screen": "play",
+          "ms": 5005.399999991059
+        },
+        {
+          "screen": "level-up",
+          "ms": 2022.6000000089407
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1013.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 10011.59999999404
+        },
+        {
+          "screen": "level-up",
+          "ms": 2025.800000011921
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1288.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 1303.7999999970198
+        },
+        {
+          "screen": "finisher",
+          "ms": 806.2000000029802
+        },
+        {
+          "screen": "finisher-bite",
+          "ms": 1503.2000000029802
+        }
+      ],
+      "loadMs": 30131.20000000298,
+      "sessionMs": 180000,
+      "controlMs": 45671.5,
+      "controlShare": 0.25373055555555557,
+      "controlInPlay": {
+        "controlMs": 60000,
+        "fromMs": 103366.20000000298,
+        "toMs": 207764.29999999702,
+        "share": 0.5747231031982711
+      },
+      "memory": {
+        "atMs": 207802,
+        "controlMsAtRead": 60001.40000000596,
+        "usedSizeAfterGc": 1812172,
+        "totalSizeAfterGc": 2883584,
+        "usedSizeBeforeGc": 7143716,
+        "framesExcluded": [
+          207802,
+          208320.20000000298
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 7143716,
+          "totalSize": 17301504,
+          "embedderHeapUsedSize": 5651240,
+          "backingStorageSize": 371940
+        },
+        "afterGc": {
+          "usedSize": 1812172,
+          "totalSize": 2883584,
+          "embedderHeapUsedSize": 1471456,
+          "backingStorageSize": 371928
+        }
+      },
+      "fps": {
+        "frames": 3593,
+        "seconds": 58,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.8802395210207,
+        "longestFrameMs": 16.800000000017462,
+        "window": {
+          "controlMs": 60000,
+          "from": 103366.20000000298,
+          "to": 207764.29999999702
+        }
+      },
+      "steering": {
+        "sent": 5,
+        "accepted": 5,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "sign-in": "Enter",
+        "terms": "Enter",
+        "loading": "Enter",
+        "world-map": "Enter",
+        "level-up": "Enter",
+        "skill-tree": "Enter",
+        "finisher": "KeyE"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 163
+        },
+        {
+          "score": 2,
+          "tick": 456
+        }
+      ],
+      "deathsInSession": 0,
+      "requests": {
+        "count": 47,
+        "bytes": 738812,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 4,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208827.30000001192,
+      "incomplete": false,
+      "timeToFirstAppleMs": 128388.5,
+      "firstAppleTick": 163,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 17.700000002980232
+        },
+        {
+          "screen": "update-required",
+          "ms": 2014.5
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9016.90000000596
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3017
+        },
+        {
+          "screen": "preparing",
+          "ms": 3016.5
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3015.7999999970198
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016.2000000029802
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3016.8999999910593
+        },
+        {
+          "screen": "warning",
+          "ms": 4021.5
+        },
+        {
+          "screen": "title",
+          "ms": 2512.800000011921
+        },
+        {
+          "screen": "connecting",
+          "ms": 3016.5
+        },
+        {
+          "screen": "sign-in",
+          "ms": 1521.8999999910593
+        },
+        {
+          "screen": "signing-in",
+          "ms": 1992.7000000029802
+        },
+        {
+          "screen": "queue",
+          "ms": 7318
+        },
+        {
+          "screen": "terms",
+          "ms": 1776.2999999970198
+        },
+        {
+          "screen": "loading",
+          "ms": 5013.4000000059605
+        },
+        {
+          "screen": "opening",
+          "ms": 44007.89999999106
+        },
+        {
+          "screen": "autosave",
+          "ms": 3019.1000000089407
+        },
+        {
+          "screen": "world-map",
+          "ms": 3016.2000000029802
+        },
+        {
+          "screen": "ready",
+          "ms": 53.3999999910593
+        },
+        {
+          "screen": "play",
+          "ms": 5010
+        },
+        {
+          "screen": "level-up",
+          "ms": 2023.6000000089407
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 995.5
+        },
+        {
+          "screen": "play",
+          "ms": 10014.89999999106
+        },
+        {
+          "screen": "level-up",
+          "ms": 2021.5
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1286.5
+        },
+        {
+          "screen": "play",
+          "ms": 1308.4000000059605
+        },
+        {
+          "screen": "finisher",
+          "ms": 804
+        },
+        {
+          "screen": "finisher-bite",
+          "ms": 1522.8999999910593
+        }
+      ],
+      "loadMs": 30148.10000000894,
+      "sessionMs": 180000,
+      "controlMs": 45694.39999999106,
+      "controlShare": 0.2538577777777281,
+      "controlInPlay": {
+        "controlMs": 60000,
+        "fromMs": 103347.80000001192,
+        "toMs": 207750.20000001788,
+        "share": 0.5746994321969282
+      },
+      "memory": {
+        "atMs": 207822.30000001192,
+        "controlMsAtRead": 60001.79999998212,
+        "usedSizeAfterGc": 1811332,
+        "totalSizeAfterGc": 2621440,
+        "usedSizeBeforeGc": 6507184,
+        "framesExcluded": [
+          207822.30000001192,
+          208343.5
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 6507184,
+          "totalSize": 17301504,
+          "embedderHeapUsedSize": 5081712,
+          "backingStorageSize": 371940
+        },
+        "afterGc": {
+          "usedSize": 1811332,
+          "totalSize": 2621440,
+          "embedderHeapUsedSize": 1556832,
+          "backingStorageSize": 371928
+        }
+      },
+      "fps": {
+        "frames": 3592,
+        "seconds": 57,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.8802395210207,
+        "longestFrameMs": 16.800000000017462,
+        "window": {
+          "controlMs": 60000,
+          "from": 103347.80000001192,
+          "to": 207750.20000001788
+        }
+      },
+      "steering": {
+        "sent": 5,
+        "accepted": 5,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "sign-in": "Enter",
+        "terms": "Enter",
+        "loading": "Enter",
+        "world-map": "Enter",
+        "level-up": "Enter",
+        "skill-tree": "Enter",
+        "finisher": "KeyE"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 163
+        },
+        {
+          "score": 2,
+          "tick": 456
+        }
+      ],
+      "deathsInSession": 0,
+      "requests": {
+        "count": 47,
+        "bytes": 738812,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    },
+    {
+      "run": 5,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208852.90000000596,
+      "incomplete": false,
+      "timeToFirstAppleMs": 128380.70000000298,
+      "firstAppleTick": 163,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 17.200000002980232
+        },
+        {
+          "screen": "update-required",
+          "ms": 2023.5999999940395
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9017
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3016.9000000059605
+        },
+        {
+          "screen": "preparing",
+          "ms": 3017
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 2998.4000000059605
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016.7999999970198
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3017.5999999940395
+        },
+        {
+          "screen": "warning",
+          "ms": 4024
+        },
+        {
+          "screen": "title",
+          "ms": 2493.9000000059605
+        },
+        {
+          "screen": "connecting",
+          "ms": 3013.8999999910593
+        },
+        {
+          "screen": "sign-in",
+          "ms": 1503.9000000059605
+        },
+        {
+          "screen": "signing-in",
+          "ms": 2013.0999999940395
+        },
+        {
+          "screen": "queue",
+          "ms": 7317.100000008941
+        },
+        {
+          "screen": "terms",
+          "ms": 1787.3999999910593
+        },
+        {
+          "screen": "loading",
+          "ms": 5018.4000000059605
+        },
+        {
+          "screen": "opening",
+          "ms": 44007.59999999404
+        },
+        {
+          "screen": "autosave",
+          "ms": 3020.4000000059605
+        },
+        {
+          "screen": "world-map",
+          "ms": 3022
+        },
+        {
+          "screen": "ready",
+          "ms": 39.900000005960464
+        },
+        {
+          "screen": "play",
+          "ms": 5001
+        },
+        {
+          "screen": "level-up",
+          "ms": 2023.7999999970198
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1012.7999999970198
+        },
+        {
+          "screen": "play",
+          "ms": 10014
+        },
+        {
+          "screen": "level-up",
+          "ms": 2019.7999999970198
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1283.7000000029802
+        },
+        {
+          "screen": "play",
+          "ms": 1312.5999999940395
+        },
+        {
+          "screen": "finisher",
+          "ms": 804.3000000119209
+        },
+        {
+          "screen": "finisher-bite",
+          "ms": 1522.5999999940395
+        }
+      ],
+      "loadMs": 30141.60000000894,
+      "sessionMs": 180000,
+      "controlMs": 45674.20000000298,
+      "controlShare": 0.2537455555555721,
+      "controlInPlay": {
+        "controlMs": 60000,
+        "fromMs": 103346.20000000298,
+        "toMs": 207807.20000000298,
+        "share": 0.5743770402351117
+      },
+      "memory": {
+        "atMs": 207855.10000000894,
+        "controlMsAtRead": 60002.79999999702,
+        "usedSizeAfterGc": 1808136,
+        "totalSizeAfterGc": 2621440,
+        "usedSizeBeforeGc": 7751432,
+        "framesExcluded": [
+          207855.10000000894,
+          208368.90000000596
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 7751432,
+          "totalSize": 17039360,
+          "embedderHeapUsedSize": 6117968,
+          "backingStorageSize": 372481
+        },
+        "afterGc": {
+          "usedSize": 1808136,
+          "totalSize": 2621440,
+          "embedderHeapUsedSize": 1527936,
+          "backingStorageSize": 372469
+        }
+      },
+      "fps": {
+        "frames": 3593,
+        "seconds": 57,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.8802395210207,
+        "longestFrameMs": 16.800000000017462,
+        "window": {
+          "controlMs": 60000,
+          "from": 103346.20000000298,
+          "to": 207807.20000000298
+        }
+      },
+      "steering": {
+        "sent": 5,
+        "accepted": 5,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "sign-in": "Enter",
+        "terms": "Enter",
+        "loading": "Enter",
+        "world-map": "Enter",
+        "level-up": "Enter",
+        "skill-tree": "Enter",
+        "finisher": "KeyE"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 163
+        },
+        {
+          "score": 2,
+          "tick": 456
+        }
+      ],
+      "deathsInSession": 0,
+      "requests": {
+        "count": 47,
+        "bytes": 738812,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    }
+  ],
+  "fpsRuns": [
+    {
+      "run": 1,
+      "mode": "visible",
+      "frames": 3593,
+      "seconds": 55,
+      "median": 60,
+      "p5": 57.142857142857146,
+      "medianPerFrame": 59.8802395210207,
+      "longestFrameMs": 18.60000000000582,
+      "window": {
+        "controlMs": 60000,
+        "from": 103247.30000001192,
+        "to": 207509.5
+      },
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 700,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208554.10000000894,
+      "errors": []
+    },
+    {
+      "run": 2,
+      "mode": "visible",
+      "frames": 3593,
+      "seconds": 54,
+      "median": 60,
+      "p5": 57.142857142857146,
+      "medianPerFrame": 59.8802395210207,
+      "longestFrameMs": 18.70000000001164,
+      "window": {
+        "controlMs": 60000,
+        "from": 103170.79999999702,
+        "to": 207469.40000002086
+      },
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208532.20000000298,
+      "errors": []
+    },
+    {
+      "run": 3,
+      "mode": "visible",
+      "frames": 3593,
+      "seconds": 55,
+      "median": 60,
+      "p5": 56.818181818163026,
+      "medianPerFrame": 59.8802395210207,
+      "longestFrameMs": 18.70000000001164,
+      "window": {
+        "controlMs": 60000,
+        "from": 103260.89999999106,
+        "to": 207534.20000001788
+      },
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208593.59999999404,
+      "errors": []
+    },
+    {
+      "run": 4,
+      "mode": "visible",
+      "frames": 3592,
+      "seconds": 54,
+      "median": 60,
+      "p5": 56.818181818163026,
+      "medianPerFrame": 59.8802395210207,
+      "longestFrameMs": 18.70000000001164,
+      "window": {
+        "controlMs": 60000,
+        "from": 103259,
+        "to": 207586.9999999851
+      },
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208654.5,
+      "errors": []
+    },
+    {
+      "run": 5,
+      "mode": "visible",
+      "frames": 3592,
+      "seconds": 56,
+      "median": 60,
+      "p5": 54.054054054054056,
+      "medianPerFrame": 59.8802395210207,
+      "longestFrameMs": 18.70000000001164,
+      "window": {
+        "controlMs": 60000,
+        "from": 103259.70000000298,
+        "to": 207595.09999999404
+      },
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 702,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.6",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 208666.59999999404,
+      "errors": []
+    }
+  ],
+  "medianRun": 5,
+  "budget": {
+    "fpsMedianMin": 50,
+    "fpsP5Min": 30,
+    "pass": true
+  }
+}

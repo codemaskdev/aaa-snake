@@ -643,3 +643,43 @@ As UPDATES.md describes (src/progress.js):
 | Frame rate median | unchanged | play draws the same world, plus one glowing bar |
 | Frame rate 5th percentile | unchanged or slightly down | the XP bar's glow (a shadow blur) every frame of play; the particles and the tree are not play, so not in the window |
 | Requests to another origin | zero | nothing new is loaded from anywhere |
+
+### v1.6, measured (`npm run measure v1.6`, medians of 5 runs) against the expectations written before measuring
+| Metric | Expected | v1.5 | v1.6 | Direction |
+|---|---|---|---|---|
+| First apple's tick | unchanged: 163 | 163 | 163 (all 5 runs) | unchanged, as expected |
+| Time to first apple | up | 122037.29999999702 ms | 128380.70000000298 ms | up, as expected (6343.4000000059605 ms; the two level-ups and skill trees on the way took 6340.0999999940395 ms in the median run) |
+| Load time | unchanged | 30122.90000000596 ms | 30141.60000000894 ms | unchanged, as expected |
+| Control share (first 180 s) | down | 0.2858988888889551 | 0.2537455555555721 | down, as expected |
+| Control share in play | down | 0.6613049530638593 | 0.5746840195698081 | down, as expected |
+| Download | up | 723428 bytes | 738812 bytes | up, as expected (15384 bytes) |
+| JS lines / bytes | up | 2093 / 86204 | 2445 / 101353 | up, as expected |
+| Assets | unchanged | 629368 bytes | 629368 bytes | unchanged, as expected |
+| JS heap after GC | up, a little | 1717284 bytes | 1811332 bytes | up (94048 bytes), more than v1.5's world added (12276 bytes); I have not looked into why |
+| Frame rate median | unchanged | 60 fps | 60 fps | unchanged, as expected |
+| Frame rate 5th percentile | unchanged or slightly down | 54.64480874311725 fps | 56.818181818163026 fps | up (2.173373075045774 fps), which I did not expect; the five visible v1.6 runs range from 54.054054054054056 to 57.142857142857146 fps |
+| Requests to another origin | zero | 0 | 0 | zero, as expected |
+
+Checks: first apple on tick 163 in all 5 runs; 25 of 25 turns accepted; 0 requests outside the game's origin; 0 failed
+requests; 0 page errors. **Budget: pass** (median 60 fps, 5th percentile 56.818181818163026 fps).
+- **What 60 s of control cost in play (run 2, the median):** 104405.20000001788 ms, with four level-ups (levels 2 to 5,
+  each LEVEL UP! and a skill tree), two apples and three reconnects. The bot learned Smooth movement, Eye contact,
+  Shadow, and at level 5, Turn left, as the rule says.
+- **Run 1 died; the others did not.** Its in-play share is 0.505244862712289 (the other four: 0.5743770402351117 to
+  0.5747231031982711). The second apple (tick 456) is at (126, 0), on the top edge of the world, and the snake reaches
+  it heading up. After the bite come the reflection, LEVEL UP! (level 5) and the skill tree; when the bot's Enter on
+  the tree resumed play, the snake was facing the edge with one move to go. In run 2 the bot's first look at play came
+  in time and it turned left 44 ms after play resumed. In run 1 the next move came 69 ms after play resumed, before the
+  bot's first look at play (its next key was Enter on the game-over screen): the snake hit the edge, a new game
+  started (autosave, world map, a third apple), and the window took 118754.30000001192 ms. It died at
+  187950.90000000893 ms, after the 180 s session, so the output says "deaths 0" for run 1: the rig counts deaths in the
+  first 180 s only. v1.5 had the same apple and the same short moment after its reflection, and the bot was in time in
+  all five runs. I changed nothing after the tag. Run 1 is one of the five values in every median, but no median is
+  run 1's own value.
+- **47 requests a run, 48 in run 1:** one more script (progress.js) than v1.5's 46; run 1's new game had one more
+  reflection line.
+- **3592 or 3593 frames per 60 s of play,** against 3593 or 3594 in v1.5. The level-ups cut play into four more pieces,
+  which by v1.3's explanation should cost about four frames, not one; I have not looked into it.
+- The short (`npm run short v1.6`): the launch and the walk at 6.05x, 29900 ms in all; the first LEVEL UP! shows in
+  the sped-up part.
+- Nothing broke while measuring, apart from run 1's death above. The full `npm test` after it: 84 of 84, exit 0.

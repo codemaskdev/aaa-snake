@@ -356,3 +356,11 @@ apple's tick (right-turns-only paths are longer). Tag v1.6, run measure
 and short, update the chart, full npm test, STOP. Do not start v1.7.
 Report as before.
 ````
+
+Built: the short's speed label moved into the patch-note card, all six shorts rendered again; a bot path search that
+uses only the allowed turns, and the skill-tree rule in keys (logged in UPDATES.md); v1.6 Progression (XP, levels,
+LEVEL UP!, a skill tree that sells back smooth movement, eye contact, the shadow and turning left); expectations
+written before measuring, measured, its short, the chart with seven versions. The frame rate stayed inside the budget.
+What broke: the bot's first turn-limited search was too slow; the skill tree would have offered Turn left too early
+after several level-ups at once; test bugs; in one measured run the snake died right after the level-5 skill tree.
+See DEVLOG.md.

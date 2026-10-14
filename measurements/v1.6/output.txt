@@ -1,0 +1,62 @@
+$ npm run measure v1.6
+machine: MacBook Air (MacBookAir10,1), Apple M1, 17179869184 bytes RAM, macOS 26.3.1 (25D771280a), Node v24.15.0
+size: js 2445 lines / 101353 bytes; code 2471 lines; assets 629368 bytes; build 731649 bytes (27 files)
+run 1/5 headless: first apple 128370.30000001192 ms (tick 163), load 30164 ms, control 45659.4999999851 / 180000 ms = 0.2536638888888061, control in play 60000 / 118754.30000001192 ms = 0.505244862712289, heap 1820488 bytes after GC (5526720 before) at 60003.4999999851 ms of control, download 738812 bytes in 48 requests, headless fps median 60 p5 59.52380952385077, steering 5/5 (0 unchecked), deaths 0, errors 0
+  screens before the first apple: (page load) 32.6000000089407 ms -> update-required 2016 ms -> patch-download 9015.79999999702 ms -> patch-install 3015.4000000059605 ms -> preparing 3017.5 ms -> publisher-logo 3016.3999999910593 ms -> studio-logo 3016.7000000029802 ms -> engine-logo 3016.7000000029802 ms -> warning 4031.0999999940395 ms -> title 2505.6000000089407 ms -> connecting 3012.199999988079 ms -> sign-in 1505.1000000089407 ms -> signing-in 2011.5999999940395 ms -> queue 7316.79999999702 ms -> terms 1778.6000000089407 ms -> loading 5013.70000000298 ms -> opening 44004.69999998808 ms -> autosave 3003.4000000059605 ms -> world-map 3018.7000000029802 ms -> ready 39.599999994039536 ms -> play 5005.5 ms -> level-up 2021.7000000029802 ms -> skill-tree 1003.2000000029802 ms -> play 10008 ms -> level-up 2020.7000000029802 ms -> skill-tree 1285 ms -> play 1293.5 ms -> finisher 819.0999999940395 ms -> finisher-bite 1525.4000000059605 ms
+run 2/5 headless: first apple 128359.59999999404 ms (tick 163), load 30134.5 ms, control 45688.69999997318 / 180000 ms = 0.2538261111109621, control in play 60000 / 104405.20000001788 ms = 0.5746840195698081, heap 1809580 bytes after GC (6976800 before) at 60003.9999999851 ms of control, download 738812 bytes in 47 requests, headless fps median 60 p5 59.52380952385077, steering 5/5 (0 unchecked), deaths 0, errors 0
+  screens before the first apple: (page load) 17 ms -> update-required 2018.0999999940395 ms -> patch-download 9016.59999999404 ms -> patch-install 3000.6000000089407 ms -> preparing 3015.5 ms -> publisher-logo 3017.5 ms -> studio-logo 3016.2999999970198 ms -> engine-logo 3016.7000000029802 ms -> warning 4023.3999999910593 ms -> title 2517.7000000029802 ms -> connecting 3008.7000000029802 ms -> sign-in 1504.5 ms -> signing-in 2011.9000000059605 ms -> queue 7315.79999999702 ms -> terms 1777.7000000029802 ms -> loading 5009.0999999940395 ms -> opening 44012.70000000298 ms -> autosave 3020.3999999910593 ms -> world-map 3018.1000000089407 ms -> ready 46.29999999701977 ms -> play 5013.70000000298 ms -> level-up 2023.7000000029802 ms -> skill-tree 996.3999999910593 ms -> play 10012.40000000596 ms -> level-up 2007.7000000029802 ms -> skill-tree 1277.2999999970198 ms -> play 1314.8999999910593 ms -> finisher 805.5 ms -> finisher-bite 1523.4000000059605 ms
+run 3/5 headless: first apple 128386.60000000894 ms (tick 163), load 30131.20000000298 ms, control 45671.5 / 180000 ms = 0.25373055555555557, control in play 60000 / 104398.09999999404 ms = 0.5747231031982711, heap 1812172 bytes after GC (7143716 before) at 60001.40000000596 ms of control, download 738812 bytes in 47 requests, headless fps median 60 p5 59.88023952091634, steering 5/5 (0 unchecked), deaths 0, errors 0
+  screens before the first apple: (page load) 17.5 ms -> update-required 1997.800000011921 ms -> patch-download 9016.29999999702 ms -> patch-install 3017.3999999910593 ms -> preparing 3015 ms -> publisher-logo 3017.2000000029802 ms -> studio-logo 3017.2000000029802 ms -> engine-logo 3015.4000000059605 ms -> warning 4027.2999999970198 ms -> title 2509.8999999910593 ms -> connecting 3013.800000011921 ms -> sign-in 1524 ms -> signing-in 2008.199999988079 ms -> queue 7315.800000011921 ms -> terms 1790.3999999910593 ms -> loading 5013.600000008941 ms -> opening 44011.19999998808 ms -> autosave 3019.7000000029802 ms -> world-map 3018.5 ms -> ready 40.1000000089407 ms -> play 5005.399999991059 ms -> level-up 2022.6000000089407 ms -> skill-tree 1013.5999999940395 ms -> play 10011.59999999404 ms -> level-up 2025.800000011921 ms -> skill-tree 1288.0999999940395 ms -> play 1303.7999999970198 ms -> finisher 806.2000000029802 ms -> finisher-bite 1503.2000000029802 ms
+run 4/5 headless: first apple 128388.5 ms (tick 163), load 30148.10000000894 ms, control 45694.39999999106 / 180000 ms = 0.2538577777777281, control in play 60000 / 104402.40000000596 ms = 0.5746994321969282, heap 1811332 bytes after GC (6507184 before) at 60001.79999998212 ms of control, download 738812 bytes in 47 requests, headless fps median 60 p5 59.88023952091634, steering 5/5 (0 unchecked), deaths 0, errors 0
+  screens before the first apple: (page load) 17.700000002980232 ms -> update-required 2014.5 ms -> patch-download 9016.90000000596 ms -> patch-install 3017 ms -> preparing 3016.5 ms -> publisher-logo 3015.7999999970198 ms -> studio-logo 3016.2000000029802 ms -> engine-logo 3016.8999999910593 ms -> warning 4021.5 ms -> title 2512.800000011921 ms -> connecting 3016.5 ms -> sign-in 1521.8999999910593 ms -> signing-in 1992.7000000029802 ms -> queue 7318 ms -> terms 1776.2999999970198 ms -> loading 5013.4000000059605 ms -> opening 44007.89999999106 ms -> autosave 3019.1000000089407 ms -> world-map 3016.2000000029802 ms -> ready 53.3999999910593 ms -> play 5010 ms -> level-up 2023.6000000089407 ms -> skill-tree 995.5 ms -> play 10014.89999999106 ms -> level-up 2021.5 ms -> skill-tree 1286.5 ms -> play 1308.4000000059605 ms -> finisher 804 ms -> finisher-bite 1522.8999999910593 ms
+run 5/5 headless: first apple 128380.70000000298 ms (tick 163), load 30141.60000000894 ms, control 45674.20000000298 / 180000 ms = 0.2537455555555721, control in play 60000 / 104461 ms = 0.5743770402351117, heap 1808136 bytes after GC (7751432 before) at 60002.79999999702 ms of control, download 738812 bytes in 47 requests, headless fps median 60 p5 59.88023952091634, steering 5/5 (0 unchecked), deaths 0, errors 0
+  screens before the first apple: (page load) 17.200000002980232 ms -> update-required 2023.5999999940395 ms -> patch-download 9017 ms -> patch-install 3016.9000000059605 ms -> preparing 3017 ms -> publisher-logo 2998.4000000059605 ms -> studio-logo 3016.7999999970198 ms -> engine-logo 3017.5999999940395 ms -> warning 4024 ms -> title 2493.9000000059605 ms -> connecting 3013.8999999910593 ms -> sign-in 1503.9000000059605 ms -> signing-in 2013.0999999940395 ms -> queue 7317.100000008941 ms -> terms 1787.3999999910593 ms -> loading 5018.4000000059605 ms -> opening 44007.59999999404 ms -> autosave 3020.4000000059605 ms -> world-map 3022 ms -> ready 39.900000005960464 ms -> play 5001 ms -> level-up 2023.7999999970198 ms -> skill-tree 1012.7999999970198 ms -> play 10014 ms -> level-up 2019.7999999970198 ms -> skill-tree 1283.7000000029802 ms -> play 1312.5999999940395 ms -> finisher 804.3000000119209 ms -> finisher-bite 1522.5999999940395 ms
+fps run 1/5 visible: median 60 fps, p5 57.142857142857146 fps, 3593 frames over 60000 ms of play, longest frame 18.60000000000582 ms
+fps run 2/5 visible: median 60 fps, p5 57.142857142857146 fps, 3593 frames over 60000 ms of play, longest frame 18.70000000001164 ms
+fps run 3/5 visible: median 60 fps, p5 56.818181818163026 fps, 3593 frames over 60000 ms of play, longest frame 18.70000000001164 ms
+fps run 4/5 visible: median 60 fps, p5 56.818181818163026 fps, 3592 frames over 60000 ms of play, longest frame 18.70000000001164 ms
+fps run 5/5 visible: median 60 fps, p5 54.054054054054056 fps, 3592 frames over 60000 ms of play, longest frame 18.70000000001164 ms
+
+median of 5 runs (v1.6):
+  time to first apple   128380.70000000298 ms (run 5)
+    (page load)      17.200000002980232 ms
+    update-required  2023.5999999940395 ms
+    patch-download   9017 ms
+    patch-install    3016.9000000059605 ms
+    preparing        3017 ms
+    publisher-logo   2998.4000000059605 ms
+    studio-logo      3016.7999999970198 ms
+    engine-logo      3017.5999999940395 ms
+    warning          4024 ms
+    title            2493.9000000059605 ms
+    connecting       3013.8999999910593 ms
+    sign-in          1503.9000000059605 ms
+    signing-in       2013.0999999940395 ms
+    queue            7317.100000008941 ms
+    terms            1787.3999999910593 ms
+    loading          5018.4000000059605 ms
+    opening          44007.59999999404 ms
+    autosave         3020.4000000059605 ms
+    world-map        3022 ms
+    ready            39.900000005960464 ms
+    play             5001 ms
+    level-up         2023.7999999970198 ms
+    skill-tree       1012.7999999970198 ms
+    play             10014 ms
+    level-up         2019.7999999970198 ms
+    skill-tree       1283.7000000029802 ms
+    play             1312.5999999940395 ms
+    finisher         804.3000000119209 ms
+    finisher-bite    1522.5999999940395 ms
+  load time             30141.60000000894 ms
+  control share         0.2537455555555721 (of 180000 ms)
+  control share in play 0.5746840195698081 (first 60000 ms of control, from the first control frame)
+  JS heap after GC      1811332 bytes
+  download              738812 bytes
+  frame rate (visible)  median 60 fps, p5 56.818181818163026 fps
+  frame rate (headless) median 60 fps, p5 59.88023952091634 fps
+  js 2445 lines, 101353 bytes; code 2471 lines; assets 629368 bytes; build 731649 bytes
+checks: first apple tick 163, 163, 163, 163, 163 (same in all runs: true); external requests 0; failed requests 0; page errors 0; steering 25/25 turns accepted (0 sent just before a death or the end of a run, not checkable); incomplete runs 0
+checks: PASS
+performance budget (median >= 50 fps, p5 >= 30 fps): PASS
+wrote measurements/v1.6.json, measurements/v1.6/ (raw runs and this output), measurements/summary.csv
