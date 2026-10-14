@@ -593,5 +593,53 @@ requests; 0 page errors. **Budget: pass** (median 60 fps, 5th percentile 54.6448
 The label with the playback speed ("5.75x") sat at the top left of the game, over the game's top bar; in v1.5's short
 it covered "Score" during the walk. It now sits at the top right of the patch-note card, where it never covers the
 game. tests/short.test.mjs checks that it stays off the game and off the card's "Patch notes" (it failed with the old
-place). All six shorts were rendered again (`npm run short v1.0` to `v1.5`, each exit 0); nothing else in them
-changed: 720, 762, 757, 894, 894 and 896 frames, as before.
+place). All six shorts were rendered again (`npm run short v1.0` to `v1.5`, each exit 0): 720, 762, 757, 894, 894
+and 896 frames. (I first wrote "as before" here; I had only checked that for v1.4 and v1.5, so it is gone.)
+
+### v1.6, what was built
+As UPDATES.md describes (src/progress.js):
+- **XP:** 1 for every move in play, 25 for every apple. Levels at 50, 150, 300, 500, 750 XP (25 x L x (L - 1) for
+  level L). Every level gives one skill point. XP, levels and skills carry over a game over.
+- **Right turns only:** a turn is a left turn when it goes a quarter counter-clockwise from where the snake will be
+  heading (right to up, up to left, left to down, down to right). Until "Turn left" is learned such a key does
+  nothing but show "Skill locked: Turn left (requires level 5)" (from level 5 on, if not learned: "... (learn it in
+  the skill tree)"). Straight back was never allowed. The rules in rules.js did not change; the lock is in the keys.
+- **Every level-up stops the game:** "LEVEL UP!" over everything (a burst of 140 particles from a seeded generator,
+  a glow; Enter after 2000 ms), then the skill tree (its links draw in for 1000 ms, then Up/Down move the cursor and
+  Enter learns). Play goes on only once a skill is learned. Two level-ups at once (an apple's 25 XP can do it) give two
+  in a row. A connection drop that comes at the same move waits until after the skill tree.
+- **The skill tree sells back what the game used to do:** Smooth movement (v1.1: until learned, the snake jumps from
+  cell to cell), Eye contact (v1.1: until learned, the eyes stare at you), Shadow (v1.2), Turn left (needs level 5),
+  Tongue (does nothing), Turn right (Deluxe) (turns right, as before). In that order in the list.
+- **The bot,** as UPDATES.md says, with the keys written down there before measuring (a logged change): it moves the
+  cursor to "Turn left" if it can be learned, otherwise to the first skill in the list that can, then presses Enter.
+  So it learns Smooth movement, Eye contact and Shadow at levels 2, 3 and 4, and Turn left at level 5. Its path search
+  uses only the turns in the probe's new `allowedTurns` (a cell and a heading per state, since with right turns only
+  the way the snake faces decides where it can go next).
+- **Graphics:** the particles, a glowing XP bar (bottom left of the view, with the level and the XP to the next one),
+  the skill tree with links that draw in and then flow (moving dashes), learned links in gold. 2D canvas.
+
+### What broke while building
+- **The bot's new path search was too slow:** 31 to 64 ms a move on the 256-cell world (a move is 100 ms), written with
+  objects and a Map. Rewritten with flat number arrays: 4 to 7 ms (timed in Node on the same world).
+- **Two levels at once would have offered "Turn left" too early:** the skill tree checked the level Snek had reached,
+  not the level being chosen for, so XP for levels 3 to 5 at once would have let level 3's tree buy Turn left. Seen
+  while writing the tests, before they ran; the tree now uses the level it is for.
+- **My own tests, again:** two cross-realm deepEqual failures (values from a vm sandbox), and the first speed-label test
+  measured the "Patch notes" block, which spans the whole card, instead of its words.
+
+### v1.6, expected direction of every metric (written before `npm run measure v1.6`)
+| Metric | Expected | Why |
+|---|---|---|
+| First apple's tick | unchanged: 163 | seed 1's first apple is 100 cells right and 63 down; the snake starts heading right, and right to down is a right turn, so the right-turns-only path is the same 163 moves. Right-turn-only paths are longer only when the shortest path needs a left turn, which this one does not; later apples, before level 5, can |
+| Time to first apple | up | two level-ups on the way (at moves 50 and 150), each a LEVEL UP! (2000 ms before Enter works) and a skill tree (1000 ms, then the bot's key presses, 250 ms apart when it moves the cursor) |
+| Load time | unchanged | nothing before the warning changed |
+| Control share (first 180 s) | down | the same launch, then level-ups taking time out of the walk; the first 180 s end before many apples |
+| Control share in play | down | in 60 s of control (about 600 moves and two or three apples) Snek reaches level 5 or 6: four or five LEVEL UP! screens and skill trees, about 3000 to 4000 ms each. Longer right-turn-only walks before level 5 add control too, but less than the level-ups take |
+| Download | up | progress.js |
+| JS lines / bytes | up | progress.js and the game's new screens |
+| Assets | unchanged | no files added; the particles and the tree are drawn in code |
+| JS heap after GC | up, a little | the skill list, the particles and the progression state |
+| Frame rate median | unchanged | play draws the same world, plus one glowing bar |
+| Frame rate 5th percentile | unchanged or slightly down | the XP bar's glow (a shadow blur) every frame of play; the particles and the tree are not play, so not in the window |
+| Requests to another origin | zero | nothing new is loaded from anywhere |
