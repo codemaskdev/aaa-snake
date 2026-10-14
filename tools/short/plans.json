@@ -12,5 +12,8 @@
   "v1.1": {
     "start": "screen:publisher-logo",
     "afterMs": 500
+  },
+  "v1.2": {
+    "start": "screen:update-required"
   }
 }
