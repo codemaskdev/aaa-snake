@@ -73,7 +73,7 @@ No update was built; UPDATES.md waits for approval.
   1 death in 3 minutes, in every run.
 - With seed 1 the first apple is 3 cells straight ahead of the snake, so the bot's fastest path is to press Right, the
   way the snake is already heading, and wait.
-- Before garbage collection the heap read 7387072, 6553656, 6607940, 6459580 and 6302320 bytes; after it, 929680 to
+- Before garbage collection the heap read 7387072, 6553656, 6607940, 6459580 and 6302320 bytes; after it, 929660 to
   930284.
 
 ### Not tested
