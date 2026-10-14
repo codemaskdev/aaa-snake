@@ -1,0 +1,21 @@
+{
+  "name": "aaa-snake",
+  "private": true,
+  "type": "module",
+  "description": "AAA Snake: a tiny Snake that gets AAA updates, and the rig that measures each one.",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "build": "node tools/build.mjs",
+    "serve": "node tools/serve.mjs",
+    "measure": "node tools/measure.mjs",
+    "fps-check": "node tools/fps-check.mjs",
+    "chart": "node tools/chart.mjs",
+    "short": "node tools/short.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
