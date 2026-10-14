@@ -723,3 +723,36 @@ From the offline search for seed 1, radius 6, and the screen lengths fixed in th
 more than 61 s of control). Five headless runs: about 92 minutes; five visible frame-rate runs stop after 61 s of
 control, about 3 minutes each. That is under 20 minutes a run, but not by much: after building I will time one
 headless run first, and if it takes more than 20 minutes I stop and tell you before running all five.
+
+### Prompt 9 (the same v1.7, with skins), before building
+Prompt 9 came while prompt 8 was under way; the vision radius, the offline search and the run-time estimate above were
+already written and committed (ed0991d) and stand. What follows is prompt 9's clarification of "cosmetics only",
+written before building.
+
+**Skins: 10 in the loot boxes, plus the one Snek starts with.** All drawn in code (src/skins.js), no image files.
+
+| Skin | Rarity | How it looks |
+|---|---|---|
+| Moss | Common | dark green body, pale head |
+| Sand | Common | tan body, cream head |
+| Slate | Common | blue-grey body, light grey head |
+| Plum | Common | purple body, pink head |
+| Tiger | Rare | orange body with dark stripes (a pattern) |
+| Frost | Rare | ice-blue body with a cold glow |
+| Ember | Rare | red body that leaves a fading trail of embers |
+| Neon | Epic | cyan body with a strong glow |
+| Galaxy | Epic | dark blue body with stars (a pattern) |
+| Classic Green | Legendary | the v1.0 snake: square cells, #3b3 with a #8f8 head, no eyes |
+
+- **Warden** is the look Snek starts with (v1.6's: round, light green, eyes). It is not in the boxes.
+- **Odds per box:** Common 60 %, Rare 25 %, Epic 12 %, Legendary 3 %; within a rarity every skin is equally likely.
+  They are shown on the loot-box screen and written in UPDATES.md (a logged change, before building).
+- **Drops come from the seed:** the loot boxes have their own generator made from the seed (not the apples'), so the
+  same seed gives the same boxes in the same order, and the apples do not move. A skin already owned is a "Duplicate".
+- **A skin changes only how the snake is drawn.** The skin is read only by the drawing code; the rules, the tick, the
+  speed and the collisions never see it. tests/v1.7.test.mjs plays the same game under every skin, on a virtual clock
+  with the same keys, and checks that the game's log and final state are identical.
+- **Flow after a game over:** "Game over" (Enter) -> the loot box (it shakes, opens with light rays and sparkles,
+  shows the skin and its rarity; the odds are on screen; Enter after the animation) -> the wardrobe (the new skin, now
+  worn, and the whole collection; Enter to leave) -> the autosave notice and the world map, as before. The bot
+  presses what each screen offers, as on every screen; it never chooses a skin (the newest is worn automatically).

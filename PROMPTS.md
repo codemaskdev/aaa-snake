@@ -392,3 +392,54 @@ Do not start v1.8.
 Report as before, plus: how many cells the bot explored before it first
 saw the apple, per run.
 ````
+
+## 9. v1.7 again, with skins (sent while #8 was being worked on)
+
+````text
+v1.6 is accepted. Do not change the post-skill-tree behaviour that killed
+run 1; it stays as it is, and the series compares versions as built.
+
+Build v1.7 (Season 1: parody battle pass and loot boxes) exactly as the
+frozen UPDATES.md describes, with one clarification of what "cosmetics
+only" means, to be written in DEVLOG before building:
+
+## Skins (the loot-box contents)
+- 8 to 12 skins, all drawn in code: colour sets and small effects for the
+  snake (a trail, a glow, a pattern). Rarities: Common, Rare, Epic,
+  Legendary. The Legendary skin "Classic Green" is the snake's original
+  v1.0 look: the game's starting appearance becomes its rarest item.
+- Drop odds per rarity are shown in the game on the loot-box screen and
+  written in UPDATES.md before building. Drops come from the game's seed,
+  so they are deterministic; the bot never chooses or buys anything.
+- A skin changes only how the snake is drawn: never speed, rules, tick or
+  collision. A test proves a game plays identically under every skin.
+- After each loot box, a wardrobe screen shows the new skin and the
+  collection; it needs a key press to leave (the bot presses it as it
+  does on any screen).
+- Report: skin count, bytes added, and the odds table.
+
+## The rest of v1.7, as frozen
+- The apple is visible only within a small vision radius around Snek.
+  Write the radius in cells in DEVLOG before building and say why.
+- Battle pass: tiers fill from XP; the top reward is "Apple Vision: the
+  ability to see the apple". "Buy" opens a PARODY screen saying nothing
+  is for sale. No payment code, no network, no prices.
+- A loot box after every game over, with an opening animation (light
+  rays, sparkles). Battle-pass track with tier cards. 2D canvas, inside
+  the budget.
+- The bot follows the rule already fixed in UPDATES.md: with no apple
+  visible it goes to the nearest unseen cell, ties broken by a fixed
+  order.
+
+## Before measuring
+- Estimate in DEVLOG how long one headless run may take with the search.
+  If a single run would exceed 20 minutes, stop and tell me before
+  running all five.
+- Write the expected direction of each metric, both control-share
+  metrics, and the first apple's tick (it is no longer 163).
+
+Tag v1.7, run measure and short, update the chart, full npm test, STOP.
+Do not start v1.8.
+Report as before, plus: how many cells the bot explored before it first
+saw the apple, per run; and the skin and odds tables.
+````

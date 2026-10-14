@@ -6,7 +6,7 @@ share may go up. Any later change to this file is a new, logged decision.
 
 Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10-14, PROMPTS.md #5); the keys of
 v1.6's skill-tree rule (2026-10-15, PROMPTS.md #7); what "seen" and "nearest" mean in v1.7's search rule (2026-10-15,
-PROMPTS.md #8).
+PROMPTS.md #8); v1.7's skins and their drop odds (2026-10-15, PROMPTS.md #9).
 
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
@@ -193,6 +193,11 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   apple it is looking for appeared: a new apple (the score changes) or a new game starts the memory again. "Nearest"
   is in moves, using only the turns the probe allows; of equally near cells the bot takes the first its search
   reaches, trying straight, then right, then left from each state. Nothing else in the bot changes; it never buys.
+- **Skins and odds (logged change, 2026-10-15, PROMPTS.md #9, written before building):** the loot boxes hold 10
+  skins, drawn in code, that change only how the snake is drawn. Odds per box: Common 60 %, Rare 25 %, Epic 12 %,
+  Legendary 3 %; within a rarity every skin is equally likely. Common: Moss, Sand, Slate, Plum. Rare: Tiger, Frost,
+  Ember. Epic: Neon, Galaxy. Legendary: Classic Green, the v1.0 snake. Drops come from the seed (their own generator).
+  After every loot box a wardrobe screen shows the new skin and the collection; it waits for a key (Enter).
 - **Metrics:** time to first apple up sharply (search instead of a straight line); control share down (battle pass
   screen at every tier, loot box at every game over); code and bytes up.
 - **Patch note:** "Season 1 is here! Unlock exclusive rewards, including the ability to see the apple."
