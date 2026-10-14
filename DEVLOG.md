@@ -683,3 +683,43 @@ requests; 0 page errors. **Budget: pass** (median 60 fps, 5th percentile 56.8181
 - The short (`npm run short v1.6`): the launch and the walk at 6.05x, 29900 ms in all; the first LEVEL UP! shows in
   the sped-up part.
 - Nothing broke while measuring, apart from run 1's death above. The full `npm test` after it: 84 of 84, exit 0.
+
+## Prompt 8: v1.7 Season 1
+
+### v1.7, the vision radius and the search (written before building)
+**Vision radius: 6 cells** (the apple shows when its centre is within 6 cells of the head's, as the crow flies). The
+view is 20 x 20 cells, so the circle Snek can see is 13 cells across, smaller than the screen: the apple can be on
+the screen and still not be there for you, which is the joke. Why 6 and not smaller:
+- **The search takes most of the world.** Before choosing, I ran the bot's search offline on the real rules
+  (rules.js, the 256-cell world, the apple 128 moves away) with the real bot code (tools/rig/bot.mjs: the nearest
+  unseen cell, right turns only until move 500, when Turn left would be learned) for seed 1, counting moves only, no
+  screens. The bot does not find seed 1's apple at (228, 191) until it has seen most of the world:
+
+  | Radius | Moves to seed 1's first apple | Cells seen when it came into view | Reconnects on the way |
+  |---|---|---|---|
+  | 3 | 13685 | 54245 | 65 (298100 ms) |
+  | 4 | 13183 | 63751 | 62 (287400 ms) |
+  | 5 | 10949 | 63225 | 52 (239200 ms) |
+  | 6 | 7595 | 52228 | 36 (163700 ms) |
+  | 7 | 7155 | 56121 | 34 (153000 ms) |
+  | 8 | 6555 | 58442 | 31 (140800 ms) |
+
+- **Run length:** with radius 5 one headless run would take about 26 minutes by the estimate below; with 6, about 18.
+  Radius 7 or 8 would save little (7155 and 6555 moves) and is no longer "small" (15 and 17 cells across, most of the
+  screen). So 6: the smallest radius that keeps a run under the 20 minutes you set.
+- **Other seeds** with radius 6 (offline, for the record): seed 2 6618 moves, 3 6760, 4 6915, 5 5885.
+
+### How long one headless run may take (estimate, written before any measurement)
+From the offline search for seed 1, radius 6, and the screen lengths fixed in the code:
+- the launch up to the first control frame, as in v1.6: about 103300 ms;
+- 7595 moves at 100 ms: 759500 ms;
+- 36 reconnects: 163700 ms (their lengths come from the seed);
+- level-ups: 7595 XP reaches level 17 (6800 XP; 18 needs 7650), so 16 LEVEL UP! screens and skill trees, about 3300
+  ms each as measured in v1.6 (3036 and 3304 ms): about 52800 ms;
+- battle-pass tiers, one every 500 XP: 15 tier screens of 1500 ms plus the bot's Enter: about 22800 ms;
+- the finishing move and the bite: about 2300 ms.
+
+**About 1104400 ms, 18.4 minutes a headless run.** The run stops soon after the first apple (by then it has had far
+more than 61 s of control). Five headless runs: about 92 minutes; five visible frame-rate runs stop after 61 s of
+control, about 3 minutes each. That is under 20 minutes a run, but not by much: after building I will time one
+headless run first, and if it takes more than 20 minutes I stop and tell you before running all five.

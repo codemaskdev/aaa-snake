@@ -5,7 +5,8 @@ Warden Snek, not Commander Snek; v1.2's patch comes only from the game's own ori
 share may go up. Any later change to this file is a new, logged decision.
 
 Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10-14, PROMPTS.md #5); the keys of
-v1.6's skill-tree rule (2026-10-15, PROMPTS.md #7).
+v1.6's skill-tree rule (2026-10-15, PROMPTS.md #7); what "seen" and "nearest" mean in v1.7's search rule (2026-10-15,
+PROMPTS.md #8).
 
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
@@ -186,6 +187,12 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   network, no prices.
   New bot rule, fixed now, before measuring: when no apple is visible, the bot goes to the nearest cell it has not yet
   seen (ties broken by a fixed order), until an apple comes into view.
+- **Search rule, details (logged change, 2026-10-15, PROMPTS.md #8, written before v1.7 was measured):** the probe
+  gives the vision radius (`vision`, in cells) and reports the apple only inside it. A cell counts as seen once it has
+  been within that radius of a cell the head has been on (every cell of the body, each time the bot looks), since the
+  apple it is looking for appeared: a new apple (the score changes) or a new game starts the memory again. "Nearest"
+  is in moves, using only the turns the probe allows; of equally near cells the bot takes the first its search
+  reaches, trying straight, then right, then left from each state. Nothing else in the bot changes; it never buys.
 - **Metrics:** time to first apple up sharply (search instead of a straight line); control share down (battle pass
   screen at every tier, loot box at every game over); code and bytes up.
 - **Patch note:** "Season 1 is here! Unlock exclusive rewards, including the ability to see the apple."

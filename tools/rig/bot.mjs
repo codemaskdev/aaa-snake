@@ -4,6 +4,8 @@
 // Rules the bot follows in every version:
 //   - On a control screen it takes the shortest path to the apple it can see,
 //     using only the turns the probe says are allowed (v1.6: right only, until "Turn left").
+//   - With no apple in view (v1.7: only within a vision radius), it goes to the nearest cell it
+//     has not yet seen, ties broken by a fixed order (exploreStep).
 //   - On any other screen it presses the key the screen offers to leave it
 //     (skip, continue, restart) as soon as it is offered.
 //   - On v1.6's skill tree it spends the point on "Turn left" first, then on whatever
@@ -73,6 +75,14 @@ export function pathToApple({ snake, apple, grid, heading }) {
 // searched with flat number arrays so a 256-cell world takes a few ms per move.
 export function pathWithTurns({ snake, apple, grid, heading, allowedTurns }) {
   if (!apple) return null;
+  const target = apple.y * grid + apple.x;
+  return firstMoveTo({ snake, grid, heading, allowedTurns: allowedTurns || ['right', 'left'] }, cell => cell === target);
+}
+
+// The first move of a shortest path (in moves, using only the allowed turns) to the first cell that
+// isTarget(cell) accepts, or null. Of several equally near cells, the first one the search reaches
+// wins: the search tries straight, then right, then left, from every state, in the order it reached them.
+function firstMoveTo({ snake, grid, heading, allowedTurns }, isTarget) {
   const cells = grid * grid;
   const freeAt = new Int32Array(cells); // the move from which a body cell is free (0: free now)
   snake.forEach((part, i) => { freeAt[part.y * grid + part.x] = snake.length - i; });
@@ -82,7 +92,6 @@ export function pathWithTurns({ snake, apple, grid, heading, allowedTurns }) {
   const firstOf = new Int8Array(cells * 4).fill(-1); // the first move of the path that reached a state; -1: not yet
   const depth = new Int32Array(cells * 4);
   const queue = new Int32Array(cells * 4);
-  const target = apple.y * grid + apple.x;
   let tail = 0;
   // Enter cell (x, y) on move k facing d, by a path that began with `first`. Returns true at the apple.
   const enter = (x, y, d, k, first) => {
@@ -91,7 +100,7 @@ export function pathWithTurns({ snake, apple, grid, heading, allowedTurns }) {
     if (freeAt[cell] > k) return false;
     const state = cell * 4 + d;
     if (firstOf[state] !== -1) return false;
-    if (cell === target) return true;
+    if (isTarget(cell)) return true;
     firstOf[state] = first;
     depth[state] = k;
     queue[tail++] = state;
@@ -113,6 +122,43 @@ export function pathWithTurns({ snake, apple, grid, heading, allowedTurns }) {
     }
   }
   return null;
+}
+
+// v1.7: the apple is visible only within probe.vision cells of the head. The bot remembers which
+// cells it has seen (those within that radius of a cell its head has been on) since the apple it is
+// looking for appeared; a new apple (the score changes) or a new game starts the memory again.
+export function makeMemory() {
+  return { seen: null, grid: 0, count: 0, score: null, tick: null };
+}
+
+export function remember(memory, probe) {
+  if (!probe.vision) return;
+  const grid = probe.grid;
+  if (!memory.seen || memory.grid !== grid || probe.score !== memory.score || probe.tick < memory.tick) {
+    memory.seen = new Uint8Array(grid * grid);
+    memory.grid = grid;
+    memory.count = 0;
+  }
+  memory.score = probe.score;
+  memory.tick = probe.tick;
+  const r = probe.vision;
+  for (const part of probe.snake) { // the head has been on every body cell, so the bot has seen around each
+    for (let y = Math.max(0, part.y - r); y <= Math.min(grid - 1, part.y + r); y++) {
+      for (let x = Math.max(0, part.x - r); x <= Math.min(grid - 1, part.x + r); x++) {
+        const dx = x - part.x;
+        const dy = y - part.y;
+        if (dx * dx + dy * dy > r * r || memory.seen[y * grid + x]) continue;
+        memory.seen[y * grid + x] = 1;
+        memory.count++;
+      }
+    }
+  }
+}
+
+// The UPDATES.md rule for v1.7: with no apple in view, go to the nearest cell not yet seen.
+export function exploreStep(probe, memory) {
+  if (!memory || !memory.seen) return null;
+  return firstMoveTo({ ...probe, allowedTurns: probe.allowedTurns || ['right', 'left'] }, cell => memory.seen[cell] === 0);
 }
 
 // How many cells the head could still reach after moving one step this way.
@@ -140,10 +186,14 @@ function roomAfter({ snake, grid }, dir) {
 
 // The direction the bot wants next on a control screen.
 // Shortest path to the apple if there is one; otherwise the move with the most room.
-export function decide(probe) {
+export function decide(probe, memory = null) {
   const limited = Array.isArray(probe.allowedTurns);
   const toApple = limited ? pathWithTurns(probe) : pathToApple(probe);
   if (toApple) return toApple;
+  if (!probe.apple && probe.vision) { // v1.7: search
+    const toUnseen = exploreStep(probe, memory);
+    if (toUnseen) return toUnseen;
+  }
   let best = probe.heading;
   let bestRoom = -1;
   for (const d of limited ? allowedMoves(probe.heading, probe.allowedTurns) : moves(probe.heading)) {

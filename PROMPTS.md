@@ -364,3 +364,31 @@ written before measuring, measured, its short, the chart with seven versions. Th
 What broke: the bot's first turn-limited search was too slow; the skill tree would have offered Turn left too early
 after several level-ups at once; test bugs; in one measured run the snake died right after the level-5 skill tree.
 See DEVLOG.md.
+
+## 8. Build v1.7, Season 1
+
+````text
+v1.6 is accepted. Do not change the post-skill-tree behaviour that killed
+run 1; it stays as it is, and the series compares versions as built.
+Build v1.7 (Season 1: parody battle pass and loot boxes) exactly as the
+frozen UPDATES.md describes: the apple is visible only within a small
+vision radius around Snek; the top battle-pass reward is "Apple Vision:
+the ability to see the apple"; tiers fill from XP or "can be bought" with
+a premium currency that cannot be bought (the button opens a PARODY
+screen saying nothing is for sale); a loot box after every game over with
+an opening animation, cosmetics only. No payment code, no network, no
+prices. Graphics step: loot-box light rays and sparkles, the battle-pass
+track with tier cards. 2D canvas, inside the budget.
+Write the vision radius in cells in DEVLOG before building and say why.
+The bot follows the rule already fixed in UPDATES.md: with no apple
+visible it goes to the nearest unseen cell, ties broken by a fixed order.
+Before any measurement, estimate in DEVLOG how long one headless run may
+take with the search, and if a single run would exceed 20 minutes, stop
+and tell me before running all five.
+Before measuring, write the expected direction of each metric, both
+control-share metrics, and the first apple's tick (it is no longer 163).
+Tag v1.7, run measure and short, update the chart, full npm test, STOP.
+Do not start v1.8.
+Report as before, plus: how many cells the bot explored before it first
+saw the apple, per run.
+````
