@@ -3,7 +3,8 @@
 // stands still until the recorder moves it, so every video frame shows the game
 // exactly at its time, however long a screenshot takes.
 // Animation frames come on a fixed 60 Hz grid of virtual time. The recorded key
-// presses of a measured run are replayed at their recorded times.
+// presses of a measured run are replayed at their recorded times, each on the screen
+// and tick where it was pressed.
 (() => {
   if (window.top === window) return;
   const FRAME = 1000 / 60;
@@ -44,10 +45,19 @@
     }
   }
 
+  // A recorded key is pressed at its recorded time, but never before the game is on the
+  // screen (and, in play, at the tick) where the bot pressed it. Frame timing in the
+  // replay can differ by a few ms from the run, and a key on the wrong screen is lost.
+  function ready(k) {
+    const game = window.snakeGame && window.snakeGame.probe();
+    if (!game || k.screen == null) return true;
+    return game.screen === k.screen && (k.tick == null || game.tick >= k.tick);
+  }
+
   function pressKeysUntil(t) {
-    while (keyIndex < keys.length && keys[keyIndex].t <= t) {
+    while (keyIndex < keys.length && keys[keyIndex].t <= t && ready(keys[keyIndex])) {
       const k = keys[keyIndex++];
-      runTimersUntil(k.t);
+      runTimersUntil(Math.max(now, k.t));
       now = Math.max(now, k.t);
       window.dispatchEvent(new KeyboardEvent('keydown', { code: k.code, key: k.code, bubbles: true, cancelable: true }));
     }
