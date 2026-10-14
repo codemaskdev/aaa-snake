@@ -57,7 +57,9 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
 - Only measured numbers, produced by `npm run measure <version>`, with the command and the raw output saved under
   measurements/. Never estimate. Never round in the logs (measurements, DEVLOG).
 - The rig: 5 runs in Chromium's new headless mode (real GPU) for every metric but frame rate, and 5 runs in a visible
-  window for frame rate (`npm run fps-check` showed why). Definitions are written into every measurements/<version>.json.
+  window for frame rate (`npm run fps-check` showed why). Frame rate and the JS heap use the same window: the first 60 s
+  of play (frame-rate method 2, since prompt 4; the method-1 files are in measurements/old-method/). Definitions are
+  written into every measurements/<version>.json.
 - measurements/summary.csv has one row per version; `npm run chart` draws out/bloat.png from it.
 - `npm run short <version>` replays the median run into the fixed short layout; its counter shows the run's clock and
   freezes on the measured median. Clip plans live in tools/short/plans.json.
@@ -69,6 +71,11 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
 - The game loads files only from its own origin (the same host that served it), including v1.2's day-one patch. The rig
   fails a version with any request to another origin (tools/rig/stats.mjs offOrigin).
 - No real game, studio, brand or character names, logos or art, and no hero that imitates a known game character.
+
+## Voice
+- The story's lines live in src/story.js; `npm run voice` writes voice/LINES.md and a silent placeholder (src/voice/NN.mp3)
+  for every line not yet recorded. Each line has a slot; the game holds the line for its slot whether or not the sound
+  plays, and a recording must fit its slot (`npm run voice -- --check`). Do not generate audio unless asked.
 
 ## Disclosure
 - Any generated image or voice line records, next to the file (and in DEVLOG.md), the tool name and version as shown

@@ -233,3 +233,32 @@ Built: one fixed plan for every short after v1.0 (v1.1 re-rendered); v1.2 Day-on
 written before measuring, measured, its short, the chart with three versions.
 What broke: the patch's grass was drawn before it existed and froze the game; the comparison counter spilled out of
 its box; three test bugs. See DEVLOG.md.
+
+## 4. Frame rate over 60 s of play; then build v1.3, Story mode
+
+````text
+v1.2 is accepted.
+
+## 1. Frame-rate method
+Measure frame rate over 60 s of play (the same window as the memory
+metric), not 60 s from page load. Re-measure v1.0, v1.1 and v1.2 with the
+new method so every version uses the same one. Keep the old measurement
+files under measurements/old-method/ and write in DEVLOG why the method
+changed and what the old numbers were. Update summary.csv and the chart.
+
+## 2. Build v1.3: Story mode, Warden Snek
+Exactly as the frozen UPDATES.md describes. For the voice: do not generate
+audio. Write every line to voice/LINES.md (numbered, with the scene and
+the emotion in one word), add a placeholder silent audio of the right
+length per line so the build and the rig work, and tell me the exact
+ElevenLabs settings to use when I record them. The lines must not
+imitate any known character; Warden Snek is a retired orchard warden.
+Keep the guardrails from UPDATES.md. Graphics step as planned: dark
+field, soft light around the head, glowing apple, letterbox in cutscenes.
+Before measuring, write the expected direction of each metric in DEVLOG.
+Tag v1.3, run measure and short, update the chart, full npm test, STOP.
+Do not start v1.4.
+
+## Report
+As before, plus voice/LINES.md in full and the ElevenLabs settings.
+````

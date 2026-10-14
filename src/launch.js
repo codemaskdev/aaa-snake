@@ -1,7 +1,8 @@
-// AAA Snake v1.2: the launch experience.
+// AAA Snake v1.3: the launch experience.
 // Everything you sit through before the snake: the day-one update (update.js), three
 // studio logos you cannot skip, a health warning, a title screen, a loading screen
-// with tips, and an autosave notice before every game.
+// with tips (it loads the voice lines), the opening cutscene (story.js), and an
+// autosave notice before every game.
 // The studio names are invented. Times are in ms of animation frames, never the clock.
 
 const LAUNCH = {
@@ -14,7 +15,8 @@ const LAUNCH = {
   'engine-logo':     { lasts: 3000, then: 'warning' },      // cannot be skipped
   'warning':         { listensAfter: 4000, then: 'title' }, // any key, once it listens
   'title':           { listensAfter: 2500, then: 'loading' }, // after the title animation
-  'loading':         { listensAfter: 5000, then: 'autosave' }, // tips, then "Press any key"
+  'loading':         { listensAfter: 5000, needs: voiceLoaded, then: 'opening' }, // tips, then "Press any key"
+  'opening':         { lasts: cutsceneMs(OPENING), then: 'autosave' }, // skippable "after your first playthrough"
   'autosave':        { lasts: 3000, then: 'ready' },        // before every game
 };
 
@@ -33,7 +35,7 @@ const GOLD = '#e8c66a';
 // True if this launch screen reacts to a key yet.
 function launchListens(screen, time) {
   const step = LAUNCH[screen];
-  return Boolean(step && step.listensAfter !== undefined && time >= step.listensAfter);
+  return Boolean(step && step.listensAfter !== undefined && time >= step.listensAfter && (!step.needs || step.needs(time)));
 }
 
 // The next screen, if this launch screen has run its time (and done its work); otherwise null.
@@ -155,6 +157,9 @@ function drawLoading(ctx, time, width, height) {
   ctx.font = 'italic 17px Helvetica, Arial, sans-serif';
   ctx.fillStyle = '#ddd';
   wrapText(ctx, TIPS[Math.floor(time / 2500) % TIPS.length], width / 2, height / 2 + 10, width - 100, 24);
+  ctx.font = '14px Menlo, monospace';
+  ctx.fillStyle = '#888';
+  ctx.fillText(`Voice lines: ${voice.loaded} of ${LINES.length}`, width / 2, height / 2 + 70);
   if (launchListens('loading', time)) {
     ctx.fillStyle = '#aaa';
     ctx.font = '16px Helvetica, Arial, sans-serif';

@@ -10,7 +10,8 @@
     "measure": "node tools/measure.mjs",
     "fps-check": "node tools/fps-check.mjs",
     "chart": "node tools/chart.mjs",
-    "short": "node tools/short.mjs"
+    "short": "node tools/short.mjs",
+    "voice": "node tools/voice.mjs"
   },
   "engines": {
     "node": ">=22"

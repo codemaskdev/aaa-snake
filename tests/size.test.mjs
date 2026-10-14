@@ -23,5 +23,8 @@ test('sizes: js, code and assets are split by file type', () => {
   const src = sizeOf(path.join(ROOT, 'src'));
   const jsFiles = fs.readdirSync(path.join(ROOT, 'src'), { recursive: true }).filter(f => f.endsWith('.js'));
   assert.equal(src.jsBytes, jsFiles.reduce((sum, f) => sum + fs.statSync(path.join(ROOT, 'src', f)).size, 0));
-  assert.equal(src.assetBytes, 0);
+  // Assets are every file that is not code: since v1.3, the voice lines in src/voice/.
+  const assets = fs.readdirSync(path.join(ROOT, 'src'), { recursive: true })
+    .filter(f => fs.statSync(path.join(ROOT, 'src', f)).isFile() && !/\.(js|html|css)$/.test(f));
+  assert.equal(src.assetBytes, assets.reduce((sum, f) => sum + fs.statSync(path.join(ROOT, 'src', f)).size, 0));
 });
