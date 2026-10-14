@@ -1,0 +1,41 @@
+$ npm run measure v1.1
+machine: MacBook Air (MacBookAir10,1), Apple M1, 17179869184 bytes RAM, macOS 26.3.1 (25D771280a), Node v24.15.0
+size: js 488 lines / 17929 bytes; code 509 lines; assets 0 bytes; build 18677 bytes (4 files)
+run 1/5 headless: first apple 18939.60000000894 ms (tick 3), load 13089 ms, control 158377.09999999404 / 180000 ms = 0.8798727777777446, heap 1048112 bytes after GC (10390152 before) at 60006.09999999404 ms of control, download 19454 bytes in 4 requests, headless fps median 60 p5 59.52380952385077, steering 201/201 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 13.700000002980232 ms -> publisher-logo 3025.2999999970198 ms -> studio-logo 3017.4000000059605 ms -> engine-logo 3016.5 ms -> warning 4024 ms -> title 2512.2000000029802 ms -> autosave 3013.5 ms -> ready 12.200000002980232 ms -> play 304.79999999701977 ms
+run 2/5 headless: first apple 18909.5 ms (tick 3), load 13077 ms, control 158390.89999999106 / 180000 ms = 0.8799494444443948, heap 1048112 bytes after GC (10275816 before) at 60001.89999999106 ms of control, download 19454 bytes in 4 requests, headless fps median 60 p5 59.88023952091634, steering 201/201 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 12.5 ms -> publisher-logo 3014.5 ms -> studio-logo 3016.1000000089407 ms -> engine-logo 3016.5 ms -> warning 4022.8999999910593 ms -> title 2512.9000000059605 ms -> autosave 3013.5999999940395 ms -> ready 10.600000008940697 ms -> play 289.8999999910593 ms
+run 3/5 headless: first apple 18920.5 ms (tick 3), load 13087 ms, control 158363.39999999106 / 180000 ms = 0.879796666666617, heap 1048112 bytes after GC (9545384 before) at 60003.79999999702 ms of control, download 19454 bytes in 4 requests, headless fps median 60 p5 59.523809523824994, steering 201/201 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 15.100000008940697 ms -> publisher-logo 3022.2999999970198 ms -> studio-logo 3016.5999999940395 ms -> engine-logo 3016.4000000059605 ms -> warning 4022.5999999940395 ms -> title 2513.5 ms -> autosave 3013.4000000059605 ms -> ready 8.599999994039536 ms -> play 292 ms
+run 4/5 headless: first apple 18929 ms (tick 3), load 13094.70000000298 ms, control 158356.20000000298 / 180000 ms = 0.8797566666666832, heap 1048108 bytes after GC (9017640 before) at 60005.89999999106 ms of control, download 19454 bytes in 4 requests, headless fps median 60 p5 59.88023952091634, steering 201/201 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 13.099999994039536 ms -> publisher-logo 3032.2000000029802 ms -> studio-logo 3016.5 ms -> engine-logo 3016.9000000059605 ms -> warning 4021 ms -> title 2518 ms -> autosave 3010.0999999940395 ms -> ready 11.700000002980232 ms -> play 289.5 ms
+run 5/5 headless: first apple 18928.20000000298 ms (tick 3), load 13095.89999999106 ms, control 158357.79999999702 / 180000 ms = 0.879765555555539, heap 1043340 bytes after GC (9866052 before) at 60003.5 ms of control, download 19454 bytes in 4 requests, headless fps median 60 p5 59.88023952091634, steering 201/201 (0 unchecked), deaths 1, errors 0
+  screens before the first apple: (page load) 13.5 ms -> publisher-logo 3032.5999999940395 ms -> studio-logo 3015.2999999970198 ms -> engine-logo 3017.5 ms -> warning 4023.2000000029802 ms -> title 2514.9000000059605 ms -> autosave 3010.7999999970198 ms -> ready 10.299999997019768 ms -> play 290.1000000089407 ms
+fps run 1/5 visible: median 60 fps, p5 54.64480874316071 fps, 3598 frames over 60000 ms of play, longest frame 18.799999999999272 ms
+fps run 2/5 visible: median 60 fps, p5 54.64480874316071 fps, 3598 frames over 60000 ms of play, longest frame 18.799999999999272 ms
+fps run 3/5 visible: median 60 fps, p5 56.818181818163026 fps, 3598 frames over 60000 ms of play, longest frame 18.700000000004366 ms
+fps run 4/5 visible: median 60 fps, p5 57.47126436781129 fps, 3598 frames over 60000 ms of play, longest frame 17.80000000000291 ms
+fps run 5/5 visible: median 60 fps, p5 57.47126436781129 fps, 3598 frames over 60000 ms of play, longest frame 17.70000000001164 ms
+
+median of 5 runs (v1.1):
+  time to first apple   18928.20000000298 ms (run 5)
+    (page load)      13.5 ms
+    publisher-logo   3032.5999999940395 ms
+    studio-logo      3015.2999999970198 ms
+    engine-logo      3017.5 ms
+    warning          4023.2000000029802 ms
+    title            2514.9000000059605 ms
+    autosave         3010.7999999970198 ms
+    ready            10.299999997019768 ms
+    play             290.1000000089407 ms
+  load time             13089 ms
+  control share         0.879796666666617 (of 180000 ms)
+  JS heap after GC      1048112 bytes
+  download              19454 bytes
+  frame rate (visible)  median 60 fps, p5 56.818181818163026 fps
+  frame rate (headless) median 60 fps, p5 59.88023952091634 fps
+  js 488 lines, 17929 bytes; code 509 lines; assets 0 bytes; build 18677 bytes
+checks: first apple tick 3, 3, 3, 3, 3 (same in all runs: true); external requests 0; failed requests 0; page errors 0; steering 1005/1005 turns accepted (0 sent just before a death, not checkable); incomplete runs 0
+checks: PASS
+performance budget (median >= 50 fps, p5 >= 30 fps): PASS
+wrote measurements/v1.1.json, measurements/v1.1/ (raw runs and this output), measurements/summary.csv

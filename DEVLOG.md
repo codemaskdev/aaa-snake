@@ -239,3 +239,35 @@ wire: the headers weigh more than the patch.
   whose launch passes 60 s, they would measure no play at all.
 
 🎬 Maybe: "1,280 of 2,126 bytes", one piece per second, while the headers of those pieces outweigh the patch.
+
+## Prompt 4, part 1: frame rate over 60 s of play (method 2)
+
+### Why the method changed
+Method 1 took frame rate from the control screens inside the first 60 s after navigation start. The longer the
+launch, the less play was left in that window: v1.0 had almost the whole 60 s, v1.2 only the part after its first
+apple at about 41 s (1162 to 1167 frames per run), and any version whose launch passes 60 s would have had no play in
+it at all. So the number measured a shrinking and different slice in every version. Method 2 takes the first 60 s of
+play (control screens only, the same window the JS heap is read at), however long the launch is: every version gets
+the same 60 s. The visible runs now go on until 61 s of control, not for a fixed time.
+
+The headless runs were not changed, but all of v1.0, v1.1 and v1.2 were measured again (`npm run measure v1.0`,
+`v1.1`, `v1.2`), so every number in the new files comes from the new runs, not only frame rate.
+
+### The old numbers (method 1, measurements/old-method/, medians of 5 runs)
+| Version | Time to first apple | Load time | Control share | JS heap after GC | Download | Frame rate median | Frame rate p5 |
+|---|---|---|---|---|---|---|---|
+| v1.0 | 320.6000000089407 ms | 26 ms | 0.9998805555555556 | 929680 bytes | 9423 bytes | 60 fps | 56.81818181818064 fps |
+| v1.1 | 18908.79999999702 ms | 13089.39999999106 ms | 0.8798588888888558 | 1048108 bytes | 19454 bytes | 60 fps | 57.142857142857146 fps |
+| v1.2 | 40996.10000000894 ms | 30147.30000001192 ms | 0.7572477777778275 | 1282896 bytes | 34115 bytes | 60 fps | 56.49717514125223 fps |
+
+### The new numbers (method 2, measurements/, medians of 5 runs)
+| Version | Time to first apple | Load time | Control share | JS heap after GC | Download | Frame rate median | Frame rate p5 |
+|---|---|---|---|---|---|---|---|
+| v1.0 | 320.09999999403954 ms | 28 ms | 0.9998761111111276 | 929680 bytes | 9423 bytes | 60 fps | 57.47126436781129 fps |
+| v1.1 | 18928.20000000298 ms | 13089 ms | 0.879796666666617 | 1048112 bytes | 19454 bytes | 60 fps | 56.818181818163026 fps |
+| v1.2 | 40993.90000000596 ms | 30135.90000000596 ms | 0.7572433333333995 | 1283040 bytes | 34115 bytes | 60 fps | 54.64480874316071 fps |
+
+Every visible run now has 3594 to 3599 frames of play. The median stays 60 fps for all three. The 5th percentile now
+falls a little from version to version (57.47126436781129, 56.818181818163026, 54.64480874316071 fps); with method 1
+v1.1 was above v1.0, and v1.2's number came from about a third of the frames. Checks and budget pass for all three.
+summary.csv and out/bloat.png are redrawn from the new files.
