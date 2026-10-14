@@ -306,3 +306,43 @@ recordings will, since they use the same format.
 | JS heap after GC | up a little | the story's lines and state; the audio is in blobs, which are not on the JS heap |
 | Frame rate median | unchanged | 60 fps; one more full-board draw per frame should still fit |
 | Frame rate 5th percentile | slightly down | the darkness is a full-board offscreen canvas redrawn every frame with a gradient, and the apple's glow is a blur |
+
+### v1.3, measured (`npm run measure v1.3`, medians of 5 runs) against the expectations written before measuring
+| Metric | Expected | v1.2 | v1.3 | Direction |
+|---|---|---|---|---|
+| Time to first apple | up, by much | 40993.90000000596 ms | 87317.09999999404 ms | up, as expected |
+| Load time | unchanged | 30135.90000000596 ms | 30136 ms | unchanged, as expected |
+| Control share | down, by much | 0.7572433333333995 | 0.07952611111121045 | down, as expected |
+| Download | up, by much | 34115 bytes | 676755 bytes | up, as expected |
+| JS lines / bytes | up | 793 / 29965 | 999 / 39996 | up, as expected |
+| Assets | up, from 0 | 0 bytes | 629368 bytes | up, as expected |
+| JS heap after GC | up a little | 1283040 bytes | 1639292 bytes | up, by more than I expected (356252 bytes); I have not looked for the cause |
+| Frame rate median | unchanged | 60 fps | 60 fps | unchanged, as expected |
+| Frame rate 5th percentile | slightly down | 54.64480874316071 fps | 54.34782608688775 fps | slightly down, as expected |
+
+Checks: first apple on tick 3 in all 5 runs; 425 of 425 turns accepted; 0 requests outside the game's origin; 0 failed
+requests; 0 page errors. Budget: pass. In the median run the opening lasted 44012 ms against 44000 ms planned
+(`cutsceneMs(OPENING)`), and the bot spent 806.5 ms on the push-in and 1510.4000000059605 ms on the bite.
+- **87 requests per run, not 32.** 32 go to the server (the page, 6 scripts, 9 pieces of the patch, 17 voice files);
+  the other 55 are the browser reading `blob:` URLs (the installed patch and the voice lines as they play), 0 bytes
+  each. They count in the request total but add nothing to the download.
+- **3552 to 3555 frames per 60 s of play, not 3594 to 3599.** Every apple now stops play for the finishing move and
+  the reflection, so the 60 s of play is made of 48 pieces in v1.3 (2 in v1.2), and each extra piece loses the one
+  frame that straddles the screen change: 3598 - 3552 = 46 = 48 - 2 in run 1.
+- The short (`npm run short v1.3`): the launch at 4.1x, 29800 ms in all. The v1.0, v1.1 and v1.2 shorts were rendered
+  again from the new measurement files, so their counters freeze on the new medians.
+
+### What broke
+- **A ghost apple.** In the screenshots of play after the first apple, a dark red dot stayed where the apple had
+  been eaten. v1.2 drew the eaten apple in the snake's mouth until its next step and cleared it on the next move;
+  v1.3 eats in the finishing move instead, never cleared it, and drew it on every move after. The bite animation
+  already shows the apple going, so that code is gone.
+- **The opening was not dark.** The light around the head is drawn under the close-up camera, so at 2.5x it grew to
+  2.5 times its size and lit the whole frame. It is now divided by the zoom.
+- **"Press E to eat" covered the head**: the message sits in the middle of the board, which in the close-up is where
+  the head is. It is now at the bottom.
+- **The placeholders were too long.** MP3 rounds up to whole frames, so silence of exactly a slot came out 26 to 49 ms
+  longer than the slot and failed `npm run voice -- --check`. The tool now asks for 10 ms less until the file fits.
+- **My own tests, again:** the v1.3 test pressed one arrow and waited for the apple "3 cells ahead", but with seed 1
+  the apple is at (11,12), two rows down; it timed out after 90 s. It now checks the start and steers there. The
+  size test assumed src/ had no assets; it now has the voice files.

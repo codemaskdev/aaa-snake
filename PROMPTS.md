@@ -262,3 +262,9 @@ Do not start v1.4.
 ## Report
 As before, plus voice/LINES.md in full and the ElevenLabs settings.
 ````
+
+Built: frame rate over the first 60 s of play, v1.0 to v1.2 measured again (old files in measurements/old-method/);
+v1.3 Story mode with 17 lines in voice/LINES.md and silent placeholders (no audio generated), expectations written
+before measuring, measured, its short, the chart with four versions.
+What broke: a ghost apple after every bite; the light grew with the close-up; the E prompt covered the head; MP3
+placeholders longer than their slots; two test bugs. See DEVLOG.md.
