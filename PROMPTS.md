@@ -621,3 +621,15 @@ No other features, no new jokes of your own: build what is written.
 Tag v2.0, measure (single run), short, chart, full npm test, STOP.
 Do not start v1.8.
 ````
+
+## 15. The cabinet's place, and measuring a game that ends early
+
+````text
+Cabinet at the start, as frozen in UPDATES.md. Measurement when the game
+ends before 60 s of control: both control-share metrics are computed
+over the actual window up to THE END (control time / elapsed time until
+the end screen), and the summary.csv row and the chart mark it "game
+ended at N s". Time to first apple is unaffected. Write the rule in
+README (methods) and DEVLOG before measuring, then continue prompt 12
+as written.
+````

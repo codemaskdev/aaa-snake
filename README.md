@@ -35,6 +35,10 @@ npm run play-share          # control share in play, from the saved runs of ever
   the first apple on tick 7595), so more runs would only measure timer noise.
 - **Before release**, `npm run measure:final <version>` measures every version again with 5 headless and 5 visible
   runs and takes medians ("median of 5 runs"). v1.0 to v1.6 were measured that way during the build already.
+- **A game that ends before 60 s of control** (v2.0, prompt 15): both control-share metrics are computed over the
+  actual window up to THE END (control time / time until the end screen), and the summary.csv row and the chart mark
+  it "game ended at N s". Time to first apple is unaffected. The JS heap is then read when the game has ended, and the
+  frame rate is taken over the control frames the run had.
 - Numbers are written as measured, never rounded; every run's raw data is kept under measurements/<version>/.
 
 ## Shorts

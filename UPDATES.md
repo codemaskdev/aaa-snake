@@ -6,7 +6,8 @@ share may go up. Any later change to this file is a new, logged decision.
 
 Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10-14, PROMPTS.md #5); the keys of
 v1.6's skill-tree rule (2026-10-15, PROMPTS.md #7); what "seen" and "nearest" mean in v1.7's search rule (2026-10-15,
-PROMPTS.md #8); v1.7's skins and their drop odds (2026-10-15, PROMPTS.md #9).
+PROMPTS.md #8); v1.7's skins and their drop odds (2026-10-15, PROMPTS.md #9); v2.0's cabinet, its bot rule and the
+ending (2026-10-15, PROMPTS.md #14 and #15).
 
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
@@ -239,6 +240,15 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
   unmodified. Walking up to it and pressing a key enters it; inside, the arrow keys steer v1.0's snake (a control
   screen), and an apple eaten inside counts as an apple. Fixed now, before measuring: the cabinet's apple is visible to
   the bot (it is on screen), so the bot will go for whichever apple it can reach sooner.
+- **Cabinet, ending and bot rule (logged change, 2026-10-15, PROMPTS.md #14 and #15, written before v2.0 was
+  measured):** the cabinet stands on cell (134, 128), six cells ahead of the start. The probe reports it (`cabinet`)
+  while it is on screen. The bot goes for whichever apple it can reach in fewer moves: the world apple by its shortest
+  path (allowed turns), or the cabinet, by the shortest path to its cell plus 3 moves inside (v1.0's first apple, seed
+  1). Reaching the cabinet's cell opens the `cabinet-door` screen, which offers Enter at once; the bot presses it.
+  Inside, the screen is `cabinet`, a control screen (arrow keys steer v1.0's snake), and the probe is v1.0's own; the
+  bot plays it with the v1.0 rule (no turn limits). The cabinet runs dist/v1.0's files, taken from the v1.0 tag at
+  build time. After the inner apple the game ends: the reflection after an apple, THE END, then the credits (the
+  disclosure: who did what), and nothing after them.
 - **Metrics:** time to first apple may go **down** for the first time, if the cabinet's apple is quicker to reach than
   the world's; everything else stays at its peak (it is the heaviest build).
 - **Patch note:** "Game of the Year Edition: includes all content, plus the original game, which some players prefer."

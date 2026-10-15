@@ -1124,3 +1124,45 @@ by 0.6530825496722912 fps, inside the spread of single runs seen before. Checks 
   first apple at 1104774.1 ms against 1104786 ms recorded. The fixture's short test still passes. The shorts of v1.0
   to v1.6 and v1.9 were made with the earlier rules and are not made again.
 - The full `npm test` after this: 105 of 105, exit 0.
+
+### v2.0, the plan (written before building; the cabinet's place decided in prompt 15)
+("Continue prompt 12 as written" in prompt 15 I take to mean prompt 14, the v2.0 prompt.)
+
+- **Where the cabinet stands: at the start**, as UPDATES.md froze it: on cell (134, 128), six cells ahead of Snek's
+  start (128, 128, heading right), so it is on screen from the first frame of play. (The other place I had worked out,
+  far away and placed by the seed, (243, 39) for seed 1, would have come on screen on move 1765 of the search; it is
+  not built.)
+- **What runs inside: the real v1.0.** `npm run build v2.0` takes dist/v1.0's three files (index.html, rules.js,
+  game.js) out of git, from the v1.0 tag (`git show v1.0:dist/v1.0/<file>`), into dist/v2.0/cabinet/, byte for byte;
+  nothing is copied into src/. The game loads it in an iframe (same origin), hands it the arrow keys while Snek is
+  inside, and draws its canvas onto the cabinet's screen in the world, so it goes through v1.9's WebGL pass like the
+  rest. tests/v2.0.test.mjs checks the files against the v1.0 tag and that the inner game, played by the v1.0 bot rule,
+  eats its apple on tick 3, as dist/v1.0 does (measurements/v1.0.json: tick 3).
+- **How the bot reaches it, and what key enters it** (the rule goes into UPDATES.md before measuring): the probe
+  reports the cabinet's cell (`cabinet`) while it is on screen. UPDATES.md already fixed that the cabinet's apple
+  counts as an apple the bot can see and that the bot goes for whichever apple it can reach sooner: the world apple
+  by its shortest path, or the cabinet by the shortest path to its cell plus 3 moves inside (v1.0's first apple). At
+  the start the world apple is out of sight, so the bot goes to the cabinet: six moves straight ahead. Reaching the
+  cabinet's cell stops play on a screen of its own, `cabinet-door` ("Press Enter to play"), which offers Enter (probe
+  `next`) from its first frame; the bot presses it as on every screen. Inside, the screen is `cabinet` and the probe
+  is v1.0's own (its snake, its apple, its 20 x 20 grid, every turn allowed); the bot plays it with the v1.0 rule.
+- **Arrow keys inside the cabinet count as control** for both control-share metrics: `cabinet` joins `ready` and
+  `play` as a control screen in tools/rig/stats.mjs (a logged change in UPDATES.md, before measuring).
+- **After the inner apple the game ends.** It counts as Snek's apple (the score shows 1), and the game does what it
+  does after every apple since v1.3: Warden Snek's reflection, line 10 ("One apple. Not the orchard. But it is a
+  start."). Then THE END (3000 ms), then the credits, which stay: no key, no further screen, no restart. The credits
+  are the disclosure: who did what (CodeMask: the idea, the prompts and every decision; Claude Code, with Claude Opus
+  5.5: the code, the tests, the measuring rig, the shorts; ElevenLabs: Warden Snek's voice, a voice designed for this
+  project with Voice Design, synthetic, not a clone), the tools (Playwright 1.63.0, ffmpeg), and that the studios,
+  publisher and engine on the logos are invented and nothing in the game can be bought.
+- **The rig:** a run ends when the game has ended (the probe says `ended` on the credits); the heap is read then if
+  the run never had 60 s of control; the frame rate is taken over the control the run had.
+- **No other features.** Everything of v1.9 stays as it is.
+
+### Measuring a game that ends before 60 s of control (prompt 15; also in README.md, "Methods")
+Both control-share metrics are computed over the actual window up to THE END: control time divided by the time that
+passed until the end screen (from navigation start for the first, from the first control frame for the second). The
+summary.csv row and the chart mark such a version "game ended at N s" (N: the time of THE END, in seconds, as
+measured). Time to first apple is unaffected. Two consequences the rule leaves to the rig, written here before
+measuring: the JS heap is read when the game has ended (there is no 60 s of control to read it after), and the frame
+rate is taken over the control frames the run had. The chart and the row say which.
