@@ -1393,3 +1393,11 @@ requests. The shorts re-rendered; each is 300 ms longer, and nothing else moved:
 ### Backup
 voice/host/ (the takes included), src/voice/, voice/RECORDING.json, voice/HOST.md and voice/LINES.md were copied to a
 folder outside the repository, with a SHA256SUMS file: 64 files and the sums, all of them verified against the copy.
+
+## Prompt 19: v1.3's host line 2 is take 3
+The author chose take 3 by ear (whisper does not know the word "Snek"). voice/host/v1.3-2.mp3 is now that take
+(8560 ms, 69006 bytes, requested 2026-10-15T20:09:59.523Z); RECORDING.json marks it kept, with who chose it. No new
+requests. v1.3's short re-rendered: 35433.333333333336 ms (1063 frames), 700 ms longer than before, since the card
+lasts as long as line 2. C 12.85x, as before. Host 1 from 0 to 3.68 s, host 2 3.98 to 12.54 s, host 3 12.84 to 19.16
+s, Snek's line 10 22.09186900130252 to 25.93186900130252 s, host 4 26.23333333333333 to 35.43333333333333 s. The
+backup outside the repository was brought up to date, and its SHA256SUMS were made again and verified.

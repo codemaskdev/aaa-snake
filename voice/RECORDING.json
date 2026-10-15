@@ -336,10 +336,10 @@
         "id": "v1.3-2",
         "file": "voice/host/v1.3-2.mp3",
         "text": "Every AAA hero has a voice, a past and a wound. Meet Warden Snek. He had an orchard. They took it.",
-        "requestedAt": "2026-10-15T19:05:10.033Z",
+        "requestedAt": "2026-10-15T20:09:59.523Z",
         "takes": 3,
-        "bytes": 63363,
-        "durationMs": 7840,
+        "bytes": 69006,
+        "durationMs": 8560,
         "history": [
           {
             "take": 1,
@@ -348,7 +348,7 @@
             "durationMs": 7840,
             "file": "voice/host/takes/v1.3-2.take1.mp3",
             "heard": "Every AAA hero has a voice, a past, and a wound. Meet Warden Snack. He had norchard. They took it.",
-            "kept": true
+            "kept": false
           },
           {
             "take": 2,
@@ -366,11 +366,12 @@
             "durationMs": 8560,
             "file": "voice/host/takes/v1.3-2.take3.mp3",
             "heard": "Every AAA hero has a voice, a past, and a wound. Meet Warden Snack. He had an orchard. They took it.",
-            "kept": false
+            "kept": true
           }
         ],
-        "keptTake": 1,
-        "check": "whisper.cpp must hear: \"Warden Snek\" and \"He had an orchard\""
+        "keptTake": 3,
+        "check": "whisper.cpp must hear: \"Warden Snek\" and \"He had an orchard\"",
+        "keptBy": "the author, by ear (prompt 19): whisper does not know the word Snek; the whisper check stays logged above"
       },
       {
         "id": "v1.3-3",

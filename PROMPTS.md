@@ -830,3 +830,11 @@ Three things:
    cost money to redo.
 Then STOP.
 ````
+
+## 19. v1.3's host line 2: take 3
+
+````text
+Use take 3 for v1.3 line 2 (whisper doesn't know the word "Snek"; the
+takes are fine). Re-render v1.3, update RECORDING.json and the backup,
+no new voice requests. STOP.
+````
