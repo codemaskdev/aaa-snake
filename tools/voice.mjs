@@ -9,6 +9,11 @@
 //                            voice/RECORDING.json (what was asked for, when, and how long each take is).
 //                            The API key comes only from the environment variable ELEVENLABS_API_KEY;
 //                            it is never written anywhere. The only network calls are the 17 requests.
+//   npm run voice -- --record host  records the host's lines for the shorts (voice/HOST.md, prompt 17)
+//                            into voice/host/<short>-<n>.mp3 with HOST_RECORDING's settings, one take a
+//                            line, and logs every request under "host" in voice/RECORDING.json. A line
+//                            already recorded with the same text is not asked for again. The mp3s are
+//                            not committed (generated media for the shorts); RECORDING.json is.
 //   npm run voice -- --retake 14,16  up to three new takes of each listed line, same settings; the first
 //                            take that fits its slot is kept, the others are deleted; every take's length
 //                            goes into voice/RECORDING.json. Slots never change; audio is never sped up or cut.
@@ -174,13 +179,13 @@ ${rows.join('\n')}
 }
 
 // One request to the API for one line; returns the MP3's bytes. Nothing else goes out.
-async function speakLine(text) {
+async function speakLine(text, settings = RECORDING, voiceSettings = { stability: RECORDING.stability }) {
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) throw new Error('set ELEVENLABS_API_KEY in the environment (it is never read from or written to a file)');
-  const response = await fetch(`${RECORDING.endpoint}/${RECORDING.voiceId}?output_format=${RECORDING.output}`, {
+  const response = await fetch(`${settings.endpoint}/${settings.voiceId}?output_format=${settings.output}`, {
     method: 'POST',
     headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
-    body: JSON.stringify({ text, model_id: RECORDING.model, voice_settings: { stability: RECORDING.stability } }),
+    body: JSON.stringify({ text, model_id: settings.model, voice_settings: voiceSettings }),
   });
   if (!response.ok) throw new Error(`the API answered ${response.status}: ${(await response.text()).slice(0, 300)}`);
   return Buffer.from(await response.arrayBuffer());
@@ -200,7 +205,8 @@ async function record(story) {
     console.log(`${fileFor(line)}  "${text}"  ${take.durationMs} ms of a ${take.slotMs} ms slot`);
   }
   const { endpoint, ...settings } = RECORDING;
-  fs.writeFileSync(RECORDING_FILE, JSON.stringify({ date, ...settings, endpoint, lines }, null, 2) + '\n');
+  const host = readRecording()?.host;
+  fs.writeFileSync(RECORDING_FILE, JSON.stringify({ date, ...settings, endpoint, lines, ...(host ? { host } : {}) }, null, 2) + '\n');
   fs.writeFileSync(path.join(ROOT, 'voice/LINES.md'), linesMarkdown(story));
   console.log('wrote src/voice/*.mp3, voice/RECORDING.json and voice/LINES.md; now run npm run voice -- --check');
 }
@@ -241,11 +247,69 @@ async function retake(story, ids, most = 3) {
   fs.writeFileSync(path.join(ROOT, 'voice/LINES.md'), linesMarkdown(story));
 }
 
+// The host of the shorts (prompt 17): Justin, the CodeMask voice of episodes 1 to 3, with their settings
+// (CodeMask's episodes/02-bug-driver/voice.json), at the shorts' output format.
+export const HOST_RECORDING = {
+  service: 'ElevenLabs text-to-speech API (v1)',
+  endpoint: 'https://api.elevenlabs.io/v1/text-to-speech',
+  voiceId: 'uFIXVu9mmnDZ7dTKCBTX',
+  voiceName: 'Justin Time - Elearning Narration (ElevenLabs voice library)',
+  model: 'eleven_v3',
+  stability: 0,
+  similarity: 0.75,
+  style: 0.2,
+  speed: 1,
+  output: 'mp3_44100_64',
+};
+export const HOST_DIR = path.join(ROOT, 'voice/host');
+export const hostFile = id => `${id}.mp3`;
+
+// voice/HOST.md: "### v1.1" (or "### trailer"), then numbered lines. Returns { short: [{ id, n, text }] }.
+export function loadHost(file = path.join(ROOT, 'voice/HOST.md')) {
+  const out = {};
+  let short = null;
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    const head = line.match(/^### (\S+)\s*$/);
+    if (head) { short = head[1]; out[short] = []; continue; }
+    const said = short && line.match(/^(\d+)\. (.+)$/);
+    if (said) out[short].push({ id: `${short}-${said[1]}`, n: Number(said[1]), text: said[2].trim() });
+  }
+  for (const [short, lines] of Object.entries(out)) {
+    lines.forEach((l, i) => { if (l.n !== i + 1) throw new Error(`voice/HOST.md: ${short} line ${l.n} is out of order`); });
+  }
+  return out;
+}
+
+// Record the host's lines: one request a line, the text exactly as in voice/HOST.md.
+async function recordHost(host = loadHost()) {
+  fs.mkdirSync(HOST_DIR, { recursive: true });
+  const recording = readRecording() || {};
+  const { endpoint, ...settings } = HOST_RECORDING;
+  const log = recording.host || { ...settings, endpoint, lines: [] };
+  const voiceSettings = { stability: HOST_RECORDING.stability, similarity_boost: HOST_RECORDING.similarity, style: HOST_RECORDING.style, speed: HOST_RECORDING.speed };
+  for (const line of Object.values(host).flat()) {
+    const file = path.join(HOST_DIR, hostFile(line.id));
+    const done = log.lines.find(t => t.id === line.id && t.text === line.text);
+    if (done && fs.existsSync(file)) continue;
+    const date = new Date().toISOString();
+    const bytes = await speakLine(line.text, HOST_RECORDING, voiceSettings);
+    fs.writeFileSync(file, bytes);
+    const take = { id: line.id, file: `voice/host/${hostFile(line.id)}`, text: line.text, requestedAt: date, takes: 1, bytes: bytes.length, durationMs: durationMs(file) };
+    log.lines = log.lines.filter(t => t.id !== line.id).concat(take);
+    recording.host = log;
+    fs.writeFileSync(RECORDING_FILE, JSON.stringify(recording, null, 2) + '\n'); // after every line, so nothing asked for is lost
+    console.log(`${take.file}  ${take.durationMs} ms  "${line.text}"`);
+  }
+  console.log(`host: ${log.lines.length} line(s) in voice/RECORDING.json`);
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const story = loadStory();
   const retakeAt = process.argv.indexOf('--retake');
   if (retakeAt !== -1) {
     await retake(story, process.argv[retakeAt + 1].split(',').map(Number));
+  } else if (process.argv.includes('--record') && process.argv.includes('host')) {
+    await recordHost();
   } else if (process.argv.includes('--record')) {
     await record(story);
   } else if (process.argv.includes('--check')) {

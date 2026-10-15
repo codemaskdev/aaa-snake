@@ -3,7 +3,9 @@
 The host is Justin, the CodeMask voice (PROMPTS.md #17). The author's lines, verbatim; numbers are written as they are
 said. One change, by the author's rule in prompt 17: v1.1 has three logos and a warning (publisher, studio, engine,
 then the photosensitivity warning: dist/v1.1/launch.js and every v1.1 run), so its line 3 is the author's
-replacement, not "Four logos you can't skip. …".
+replacement, not "Four logos you can't skip. …". Two more by the author after the number check (prompt 17): v1.7's
+line 2 says "Ten skins" (the loot boxes hold 10; it said "Twelve skins") and its line 4 "The game is two days old"
+(v1.0 was committed on 2026-10-14; it said "a week old").
 
 ### v1.1
 1. I'm turning Snake into a AAA game. Patch 1.1.
@@ -43,9 +45,9 @@ replacement, not "Four logos you can't skip. …".
 
 ### v1.7
 1. I'm turning Snake into a AAA game. Patch 1.7. Season One.
-2. A game needs a season, a pass and loot boxes. Cosmetics only, of course. Twelve skins. The legendary one is the snake you started with.
+2. A game needs a season, a pass and loot boxes. Cosmetics only, of course. Ten skins. The legendary one is the snake you started with.
 3. The apple is now hidden. The top reward of the pass is the ability to see it. First apple: eighteen minutes.
-4. Next patch: the remaster. The game is a week old. Subscribe, like it if you've bought a skin, and comment: one patch is yours, what should it add?
+4. Next patch: the remaster. The game is two days old. Subscribe, like it if you've bought a skin, and comment: one patch is yours, what should it add?
 
 ### v1.9
 1. I'm turning Snake into a AAA game. Patch 1.9. Remastered.

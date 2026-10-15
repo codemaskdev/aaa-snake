@@ -19,6 +19,12 @@
 //               the apple for a version without voice lines. If that makes the short longer
 //               than 30 s, C goes faster in steps of 0.05 until it fits.
 // Sound: silence, except that line in D (since prompt 12, A carries no voice).
+// The host (prompt 17, voice/HOST.md, one take a line in voice/host/): line 1 from 0 s over A, line 2
+// over B, line 3 over C, nothing during D (Snek's line plays alone), line 4 right after D over a
+// freeze of D's last frame; the short ends when line 4 ends. A, B and C last at least as long as
+// their line plus HOST_GAP_MS (A starts earlier in the previous run, so its apple keeps its place
+// 1 s before A ends); C lasts as long as its line needs, at the largest step of 0.05x that keeps it
+// at least that long. With the host, the 30 s limit no longer applies (prompt 17).
 //
 // Output in out/shorts/<version>/: frames/00001.png..., short-<version>.mp4
 // (1080x1920, 30 fps, H.264), first/middle/last.png and clip.json.
@@ -30,6 +36,7 @@ import vm from 'node:vm';
 import { chromium } from 'playwright';
 import { startServer } from './serve.mjs';
 import { listVersions } from './build.mjs';
+import { loadHost, HOST_DIR, hostFile } from './voice.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 export const WIDTH = 1080;
@@ -44,6 +51,8 @@ export const PLAN = { prevMs: 3000, noteMs: 3000, launchMs: 16000, launchMaxMs: 
 // Room kept for the line starting a little later in the replay than in the recorded run (the
 // first apple may be up to MAX_APPLE_DRIFT_MS off, and a line starts on the next 60 Hz frame).
 const LINE_SLACK_MS = 100;
+// Silence between the end of one host line and the start of the next thing said (prompt 17).
+export const HOST_GAP_MS = 300;
 
 // The one-line patch note of a version, from its section in UPDATES.md:
 // a "## <version> ..." heading and a "**Patch note:** ..." line under it.
@@ -137,7 +146,10 @@ export function singleTimeline(cur) {
 
 // The fixed plan for every version after v1.0 (see the top of this file).
 export function compareTimeline(prev, cur) {
-  const aFrom = Math.max(prev.start, prev.apple - PLAN.beforeAppleMs);
+  const host = cur.host || null;
+  const aMs = host ? Math.max(PLAN.prevMs, host[0].ms + HOST_GAP_MS) : PLAN.prevMs;
+  const bMs = host ? Math.max(PLAN.noteMs, host[1].ms + HOST_GAP_MS) : PLAN.noteMs;
+  const aFrom = Math.max(prev.start, prev.apple - (aMs - (PLAN.prevMs - PLAN.beforeAppleMs)));
   const dFrom = cur.apple - PLAN.beforeAppleMs;
   if (dFrom <= cur.start) throw new Error(`${cur.version}: the first apple comes too soon after the start for this plan`);
   // D ends when the line after the apple has been said (prompt 12), or, for a plan with `until` (v2.0's
@@ -148,13 +160,22 @@ export function compareTimeline(prev, cur) {
   // rounded to whole frames) already shows that screen (prompt 16: v2.0 runs to the credits' first frame).
   const dMs = until ? until.t + cur.plan.until.afterMs - dFrom + (2 * 1000) / FPS
     : cur.firstLine ? PLAN.beforeAppleMs + cur.firstLine.afterAppleMs + cur.firstLine.ms : PLAN.appleMs;
-  const room = MAX_CLIP_MS - PLAN.prevMs - PLAN.noteMs - dMs - (cur.firstLine && !until ? LINE_SLACK_MS : 0);
-  let speed = compressSpeed(dFrom - cur.start);
-  while ((dFrom - cur.start) / speed > room) speed = Math.round((speed + 0.05) * 100) / 100; // C faster, so it all fits
+  const span = dFrom - cur.start;
+  let speed = compressSpeed(span);
+  if (host) {
+    // No 30 s limit: C lasts as long as host line 3 needs (prompt 17, "as long as the lines need"), at the
+    // largest step of 0.05x that keeps it at least that long; never slower than real time.
+    const need = host[2].ms + HOST_GAP_MS;
+    speed = Math.max(1, Math.floor((span / need) * 20 + 1e-9) / 20);
+    if (span / speed < need) throw new Error(`${cur.version}: C (${span} ms at 1x) is shorter than host line 3 (${host[2].ms} ms)`);
+  } else {
+    const room = MAX_CLIP_MS - PLAN.prevMs - PLAN.noteMs - dMs - (cur.firstLine && !until ? LINE_SLACK_MS : 0);
+    while (span / speed > room) speed = Math.round((speed + 0.05) * 100) / 100; // C faster, so it all fits
+  }
   return [
-    { name: 'A previous version', kind: 'game', who: 'prev', runFrom: aFrom, clipMs: PLAN.prevMs, speed: 1, counter: 'compare', card: 'prev' },
-    { name: 'B patch note', kind: 'note', clipMs: PLAN.noteMs, counter: 'compare-done', card: 'cur-version' },
-    { name: 'C launch', kind: 'game', who: 'cur', runFrom: cur.start, clipMs: (dFrom - cur.start) / speed, speed, counter: 'run', card: 'cur' },
+    { name: 'A previous version', kind: 'game', who: 'prev', runFrom: aFrom, clipMs: aMs, speed: 1, counter: 'compare', card: 'prev', host: host ? 0 : null },
+    { name: 'B patch note', kind: 'note', clipMs: bMs, counter: 'compare-done', card: 'cur-version', host: host ? 1 : null },
+    { name: 'C launch', kind: 'game', who: 'cur', runFrom: cur.start, clipMs: span / speed, speed, counter: 'run', card: 'cur', host: host ? 2 : null },
     { name: 'D first apple', kind: 'game', who: 'cur', runFrom: dFrom, clipMs: dMs, speed: 1, counter: 'run', card: 'cur', untilLine: until ? null : cur.firstLine },
   ];
 }
@@ -172,7 +193,7 @@ export const speedText = s => `${Number(s.toFixed(2))}x`;
 export async function recordShort({ cur, prev = null, distDirs, outDir, frameLimit = Infinity, encode = true, log = console.log }) {
   const timeline = prev ? compareTimeline(prev, cur) : singleTimeline(cur);
   const clipMs = timeline.reduce((s, x) => s + x.clipMs, 0);
-  if (clipMs > MAX_CLIP_MS) throw new Error(`clip is ${clipMs} ms, more than ${MAX_CLIP_MS}`);
+  if (clipMs > MAX_CLIP_MS && !cur.host) throw new Error(`clip is ${clipMs} ms, more than ${MAX_CLIP_MS}`);
   let at = 0;
   for (const seg of timeline) {
     seg.clipFrom = at;
@@ -327,15 +348,27 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
     checks[who] = c;
   }
 
+  const gameMs = (frames * 1000) / FPS; // where D ends
+  const voice = voiceTrack(timeline, panes, distDirs, gameMs);
+  let host = [];
+  if (cur.host && prev) {
+    // Line 4 right after D, over a freeze of D's last frame, until it ends.
+    const freeze = frameLimit === Infinity ? Math.ceil((cur.host[3].ms * FPS) / 1000) : 0;
+    const last = path.join(framesDir, `${String(frames).padStart(5, '0')}.png`);
+    for (let f = frames + 1; f <= frames + freeze; f++) fs.copyFileSync(last, path.join(framesDir, `${String(f).padStart(5, '0')}.png`));
+    frames += freeze;
+    host = hostTrack(timeline, cur.host, gameMs);
+    if (frameLimit !== Infinity) host = host.filter(h => h.clipAtMs < gameMs);
+    checkNoOverlap(host, voice);
+  }
   const names = fs.readdirSync(framesDir).sort();
   const pickFrame = (i, name) => fs.copyFileSync(path.join(framesDir, names[i]), path.join(outDir, name));
   pickFrame(0, 'first.png');
   pickFrame(Math.floor((names.length - 1) / 2), 'middle.png');
   pickFrame(names.length - 1, 'last.png');
 
-  const voice = voiceTrack(timeline, panes, distDirs, (frames * 1000) / FPS);
   const mp4 = path.join(outDir, `short-${cur.version}.mp4`);
-  if (encode) encodeShort(framesDir, voice, (frames * 1000) / FPS, mp4);
+  if (encode) encodeShort(framesDir, [...voice, ...host], (frames * 1000) / FPS, mp4);
   const clip = {
     version: cur.version,
     comparedWith: prev ? prev.version : null,
@@ -348,6 +381,8 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
     counter: 'run clock (virtual time of the replay) until the first apple, then the measured median; in A, the new version\'s median appears once the previous one freezes',
     checks,
     voice: voice.map(({ file, ...v }) => ({ ...v, file: path.relative(ROOT, file) })),
+    host: host.map(({ file, ...h }) => ({ ...h, file: path.relative(ROOT, file) })),
+    freezeFromMs: cur.host && prev ? gameMs : null,
     safeArea: { ...SAFE, elements: safeArea },
     browser: browser.version(),
     encoder: encode ? ffmpegVersion() : null,
@@ -375,6 +410,30 @@ export function voiceTrack(timeline, panes, distDirs, clipMs) {
     }
   }
   return out;
+}
+
+// The host's four lines in a short: 1, 2 and 3 where A, B and C start, 4 where D ends (gameMs).
+// Each is heard in full; a line that would run into the next segment is an error.
+export function hostTrack(timeline, lines, gameMs) {
+  const out = timeline.filter(seg => seg.host !== null && seg.host !== undefined).map(seg => {
+    const line = lines[seg.host];
+    if (line.ms + HOST_GAP_MS > seg.clipMs + 1e-6) throw new Error(`host line ${line.id} (${line.ms} ms) does not fit in ${seg.name} (${seg.clipMs} ms)`);
+    return { who: 'host', segment: seg.name, line: line.id, file: line.file, clipAtMs: seg.clipFrom, lengthMs: line.ms, heardMs: line.ms };
+  });
+  const last = lines[3];
+  out.push({ who: 'host', segment: 'freeze after D', line: last.id, file: last.file, clipAtMs: gameMs, lengthMs: last.ms, heardMs: last.ms });
+  return out;
+}
+
+// Host and Snek never speak at once (prompt 17).
+export function checkNoOverlap(host, snek) {
+  for (const h of host) {
+    for (const v of snek) {
+      if (h.clipAtMs < v.clipAtMs + v.heardMs && v.clipAtMs < h.clipAtMs + h.heardMs) {
+        throw new Error(`host line ${h.line} (${h.clipAtMs} to ${h.clipAtMs + h.heardMs} ms) overlaps Snek's line ${v.line} (${v.clipAtMs} to ${v.clipAtMs + v.heardMs} ms)`);
+      }
+    }
+  }
 }
 
 export function audioMs(file) {
@@ -438,7 +497,18 @@ export function loadForShort(v) {
   if (!note) throw new Error(`no "**Patch note:**" line for ${v} in UPDATES.md`);
   const name = shortName(updates, v);
   if (!name) throw new Error(`no "**Short name:**" line for ${v} in UPDATES.md`);
-  return { ...loadVersion(path.join(ROOT, 'measurements'), v, plans[v], note, firstAppleLine(path.join(ROOT, 'dist', v))), shortName: name };
+  return { ...loadVersion(path.join(ROOT, 'measurements'), v, plans[v], note, firstAppleLine(path.join(ROOT, 'dist', v))), shortName: name, host: hostLines(v) };
+}
+
+// The host's recorded lines for a short (voice/HOST.md, voice/host/), with their lengths; null if it has none.
+export function hostLines(short) {
+  const lines = loadHost()[short];
+  if (!lines) return null;
+  return lines.map(l => {
+    const file = path.join(HOST_DIR, hostFile(l.id));
+    if (!fs.existsSync(file)) throw new Error(`host line ${l.id} is not recorded (npm run voice -- --record host)`);
+    return { id: l.id, text: l.text, file, ms: audioMs(file) };
+  });
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url) && process.argv[2] === 'trailer') {
@@ -473,10 +543,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const c of Object.values(clip.checks)) {
     console.log(`${c.version}: first apple replayed at ${c.replayFirstAppleMs} ms, recorded ${c.recordedFirstAppleMs} ms, median ${c.medianFirstAppleMs} ms (counter freezes on the median); ${c.applesReplayed.length} apples shown, same as the recorded run: ${c.sameApplesAsRecordedRun}`);
   }
+  for (const h of clip.host) console.log(`host: line ${h.line} (${h.segment}) from ${h.clipAtMs / 1000} s to ${(h.clipAtMs + h.heardMs) / 1000} s of the short`);
   if (!clip.voice.length) console.log('sound: silence (no Warden Snek line in segment D)');
   for (const v of clip.voice) {
     console.log(`sound: ${v.version} line ${v.line} (${v.segment}) from ${v.clipAtMs / 1000} s to ${(v.clipAtMs + v.heardMs) / 1000} s of the short, ${v.heardMs} ms heard of ${v.lengthMs} ms${v.heardMs === v.lengthMs ? ' (in full)' : ' (CUT)'}`);
   }
-    if (clip.clipMs < 25000 && clip.comparedWith) console.log(`note: the clip is shorter than 25 s because ${version}'s launch is shorter than ${PLAN.launchMs} ms at 1x`);
+    if (clip.clipMs > 45000) console.log(`note: the short is ${clip.clipMs} ms, over 45 s`);
+  if (clip.clipMs < 25000 && clip.comparedWith && !clip.host.length) console.log(`note: the clip is shorter than 25 s because ${version}'s launch is shorter than ${PLAN.launchMs} ms at 1x`);
   console.log(`wrote out/shorts/${version}/short-${version}.mp4, frames/, first.png, middle.png, last.png, clip.json`);
 }

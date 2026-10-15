@@ -238,5 +238,388 @@
       "durationMs": 5360,
       "slotMs": 5600
     }
-  ]
+  ],
+  "host": {
+    "service": "ElevenLabs text-to-speech API (v1)",
+    "voiceId": "uFIXVu9mmnDZ7dTKCBTX",
+    "voiceName": "Justin Time - Elearning Narration (ElevenLabs voice library)",
+    "model": "eleven_v3",
+    "stability": 0,
+    "similarity": 0.75,
+    "style": 0.2,
+    "speed": 1,
+    "output": "mp3_44100_64",
+    "endpoint": "https://api.elevenlabs.io/v1/text-to-speech",
+    "lines": [
+      {
+        "id": "v1.1-1",
+        "file": "voice/host/v1.1-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.1.",
+        "requestedAt": "2026-10-15T19:04:53.368Z",
+        "takes": 1,
+        "bytes": 30554,
+        "durationMs": 3760
+      },
+      {
+        "id": "v1.1-2",
+        "file": "voice/host/v1.1-2.mp3",
+        "text": "A real game doesn't just start. It has a publisher, a studio and an engine, and you see all three first.",
+        "requestedAt": "2026-10-15T19:04:55.428Z",
+        "takes": 1,
+        "bytes": 55004,
+        "durationMs": 6800
+      },
+      {
+        "id": "v1.1-3",
+        "file": "voice/host/v1.1-3.mp3",
+        "text": "Three logos and a warning you can't skip. First apple moves from zero point three seconds to nineteen.",
+        "requestedAt": "2026-10-15T19:04:57.424Z",
+        "takes": 1,
+        "bytes": 52496,
+        "durationMs": 6480
+      },
+      {
+        "id": "v1.1-4",
+        "file": "voice/host/v1.1-4.mp3",
+        "text": "Next patch: a day-one patch. Subscribe so you don't miss it, like it if you've ever skipped a logo, and tell me in the comments what else a real launch needs.",
+        "requestedAt": "2026-10-15T19:04:59.383Z",
+        "takes": 1,
+        "bytes": 67125,
+        "durationMs": 8320
+      },
+      {
+        "id": "v1.2-1",
+        "file": "voice/host/v1.2-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.2.",
+        "requestedAt": "2026-10-15T19:05:01.813Z",
+        "takes": 1,
+        "bytes": 30554,
+        "durationMs": 3760
+      },
+      {
+        "id": "v1.2-2",
+        "file": "voice/host/v1.2-2.mp3",
+        "text": "Big games ship, then patch themselves on day one. So Snake now updates before it runs.",
+        "requestedAt": "2026-10-15T19:05:02.906Z",
+        "takes": 1,
+        "bytes": 49780,
+        "durationMs": 6160
+      },
+      {
+        "id": "v1.2-3",
+        "file": "voice/host/v1.2-3.mp3",
+        "text": "The patch is two thousand bytes. Downloading it costs four and a half thousand. The headers are bigger than the fix.",
+        "requestedAt": "2026-10-15T19:05:04.581Z",
+        "takes": 1,
+        "bytes": 53750,
+        "durationMs": 6640
+      },
+      {
+        "id": "v1.2-4",
+        "file": "voice/host/v1.2-4.mp3",
+        "text": "Next patch: a story. Subscribe for it, like it if you've waited for a patch on launch night, and comment what the snake's backstory should be.",
+        "requestedAt": "2026-10-15T19:05:06.650Z",
+        "takes": 1,
+        "bytes": 65871,
+        "durationMs": 8160
+      },
+      {
+        "id": "v1.3-1",
+        "file": "voice/host/v1.3-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.3.",
+        "requestedAt": "2026-10-15T19:05:08.771Z",
+        "takes": 1,
+        "bytes": 29927,
+        "durationMs": 3680
+      },
+      {
+        "id": "v1.3-2",
+        "file": "voice/host/v1.3-2.mp3",
+        "text": "Every AAA hero has a voice, a past and a wound. Meet Warden Snek. He had an orchard. They took it.",
+        "requestedAt": "2026-10-15T19:05:10.033Z",
+        "takes": 1,
+        "bytes": 63363,
+        "durationMs": 7840
+      },
+      {
+        "id": "v1.3-3",
+        "file": "voice/host/v1.3-3.mp3",
+        "text": "The opening is forty-four seconds. You control the snake eight percent of the time. The rest is cinema.",
+        "requestedAt": "2026-10-15T19:05:12.187Z",
+        "takes": 1,
+        "bytes": 51034,
+        "durationMs": 6320
+      },
+      {
+        "id": "v1.3-4",
+        "file": "voice/host/v1.3-4.mp3",
+        "text": "Next patch: online. Yes, for a single-player snake. Subscribe, like it if you skip cutscenes, and comment which feature is still missing.",
+        "requestedAt": "2026-10-15T19:05:13.987Z",
+        "takes": 1,
+        "bytes": 74230,
+        "durationMs": 9200
+      },
+      {
+        "id": "v1.4-1",
+        "file": "voice/host/v1.4-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.4.",
+        "requestedAt": "2026-10-15T19:05:16.367Z",
+        "takes": 1,
+        "bytes": 30554,
+        "durationMs": 3760
+      },
+      {
+        "id": "v1.4-2",
+        "file": "voice/host/v1.4-2.mp3",
+        "text": "Every big release is online now, even the single-player ones. So Snake has a login, a queue and terms of service.",
+        "requestedAt": "2026-10-15T19:05:17.719Z",
+        "takes": 1,
+        "bytes": 59393,
+        "durationMs": 7360
+      },
+      {
+        "id": "v1.4-3",
+        "file": "voice/host/v1.4-3.mp3",
+        "text": "There's no one else on the server. You still wait seven seconds. Industry standard.",
+        "requestedAt": "2026-10-15T19:05:19.762Z",
+        "takes": 1,
+        "bytes": 42883,
+        "durationMs": 5280
+      },
+      {
+        "id": "v1.4-4",
+        "file": "voice/host/v1.4-4.mp3",
+        "text": "Next patch: an open world. Subscribe for it, like it if you've been in a queue for a single-player game, and comment how big the world should be.",
+        "requestedAt": "2026-10-15T19:05:21.506Z",
+        "takes": 1,
+        "bytes": 65871,
+        "durationMs": 8160
+      },
+      {
+        "id": "v1.5-1",
+        "file": "voice/host/v1.5-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.5.",
+        "requestedAt": "2026-10-15T19:05:23.759Z",
+        "takes": 1,
+        "bytes": 34524,
+        "durationMs": 4240
+      },
+      {
+        "id": "v1.5-2",
+        "file": "voice/host/v1.5-2.mp3",
+        "text": "A twenty-by-twenty field is not content. So the field is now two hundred fifty-six by two hundred fifty-six, with six hundred map markers.",
+        "requestedAt": "2026-10-15T19:05:25.039Z",
+        "takes": 1,
+        "bytes": 76111,
+        "durationMs": 9440
+      },
+      {
+        "id": "v1.5-3",
+        "file": "voice/host/v1.5-3.mp3",
+        "text": "One hundred sixty chests. All empty. One apple. Fast travel is coming in a future update.",
+        "requestedAt": "2026-10-15T19:05:27.294Z",
+        "takes": 1,
+        "bytes": 59393,
+        "durationMs": 7360
+      },
+      {
+        "id": "v1.5-4",
+        "file": "voice/host/v1.5-4.mp3",
+        "text": "Next patch: a skill tree. Subscribe, like it if you've opened an empty chest, and comment which skill the snake should unlock first.",
+        "requestedAt": "2026-10-15T19:05:29.208Z",
+        "takes": 1,
+        "bytes": 60647,
+        "durationMs": 7520
+      },
+      {
+        "id": "v1.6-1",
+        "file": "voice/host/v1.6-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.6.",
+        "requestedAt": "2026-10-15T19:05:31.789Z",
+        "takes": 1,
+        "bytes": 32016,
+        "durationMs": 3920
+      },
+      {
+        "id": "v1.6-2",
+        "file": "voice/host/v1.6-2.mp3",
+        "text": "AAA games don't give you abilities. You unlock them. So turning is now a skill tree.",
+        "requestedAt": "2026-10-15T19:05:33.206Z",
+        "takes": 1,
+        "bytes": 42883,
+        "durationMs": 5280
+      },
+      {
+        "id": "v1.6-3",
+        "file": "voice/host/v1.6-3.mp3",
+        "text": "Left turn: level five. Before that, you earn it. That's called progression.",
+        "requestedAt": "2026-10-15T19:05:35.070Z",
+        "takes": 1,
+        "bytes": 42256,
+        "durationMs": 5200
+      },
+      {
+        "id": "v1.6-4",
+        "file": "voice/host/v1.6-4.mp3",
+        "text": "Next patch: a battle pass. You knew it was coming. Subscribe, like it if you've grinded for a basic move, and comment what goes in the loot boxes.",
+        "requestedAt": "2026-10-15T19:05:36.556Z",
+        "takes": 1,
+        "bytes": 73603,
+        "durationMs": 9120
+      },
+      {
+        "id": "v1.7-1",
+        "file": "voice/host/v1.7-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.7. Season One.",
+        "requestedAt": "2026-10-15T19:05:38.885Z",
+        "takes": 1,
+        "bytes": 46645,
+        "durationMs": 5760
+      },
+      {
+        "id": "v1.7-2",
+        "file": "voice/host/v1.7-2.mp3",
+        "text": "A game needs a season, a pass and loot boxes. Cosmetics only, of course. Ten skins. The legendary one is the snake you started with.",
+        "requestedAt": "2026-10-15T19:05:40.580Z",
+        "takes": 1,
+        "bytes": 74857,
+        "durationMs": 9280
+      },
+      {
+        "id": "v1.7-3",
+        "file": "voice/host/v1.7-3.mp3",
+        "text": "The apple is now hidden. The top reward of the pass is the ability to see it. First apple: eighteen minutes.",
+        "requestedAt": "2026-10-15T19:05:43.318Z",
+        "takes": 1,
+        "bytes": 57512,
+        "durationMs": 7120
+      },
+      {
+        "id": "v1.7-4",
+        "file": "voice/host/v1.7-4.mp3",
+        "text": "Next patch: the remaster. The game is two days old. Subscribe, like it if you've bought a skin, and comment: one patch is yours, what should it add?",
+        "requestedAt": "2026-10-15T19:05:45.399Z",
+        "takes": 1,
+        "bytes": 79873,
+        "durationMs": 9920
+      },
+      {
+        "id": "v1.9-1",
+        "file": "voice/host/v1.9-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 1.9. Remastered.",
+        "requestedAt": "2026-10-15T19:05:48.045Z",
+        "takes": 1,
+        "bytes": 42256,
+        "durationMs": 5200
+      },
+      {
+        "id": "v1.9-2",
+        "file": "voice/host/v1.9-2.mp3",
+        "text": "Every classic gets a remaster. Bloom, grain, chromatic aberration, and hair physics on a twenty-by-twenty grid.",
+        "requestedAt": "2026-10-15T19:05:49.609Z",
+        "takes": 1,
+        "bytes": 61900,
+        "durationMs": 7680
+      },
+      {
+        "id": "v1.9-3",
+        "file": "voice/host/v1.9-3.mp3",
+        "text": "Four graphics presets. All of them are Ultra. The apple is in the same place.",
+        "requestedAt": "2026-10-15T19:05:51.710Z",
+        "takes": 1,
+        "bytes": 49153,
+        "durationMs": 6080
+      },
+      {
+        "id": "v1.9-4",
+        "file": "voice/host/v1.9-4.mp3",
+        "text": "Next patch: the Game of the Year Edition. We haven't won anything. Subscribe for the finale, like it if you've bought a remaster of a game you own, and comment your patch: it's still open.",
+        "requestedAt": "2026-10-15T19:05:53.341Z",
+        "takes": 1,
+        "bytes": 90113,
+        "durationMs": 11200
+      },
+      {
+        "id": "v2.0-1",
+        "file": "voice/host/v2.0-1.mp3",
+        "text": "I'm turning Snake into a AAA game. Patch 2.0. The final one.",
+        "requestedAt": "2026-10-15T19:05:56.389Z",
+        "takes": 1,
+        "bytes": 46018,
+        "durationMs": 5680
+      },
+      {
+        "id": "v2.0-2",
+        "file": "voice/host/v2.0-2.mp3",
+        "text": "Every big game ends with a nostalgia piece: a little arcade cabinet with the original inside. So I put Snake 1.0 in Snake.",
+        "requestedAt": "2026-10-15T19:05:57.899Z",
+        "takes": 1,
+        "bytes": 67125,
+        "durationMs": 8320
+      },
+      {
+        "id": "v2.0-3",
+        "file": "voice/host/v2.0-3.mp3",
+        "text": "Walk six steps, press Enter, and you're playing the real thing. First apple: one hundred and seven seconds. You control the snake for less than one of them.",
+        "requestedAt": "2026-10-15T19:06:00.257Z",
+        "takes": 1,
+        "bytes": 84470,
+        "durationMs": 10480
+      },
+      {
+        "id": "v2.0-4",
+        "file": "voice/host/v2.0-4.mp3",
+        "text": "That's the whole game. Play any version: the link is in the description. Subscribe for the full video, like it if you'd play the cabinet, and comment the one patch you want: I'll build it.",
+        "requestedAt": "2026-10-15T19:06:02.774Z",
+        "takes": 1,
+        "bytes": 83843,
+        "durationMs": 10400
+      },
+      {
+        "id": "trailer-1",
+        "file": "voice/host/trailer-1.mp3",
+        "text": "This is Snake. This is Snake after I made it AAA.",
+        "requestedAt": "2026-10-15T19:06:05.687Z",
+        "takes": 1,
+        "bytes": 29300,
+        "durationMs": 3600
+      },
+      {
+        "id": "trailer-2",
+        "file": "voice/host/trailer-2.mp3",
+        "text": "Done.",
+        "requestedAt": "2026-10-15T19:06:06.850Z",
+        "takes": 1,
+        "bytes": 5058,
+        "durationMs": 560
+      },
+      {
+        "id": "trailer-3",
+        "file": "voice/host/trailer-3.mp3",
+        "text": "Logos, a day-one patch, a story, a login, an open world, a skill tree, a season, a remaster.",
+        "requestedAt": "2026-10-15T19:06:07.577Z",
+        "takes": 1,
+        "bytes": 70260,
+        "durationMs": 8720
+      },
+      {
+        "id": "trailer-4",
+        "file": "voice/host/trailer-4.mp3",
+        "text": "The only way to eat the apple is the arcade cabinet with the old game inside.",
+        "requestedAt": "2026-10-15T19:06:09.762Z",
+        "takes": 1,
+        "bytes": 32016,
+        "durationMs": 3920
+      },
+      {
+        "id": "trailer-5",
+        "file": "voice/host/trailer-5.mp3",
+        "text": "Same code. Same seed. Same apple. Ten patches. Subscribe: one patch a day, and one of them is yours. Comment it.",
+        "requestedAt": "2026-10-15T19:06:11.224Z",
+        "takes": 1,
+        "bytes": 82380,
+        "durationMs": 10240
+      }
+    ]
+  }
 }

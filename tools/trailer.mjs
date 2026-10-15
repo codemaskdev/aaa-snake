@@ -5,6 +5,11 @@
 // smallest step of 0.05x that keeps the whole within TRAILER.totalMs, the factor on screen. Prompt 16
 // asked for the first 20 s at real time; with the last 10 s at real time that leaves no middle within
 // 30 s, so the first part is 15 s (DEVLOG.md, prompt 16).
+// With the host (prompt 17, voice/HOST.md "trailer"): line 1 at 0 s, line 2 right after it (v1.0 has
+// eaten by then); line 3 over the middle, which lasts at least line 3 (its factor the largest step of
+// 0.05x that allows it); line 4 starts the last real-time part, timed to end HOST_GAP_MS before Warden
+// Snek's line (so it plays over the walk to the cabinet); line 5 when THE END shows, over a freeze of
+// the last frame until it ends. The 30 s limit does not apply.
 // Output in out/shorts/trailer/: trailer-<left>-<right>.mp4, frames/, first/middle/last.png, clip.json.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,16 +17,18 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { startServer } from './serve.mjs';
 import {
-  WIDTH, HEIGHT, FPS, SAFE, PREMISE, MAX_APPLE_DRIFT_MS, formatTime, speedText, audioMs, encodeShort, ffmpegVersion, loadForShort,
+  WIDTH, HEIGHT, FPS, SAFE, PREMISE, MAX_APPLE_DRIFT_MS, HOST_GAP_MS, formatTime, speedText, audioMs, encodeShort, ffmpegVersion,
+  loadForShort, hostLines, checkNoOverlap,
 } from './short.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 export const TRAILER = { firstMs: 15000, lastMs: 10000, totalMs: 30000, afterEndMs: 1000 };
 
 // The three parts, in run time and clip time. The last part ends TRAILER.afterEndMs after THE END.
-export function trailerTimeline(right, t = TRAILER) {
+export function trailerTimeline(right, t = TRAILER, host = null) {
   const theEnd = right.raw.log.find(e => e.type === 'screen' && e.name === 'the-end');
   if (!theEnd) throw new Error(`${right.version}: the run never shows THE END`);
+  if (host) return hostTimeline(right, theEnd, t, host);
   const lastFrom = theEnd.t + t.afterEndMs - t.lastMs;
   const span = lastFrom - t.firstMs;
   const room = t.totalMs - t.firstMs - t.lastMs;
@@ -37,6 +44,35 @@ export function trailerTimeline(right, t = TRAILER) {
     at += seg.clipMs;
     seg.runTo = seg.runFrom + seg.clipMs * seg.speed;
   }
+  return segs;
+}
+
+// The trailer with the host's five lines: the parts, and where each line starts (clip ms).
+function hostTimeline(right, theEnd, t, host) {
+  if (!right.firstLine) throw new Error(`${right.version}: no Warden Snek line after the apple`);
+  const snekAt = right.apple + right.firstLine.afterAppleMs;
+  const lastFrom = snekAt - HOST_GAP_MS - host[3].ms;
+  if (host[0].ms + HOST_GAP_MS + host[1].ms + HOST_GAP_MS > t.firstMs) throw new Error('host lines 1 and 2 do not fit in the first part');
+  const span = lastFrom - t.firstMs;
+  const need = host[2].ms + HOST_GAP_MS;
+  const speed = Math.max(1, Math.floor((span / need) * 20 + 1e-9) / 20);
+  const segs = [
+    { name: 'first', runFrom: 0, clipMs: t.firstMs, speed: 1 },
+    { name: 'middle', runFrom: t.firstMs, clipMs: span / speed, speed },
+    { name: 'last', runFrom: lastFrom, clipMs: theEnd.t + t.afterEndMs - lastFrom, speed: 1 },
+  ];
+  let at = 0;
+  for (const seg of segs) {
+    seg.clipFrom = at;
+    at += seg.clipMs;
+    seg.runTo = seg.runFrom + seg.clipMs * seg.speed;
+  }
+  const [first, middle, last] = segs;
+  const theEndAt = last.clipFrom + (theEnd.t - last.runFrom);
+  const starts = [0, host[0].ms + HOST_GAP_MS, middle.clipFrom, last.clipFrom, theEndAt];
+  segs.host = host.map((line, i) => ({ who: 'host', line: line.id, file: line.file, clipAtMs: starts[i], lengthMs: line.ms, heardMs: line.ms,
+    segment: ['first', 'first', 'middle', 'last', 'THE END and the freeze'][i] }));
+  segs.freezeMs = Math.max(0, theEndAt + host[4].ms - at);
   return segs;
 }
 
@@ -57,8 +93,8 @@ async function checkSafeAreaOf(page, ids) {
   if (outside.length) throw new Error(`trailer layout outside the safe area or text spilling out: ${outside.map(r => r.id).join(', ')}`);
 }
 
-export async function recordTrailer({ left, right, distDirs, outDir, frameLimit = Infinity, encode = true, log = console.log }) {
-  const timeline = trailerTimeline(right);
+export async function recordTrailer({ left, right, host = null, distDirs, outDir, frameLimit = Infinity, encode = true, log = console.log }) {
+  const timeline = trailerTimeline(right, TRAILER, host);
   const clipMs = timeline.reduce((sum, seg) => sum + seg.clipMs, 0);
   const frames = Math.min(Math.round((clipMs * FPS) / 1000), frameLimit);
   const framesDir = path.join(outDir, 'frames');
@@ -142,18 +178,31 @@ export async function recordTrailer({ left, right, distDirs, outDir, frameLimit 
       voice.push({ version: right.version, segment: seg.name, line: p.line, file, runAtMs: p.t, clipAtMs, lengthMs, heardMs: Math.min(lengthMs, stopAtMs - clipAtMs) });
     }
   }
+  // The host: line 5 over a freeze of the last frame until it ends.
+  let total = frames;
+  const hostVoice = timeline.host || [];
+  if (hostVoice.length && frameLimit === Infinity) {
+    const freeze = Math.ceil((timeline.freezeMs * FPS) / 1000);
+    const last = path.join(framesDir, `${String(frames).padStart(5, '0')}.png`);
+    for (let f = frames + 1; f <= frames + freeze; f++) fs.copyFileSync(last, path.join(framesDir, `${String(f).padStart(5, '0')}.png`));
+    total += freeze;
+    checkNoOverlap(hostVoice, voice);
+  }
   const names = fs.readdirSync(framesDir).sort();
   const pickFrame = (i, name) => fs.copyFileSync(path.join(framesDir, names[i]), path.join(outDir, name));
   pickFrame(0, 'first.png');
   pickFrame(Math.floor((names.length - 1) / 2), 'middle.png');
   pickFrame(names.length - 1, 'last.png');
   const mp4 = path.join(outDir, `trailer-${left.version}-${right.version}.mp4`);
-  if (encode) encodeShort(framesDir, voice, (frames * 1000) / FPS, mp4);
+  const heard = frameLimit === Infinity ? hostVoice : [];
+  if (encode) encodeShort(framesDir, [...voice, ...heard], (total * 1000) / FPS, mp4);
   const clip = {
-    trailer: [left.version, right.version], size: [WIDTH, HEIGHT], fps: FPS, frames, clipMs: (frames * 1000) / FPS,
+    trailer: [left.version, right.version], size: [WIDTH, HEIGHT], fps: FPS, frames: total, clipMs: (total * 1000) / FPS,
+    freezeFromMs: hostVoice.length ? (frames * 1000) / FPS : null,
     timeline: timeline.map(({ name, runFrom, runTo, clipFrom, clipMs: ms, speed }) => ({ name, runFrom, runTo, clipFrom, clipMs: ms, speed })),
     apples: Object.fromEntries(Object.values(panes).map(p => [p.v.version, { replayed: p.apple, recorded: p.v.apple, median: p.v.median }])),
     voice: voice.map(({ file, ...v }) => ({ ...v, file: path.relative(ROOT, file) })),
+    host: heard.map(({ file, ...h }) => ({ ...h, file: path.relative(ROOT, file) })),
     encoder: encode ? ffmpegVersion() : null,
   };
   fs.writeFileSync(path.join(outDir, 'clip.json'), JSON.stringify(clip, null, 2) + '\n');
@@ -171,13 +220,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (left.seed !== right.seed) throw new Error(`${l} was measured with seed ${left.seed}, ${r} with seed ${right.seed}: not the same seed`);
   console.log(`$ npm run short -- trailer ${l} ${r}   (seed ${left.seed})`);
   const clip = await recordTrailer({
-    left, right,
+    left, right, host: hostLines('trailer'),
     distDirs: { left: path.join(ROOT, 'dist', l), right: path.join(ROOT, 'dist', r) },
     outDir: path.join(ROOT, 'out/shorts/trailer'),
   });
   console.log(`clip: ${clip.frames} frames, ${clip.clipMs} ms`);
   for (const s of clip.timeline) console.log(`  ${s.name.padEnd(8)} clip ${s.clipFrom} ms + ${s.clipMs} ms: run ${s.runFrom} -> ${s.runTo} ms at ${s.speed}x`);
   for (const [v, a] of Object.entries(clip.apples)) console.log(`${v}: first apple replayed at ${a.replayed} ms, recorded ${a.recorded} ms, median ${a.median} ms (counter freezes on the median)`);
+  for (const h of clip.host) console.log(`host: line ${h.line} (${h.segment}) from ${h.clipAtMs / 1000} s to ${(h.clipAtMs + h.heardMs) / 1000} s of the trailer`);
   if (!clip.voice.length) console.log('sound: silence');
   for (const v of clip.voice) {
     console.log(`sound: ${v.version} line ${v.line} (${v.segment}) from ${v.clipAtMs / 1000} s to ${(v.clipAtMs + v.heardMs) / 1000} s of the trailer, ${v.heardMs} ms heard of ${v.lengthMs} ms${v.heardMs === v.lengthMs ? ' (in full)' : ' (CUT)'}`);

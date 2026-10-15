@@ -798,3 +798,15 @@ Numbers:
 
 Order as you wrote it: names → number check → voice → re-record.
 ````
+
+The answer to the number check:
+
+````text
+1. "Twelve skins" → "Ten skins." Line 2 of v1.7 becomes: "A game needs
+   a season, a pass and loot boxes. Cosmetics only, of course. Ten
+   skins. The legendary one is the snake you started with."
+2. "The game is a week old" → "The game is two days old." (v1.7 line 4).
+3. Keep as written: "grid" means the screen.
+4. Keep: it is the publishing schedule, not a game fact.
+Record the host voice and re-record the shorts and the trailer.
+````

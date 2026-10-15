@@ -1286,3 +1286,74 @@ v1.1 and v1.2 stay under 25 s, as before: their launches are shorter than 16 s a
   to make room.
 - The trailer's v1.0 pane keeps playing v1.0's measured run next to v2.0's whole launch, still
   eating apples beside THE END. That is the recorded run, not a choice.
+
+## Prompt 17: the host's voice in the shorts and the trailer
+
+### Before recording
+- Short names set to the ones the host says (UPDATES.md, logged): cinematic intro, day-one patch, story and voice,
+  online only, open world, skill tree, Season One, Remastered, Game of the Year Edition. All fit the card. Prompt 16's
+  "2 to 4 words" check went, since "Remastered" is one word and "Game of the Year Edition" five; the test now checks
+  the names word for word.
+- The voice: CodeMask's episodes 1 to 3 use uFIXVu9mmnDZ7dTKCBTX, "Justin Time - Elearning Narration"
+  (episodes/01-bug-survivor/script.md, 02-bug-driver/voice.json, 03-ping-vtuber/voice.json there): eleven_v3,
+  stability 0, similarity 0.75, style 0.2, speed 1. The author confirmed them, with mp3_44100_64.
+- The number check, every number in voice/HOST.md against the game and the measurements:
+  - v1.1 has three logos and a warning, not four logos. By the author's rule, line 3 became "Three logos and a warning
+    you can't skip. …".
+  - v1.7's loot boxes hold 10 skins, plus the starter; the line said "Twelve skins", and the author changed it to "Ten
+    skins".
+  - "The game is a week old": v1.0 was committed on 2026-10-14. The author changed it to "two days old".
+  - Kept by the author: "a twenty-by-twenty grid" in v1.9 (the screen is 20 x 20 cells; the world 256 x 256) and "one
+    patch a day" in the trailer (the publishing schedule).
+  - Everything else matched, rounded as spoken. 0.320 s to 18.928 s; a patch of 2126 bytes, 4519 on the wire; an
+    opening of 44012 ms; a control share of 0.07952611111121045; a queue of 7314.9000000059605 ms; 600 markers with
+    160 empty chests; Turn left at level 5; four presets, all Ultra; the same apple on tick 7595; six cells to the
+    cabinet; 107290.10000002384 ms; 942.1000000238419 ms of control in v2.0.
+- Timing conflicts settled before recording: "Done." right after line 1, since v1.0 eats at 0.32 s while line 1 is
+  still being said. The trailer's middle is as long as line 3. Line 4 starts the last real-time part and ends 0.3 s
+  before Snek. In a short, A is longer if line 1 is.
+
+### Recording
+`npm run voice -- --record host` (new in tools/voice.mjs): 41 requests from 2026-10-15T19:04:53.368Z to
+2026-10-15T19:06:11.224Z, one take a line, 2246601 bytes in all, every request logged in voice/RECORDING.json ("host").
+The key was put into the command's environment from the ElevenLabs MCP entry and written nowhere. The mp3s are in
+voice/host/ and are not committed (generated media for the shorts, which can be recorded again).
+whisper.cpp (ggml-base.en) heard every take as written, numbers included. One doubt: in v1.3's line 2 it heard
+"Warden Snack" and "He had norchard". That may be whisper (it does not know "Snek") or the take; one take per line,
+so it stays, and it needs an ear.
+
+### C with the host
+With the host, the shorts are "as long as the lines need". Under the old rule, C is 16 s of clip and 4x while that
+fits in 21 s; that would have left 10 to 15 s of C with nothing said and made v1.3 to v2.0 46 to 57 s long. So C now
+lasts as long as line 3 needs, at the largest step of 0.05x that keeps it at least that long. That is why C's factors
+went up: v1.7 to 148.6x, for example. The rule without the host is unchanged (v1.0's short and the tests' fixture).
+
+### The shorts and the trailer, re-recorded with the host
+Each line is heard in full and none overlaps another. Times are seconds of the short, as the recorder logged them.
+Line 4 starts where D ends, on the first video frame after Snek's line; in v1.6 that is 0.401452435668034 ms after it, the closest.
+
+| file | length | C | host 1 | host 2 | host 3 | Snek line 10 | host 4 |
+|---|---|---|---|---|---|---|---|
+| v1.1 | 29333.333333333332 ms | 2.4x | 0 to 3.76 | 4.06 to 10.86 | 11.16 to 17.64 | none | 21 to 29.32 |
+| v1.2 | 28633.333333333332 ms | 5.6x | 0 to 3.76 | 4.06 to 10.22 | 10.52 to 17.16 | none | 20.46666666666667 to 28.62666666666667 |
+| v1.3 | 34433.333333333336 ms | 12.85x | 0 to 3.68 | 3.98 to 11.82 | 12.12 to 18.44 | 21.371869001302517 to 25.211869001302517 | 25.23333333333333 to 34.43333333333333 |
+| v1.4 | 31933.333333333332 ms | 18.05x | 0 to 3.76 | 4.06 to 11.42 | 11.72 to 17 | 19.910661957528212 to 23.750661957528212 | 23.76666666666667 to 31.92666666666667 |
+| v1.5 | 35933.333333333336 ms | 15.65x | 0 to 4.24 | 4.54 to 13.98 | 14.28 to 21.64 | 24.53738509052462 to 28.37738509052462 | 28.4 to 35.92 |
+| v1.6 | 30866.666666666668 ms | 22.95x | 0 to 3.92 | 4.22 to 9.5 | 9.8 to 15 | 17.89293188089766 to 21.73293188089766 | 21.73333333333333 to 30.85333333333333 |
+| v1.7 | 39433.333333333336 ms | 148.6x | 0 to 5.76 | 6.06 to 15.34 | 15.64 to 22.76 | 25.648934454915405 to 29.488934454915405 | 29.5 to 39.42 |
+| v1.9 | 37533.333333333336 ms | 173.3x | 0 to 5.2 | 5.5 to 13.18 | 13.48 to 19.56 | 22.464751067533555 to 26.304751067533555 | 26.333333333333332 to 37.53333333333333 |
+| v2.0 | 46900 ms (over 45 s) | 9.75x | 0 to 5.68 | 5.98 to 14.3 | 14.6 to 25.08 | 27.988228205106815 to 31.828228205106814 | 36.5 to 46.9 |
+
+v2.0 is over 45 s because its D runs from 2 s before the inner apple to the credits' first frame (11.1 s, the
+reflection and THE END included) and its lines 1 to 4 are the longest.
+
+The trailer: 43966.666666666664 ms (1319 frames). First part 15 s at 1x; middle 9.8x (run 15000 to 103670.10000002384
+ms, 9047.969387757534 ms of clip); last part at 1x from run 103670.10000002384 ms to 1 s after THE END; then a freeze.
+Host 1 from 0 to 3.6 s, host 2 ("Done.") 3.9 to 4.46 s, host 3 15 to 23.72 s, host 4 24.047969387757533 to
+27.967969387757535 s, Snek's line 10 28.267469387733698 to 32.1074693877337 s, host 5 (from THE END) 33.68496938775753
+to 43.924969387757535 s.
+
+### What broke
+Nothing failed. The first plan, which kept C at its 16 to 21 s rule, came out at 46 to 57 s for v1.3 to v2.0 with long
+silences in C; that is why C follows line 3 now (above). whisper.cpp on v1.1's mp4 heard the four host lines in
+order with gaps where the plan puts them, and its loudest moment is -0.8 dB (no clipping).

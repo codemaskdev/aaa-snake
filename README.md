@@ -24,6 +24,7 @@ npm run short -- trailer v1.0 v2.0  # the trailer: both side by side on one cloc
 npm run voice               # voice/LINES.md, placeholders, and src/voice/ copied into every build
 npm run voice -- --check    # every voice line against its slot, and every build against src/voice/
 npm run voice -- --record   # record the 17 lines with the ElevenLabs API (needs ELEVENLABS_API_KEY in the environment)
+npm run voice -- --record host  # record the host's lines for the shorts (voice/HOST.md) into voice/host/
 npm run play-share          # control share in play, from the saved runs of every version
 ```
 
@@ -66,6 +67,14 @@ note. All three shrink to fit their box, and the recorder fails if any text spil
 
 The sound track is silence except that line in D, from the moment the replay starts it, at its recorded length.
 
+**The host** (since prompt 17; voice/HOST.md): four lines per short. Line 1 starts at 0 s over A; line 2 over the
+patch card; line 3 over C; nothing from the host during D, where Warden Snek's line plays alone; line 4 right after D,
+over a freeze of D's last frame, and the short ends when line 4 ends. A, B and C each last at least their line plus
+0.3 s (A starts earlier in the previous run, so its apple stays 1 s before A ends). C lasts as long as line 3 needs:
+its factor is the largest step of 0.05x that keeps C at least that long, never slower than real time. Host and Snek
+never speak at once (the recorder fails if they would); no line is cut or sped up. The 25 to 30 s target no longer
+applies.
+
 ### The trailer
 
 `npm run short -- trailer v1.0 v2.0` puts both versions side by side, each replaying its median measured run from
@@ -76,6 +85,11 @@ time, ending 1 s after THE END, so they hold the inner apple, the line, THE END 
 middle sped up at the smallest step of 0.05x that keeps the whole within 30 s, the factor on screen. Prompt 16 asked
 for 20 s at the start; 20 + 10 s at real time leave no room for the middle within 30 s, so the start is 15 s. The sound
 is Warden Snek's lines that start in a real-time part.
+
+With the host (five lines): line 1 at 0 s and line 2 ("Done.") right after it, when v1.0 has already eaten; line 3
+over the middle, which lasts at least line 3 (its factor the largest step of 0.05x that allows it); line 4 starts the
+last real-time part, timed to end 0.3 s before Warden Snek's line, so it plays over the walk to the cabinet; line 5
+when THE END shows, over a freeze of the last frame until it ends. The 30 s limit does not apply.
 
 ## Files
 
@@ -92,3 +106,9 @@ Warden Snek's 17 voice lines (`src/voice/`, since v1.3) are a synthetic voice: g
 text-to-speech API (model eleven_v3) in a voice designed for this project with ElevenLabs Voice Design. It is not a
 library voice, not a clone, and not modelled on any actor or character. Date, settings and the exact text of every
 line: `voice/LINES.md` and `voice/RECORDING.json`.
+
+The host of the shorts and the trailer (`voice/host/`, since prompt 17) is a synthetic voice too: Justin, the CodeMask
+voice of earlier episodes, ElevenLabs voice library voice "Justin Time - Elearning Narration" (uFIXVu9mmnDZ7dTKCBTX),
+generated with the ElevenLabs text-to-speech API, model eleven_v3, stability 0, similarity 0.75, style 0.2, speed 1,
+mp3_44100_64, one take a line, on 2026-10-15. The exact text of every line: `voice/HOST.md`; every request, its date
+and the length of each take: `voice/RECORDING.json` ("host").
