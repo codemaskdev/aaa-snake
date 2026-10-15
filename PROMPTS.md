@@ -889,3 +889,15 @@ Sequence:
 The first frame of the file is never black. Report length, the start
 second of each part, the factor, and the first still. STOP.
 ````
+
+## 22. The trailer's line 5, new words
+
+````text
+Trailer accepted except line 5. Replace it with:
+  5. Same snake. Same apple. Ten patches of progress. Subscribe.
+One new voice request, same settings, logged in RECORDING.json and the
+backup; the old line stays in the log as trailer-5-old. Update
+voice/HOST.md. Re-render the trailer: the freeze on THE END lasts
+exactly as long as the new line 5 plus 300 ms, then the file ends.
+Report length and the line's start and end. STOP.
+````

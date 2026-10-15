@@ -11,7 +11,7 @@
 //   4  real time from TRAILER.beforeCabinetMs before the cabinet is reached (its door shows): line 4, Enter, the
 //      inner apple, Warden Snek's line, THE END, until TRAILER.afterEndMs after THE END. Line 4 must end
 //      HOST_GAP_MS before Snek starts.
-//   5  a freeze on THE END with line 5; the file ends when line 5 ends.
+//   5  a freeze on THE END with line 5, as long as line 5 plus HOST_GAP_MS (prompt 22); then the file ends.
 // Output in out/shorts/trailer/: trailer-<left>-<right>.mp4, frames/, first/middle/last.png, sting.wav, clip.json.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -60,7 +60,7 @@ export function trailerTimeline(left, right, host, t = TRAILER) {
     { name: '2b card', kind: 'card', clipMs: host['1b'].ms + HOST_GAP_MS },
     { name: '3 v2.0 sped up', kind: 'game', who: 'right', runFrom: f2, clipMs: span / speed, speed },
     { name: '4 v2.0 real time', kind: 'game', who: 'right', runFrom: fourFrom, clipMs: theEnd + t.afterEndMs - fourFrom, speed: 1 },
-    { name: '5 freeze', kind: 'freeze', who: 'right', clipMs: host['5'].ms },
+    { name: '5 freeze', kind: 'freeze', who: 'right', clipMs: host['5'].ms + HOST_GAP_MS }, // line 5 plus 300 ms (prompt 22)
   ];
   let at = 0;
   for (const p of parts) {

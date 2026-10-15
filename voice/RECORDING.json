@@ -644,13 +644,14 @@
         "durationMs": 3920
       },
       {
-        "id": "trailer-5",
-        "file": "voice/host/trailer-5.mp3",
+        "id": "trailer-5-old",
+        "file": "voice/host/trailer-5-old.mp3",
         "text": "Same code. Same seed. Same apple. Ten patches. Subscribe: one patch a day, and one of them is yours. Comment it.",
         "requestedAt": "2026-10-15T19:06:11.224Z",
         "takes": 1,
         "bytes": 82380,
-        "durationMs": 10240
+        "durationMs": 10240,
+        "replaced": "by the author in prompt 22: new words for line 5"
       },
       {
         "id": "trailer-1a",
@@ -669,6 +670,15 @@
         "takes": 1,
         "bytes": 16552,
         "durationMs": 2000
+      },
+      {
+        "id": "trailer-5",
+        "file": "voice/host/trailer-5.mp3",
+        "text": "Same snake. Same apple. Ten patches of progress. Subscribe.",
+        "requestedAt": "2026-10-15T21:45:07.087Z",
+        "takes": 1,
+        "bytes": 44137,
+        "durationMs": 5440
       }
     ]
   }

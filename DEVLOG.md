@@ -1473,3 +1473,13 @@ as v1.4's voice lines, which its loading screen fetches. Nothing in src/ or dist
 test file then passed twice on its own (6 of 6, twice), so it looks like a timing race in the test: on a busy machine,
 the voice files can still be loading when the test starts counting. It is not fixed here; the prompt did not ask for
 it.
+
+## Prompt 22: the trailer's line 5, new words
+One request, same settings: "Same snake. Same apple. Ten patches of progress. Subscribe." (trailer-5, 5440 ms,
+requested 2026-10-15T21:45:07.087Z). whisper.cpp heard "Same snake, same apple, 10 patches of progress. Subscribe!". The
+old line 5 (10240 ms) stays in voice/RECORDING.json and in voice/host/ as trailer-5-old; voice/HOST.md has the new
+words. The backup outside the repository was brought up to date and checked against its SHA256SUMS.
+The freeze on THE END now lasts line 5 plus 300 ms: 5740 ms from 25.523934042564097 s. The trailer re-rendered:
+31266.666666666668 ms (938 frames; the last frame ends 2.732624102569389 ms after the freeze's planned end, because the
+video is counted in whole frames). Line 5 from 25.523934042564097 s to 30.963934042564098 s. Everything before it is
+unchanged.

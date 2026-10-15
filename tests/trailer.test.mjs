@@ -26,7 +26,7 @@ test('the trailer\'s five parts: v1.0 held until "Done." + 400 ms, black with th
   assert.ok(Math.abs(three.runTo - four.runFrom) < 1e-6, 'part 4 starts where part 3 ends');
   assert.equal(four.runFrom, 106956.8 - 4000, '4 s before the cabinet is reached');
   assert.ok(Math.abs(four.runTo - (113307.1 + TRAILER.afterEndMs)) < 1e-6);
-  assert.equal(five.clipMs, 10240, 'the file ends when line 5 ends');
+  assert.equal(five.clipMs, 10240 + HOST_GAP_MS, 'the freeze lasts line 5 plus 300 ms, then the file ends (prompt 22)');
   const at = Object.fromEntries(parts.host.map(h => [h.line, h.clipAtMs]));
   assert.deepEqual([at['trailer-1a'], at['trailer-2'], at['trailer-1b'], at['trailer-3'], at['trailer-4'], at['trailer-5']],
     [0, 1360 + HOST_GAP_MS, card.clipFrom, three.clipFrom, four.clipFrom, five.clipFrom]);

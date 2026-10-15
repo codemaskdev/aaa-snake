@@ -91,7 +91,7 @@ own virtual clock. The host's lines are voice/HOST.md's "trailer": 1a, 1b, 2 to 
    keeps the part at least as long as the line, and it shows in the corner. The counter runs.
 4. Real time from 4 s before the cabinet is reached (its door shows): line 4, Enter, the inner apple, Warden Snek's
    line and THE END, until 1 s after THE END. Line 4 must end 0.3 s before Snek starts.
-5. A freeze on THE END with line 5. The file ends when line 5 ends.
+5. A freeze on THE END with line 5, as long as line 5 plus 300 ms (prompt 22). Then the file ends.
 
 ## Files
 

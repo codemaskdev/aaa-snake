@@ -7,7 +7,9 @@ replacement, not "Four logos you can't skip. …". Two more by the author after 
 line 2 says "Ten skins" (the loot boxes hold 10; it said "Twelve skins") and its line 4 "The game is two days old"
 (v1.0 was committed on 2026-10-14; it said "a week old"). The trailer's line 1 is two lines since prompt 21, 1a and
 1b, recorded separately (the take of the old line 1, "This is Snake. This is Snake after I made it AAA.", stays in
-voice/RECORDING.json as trailer-1).
+voice/RECORDING.json as trailer-1). Line 5 has new words since prompt 22; the take of the old line 5 ("Same code. Same
+seed. Same apple. Ten patches. Subscribe: one patch a day, and one of them is yours. Comment it.") stays in
+voice/RECORDING.json as trailer-5-old.
 
 ### v1.1
 1. I'm turning Snake into a AAA game. Patch 1.1.
@@ -69,4 +71,4 @@ voice/RECORDING.json as trailer-1).
 2. Done.
 3. Logos, a day-one patch, a story, a login, an open world, a skill tree, a season, a remaster.
 4. The only way to eat the apple is the arcade cabinet with the old game inside.
-5. Same code. Same seed. Same apple. Ten patches. Subscribe: one patch a day, and one of them is yours. Comment it.
+5. Same snake. Same apple. Ten patches of progress. Subscribe.
