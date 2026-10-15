@@ -756,3 +756,30 @@ written before building.
   shows the skin and its rarity; the odds are on screen; Enter after the animation) -> the wardrobe (the new skin, now
   worn, and the whole collection; Enter to leave) -> the autosave notice and the world map, as before. The bot
   presses what each screen offers, as on every screen; it never chooses a skin (the newest is worn automatically).
+
+## Prompt 10: Warden Snek's voice
+
+v1.7 was being built when prompt 10 came. Its unfinished work (src/season.js, src/skins.js, changes to src/ and the
+rig) went into `git stash` ("v1.7 in progress (prompt 9), paused for the voice recording (prompt 10)") so that this
+prompt changes no game code; it is still there, untouched.
+
+- **What was recorded:** the 17 lines of src/story.js, on 2026-10-14 (UTC), with `npm run voice -- --record` (new in
+  tools/voice.mjs): the ElevenLabs text-to-speech API (v1), model eleven_v3, voice S44KQ3oLFckbxgyKfold (the author's
+  own Voice Design voice, not a library voice, not a clone), stability 0.5, output mp3_44100_64; each line sent as its
+  emotion tag and its text, e.g. "[weary] There was an orchard here once." **One take a line, 17 takes in all.** The
+  only network calls were those 17 requests. The API key came from the environment (ELEVENLABS_API_KEY) and is
+  written nowhere. voice/RECORDING.json has every request's text and every take's bytes and length; voice/LINES.md
+  has the disclosure line.
+- **Two lines do not fit their slots** (`npm run voice -- --check`, exit 1): 14 ("I am getting longer. That is either
+  growth or regret.") is 5520 ms in a 4800 ms slot, 720 ms over; 16 ("Another one. The orchard remembers.") is 3600 ms
+  in a 2800 ms slot, 800 ms over. As asked, I did not change a slot or speed up a take. tests/v1.3.test.mjs ("every
+  line has its audio file, and it fits in the line's slot") fails on those two, as it should, until this is decided.
+- The recordings replace the placeholders in src/voice/ and, by `npm run voice`, in dist/v1.3/ to dist/v1.6/ (68
+  files). No .js or .html in src/ changed.
+- **The shorts have no sound.** The recorder makes each short from screenshots, with no audio track, so the voice is
+  not in them. The shorts of v1.3 to v1.6 were rendered again, as asked.
+- The shorts, rendered again (`npm run short v1.3` to `v1.6`, each exit 0): 894, 894, 896 and 897 frames, video only.
+  The mp4 files of v1.3, v1.4 and v1.5 came out different from the ones before; v1.6's is byte for byte the same. I
+  have not looked into why.
+- Tests after the recording: tests/v1.3.test.mjs, v1.4, build, size and determinism, 18 of 19; the one that fails is
+  the slot test, on 14.mp3 (it stops at the first). I did not run the full `npm test` for this prompt.

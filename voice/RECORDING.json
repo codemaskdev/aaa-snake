@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-14",
+  "service": "ElevenLabs text-to-speech API (v1)",
+  "voiceId": "S44KQ3oLFckbxgyKfold",
+  "model": "eleven_v3",
+  "stability": 0.5,
+  "output": "mp3_44100_64",
+  "endpoint": "https://api.elevenlabs.io/v1/text-to-speech",
+  "lines": [
+    {
+      "id": 1,
+      "file": "src/voice/01.mp3",
+      "text": "[weary] There was an orchard here once.",
+      "takes": 1,
+      "bytes": 18434,
+      "durationMs": 2240,
+      "slotMs": 3200
+    },
+    {
+      "id": 2,
+      "file": "src/voice/02.mp3",
+      "text": "[wistful] Rows and rows of trees, every one of them heavy with apples.",
+      "takes": 1,
+      "bytes": 40795,
+      "durationMs": 5040,
+      "slotMs": 5600
+    },
+    {
+      "id": 3,
+      "file": "src/voice/03.mp3",
+      "text": "[proud] I was its warden. I knew every tree by name.",
+      "takes": 1,
+      "bytes": 29928,
+      "durationMs": 3680,
+      "slotMs": 4800
+    },
+    {
+      "id": 4,
+      "file": "src/voice/04.mp3",
+      "text": "[bitter] Then they came. They took the apples. All of them.",
+      "takes": 1,
+      "bytes": 33271,
+      "durationMs": 4080,
+      "slotMs": 4800
+    },
+    {
+      "id": 5,
+      "file": "src/voice/05.mp3",
+      "text": "[grim] They took the trees. They took the fence.",
+      "takes": 1,
+      "bytes": 23658,
+      "durationMs": 2880,
+      "slotMs": 4000
+    },
+    {
+      "id": 6,
+      "file": "src/voice/06.mp3",
+      "text": "[deadpan] They even took the little sign that said Orchard.",
+      "takes": 1,
+      "bytes": 23031,
+      "durationMs": 2800,
+      "slotMs": 4400
+    },
+    {
+      "id": 7,
+      "file": "src/voice/07.mp3",
+      "text": "[hollow] Now there is only this field. And it is very dark.",
+      "takes": 1,
+      "bytes": 40795,
+      "durationMs": 5040,
+      "slotMs": 5200
+    },
+    {
+      "id": 8,
+      "file": "src/voice/08.mp3",
+      "text": "[hopeful] But somewhere out there, there is one apple left.",
+      "takes": 1,
+      "bytes": 32017,
+      "durationMs": 3920,
+      "slotMs": 4400
+    },
+    {
+      "id": 9,
+      "file": "src/voice/09.mp3",
+      "text": "[resolute] I am retired. I am three squares long. I am going to get it.",
+      "takes": 1,
+      "bytes": 41421,
+      "durationMs": 5120,
+      "slotMs": 6400
+    },
+    {
+      "id": 10,
+      "file": "src/voice/10.mp3",
+      "text": "[quiet] One apple. Not the orchard. But it is a start.",
+      "takes": 1,
+      "bytes": 31181,
+      "durationMs": 3840,
+      "slotMs": 4800
+    },
+    {
+      "id": 11,
+      "file": "src/voice/11.mp3",
+      "text": "[nostalgic] It tastes like the old days. Crisp. A little sour.",
+      "takes": 1,
+      "bytes": 32644,
+      "durationMs": 4000,
+      "slotMs": 4800
+    },
+    {
+      "id": 12,
+      "file": "src/voice/12.mp3",
+      "text": "[rueful] I used to count them. Now I just eat them.",
+      "takes": 1,
+      "bytes": 28047,
+      "durationMs": 3440,
+      "slotMs": 4800
+    },
+    {
+      "id": 13,
+      "file": "src/voice/13.mp3",
+      "text": "[defiant] They can take the trees. They cannot take the taste.",
+      "takes": 1,
+      "bytes": 29301,
+      "durationMs": 3600,
+      "slotMs": 4800
+    },
+    {
+      "id": 14,
+      "file": "src/voice/14.mp3",
+      "text": "[dry] I am getting longer. That is either growth or regret.",
+      "takes": 1,
+      "bytes": 44765,
+      "durationMs": 5520,
+      "slotMs": 4800
+    },
+    {
+      "id": 15,
+      "file": "src/voice/15.mp3",
+      "text": "[tender] Somewhere, a tree is proud of me.",
+      "takes": 1,
+      "bytes": 22404,
+      "durationMs": 2720,
+      "slotMs": 3600
+    },
+    {
+      "id": 16,
+      "file": "src/voice/16.mp3",
+      "text": "[solemn] Another one. The orchard remembers.",
+      "takes": 1,
+      "bytes": 29301,
+      "durationMs": 3600,
+      "slotMs": 2800
+    },
+    {
+      "id": 17,
+      "file": "src/voice/17.mp3",
+      "text": "[tired] My back hurts. I do not have a back. It still hurts.",
+      "takes": 1,
+      "bytes": 43511,
+      "durationMs": 5360,
+      "slotMs": 5600
+    }
+  ]
+}

@@ -443,3 +443,29 @@ Do not start v1.8.
 Report as before, plus: how many cells the bot explored before it first
 saw the apple, per run; and the skin and odds tables.
 ````
+
+## 10. Record the Warden Snek voice (sent while #9 was being worked on)
+
+````text
+Record the Warden Snek voice. ElevenLabs voice ID: S44KQ3oLFckbxgyKfold
+(my own Voice Design voice, not a library voice, not a clone).
+
+- Write a script `npm run voice -- --record` that generates all 17 lines
+  from voice/LINES.md through the ElevenLabs text-to-speech API:
+  model eleven_v3, stability 0.5, output mp3_44100_64, the emotion tag
+  from LINES.md placed before each line. The API key comes only from
+  the environment variable ELEVENLABS_API_KEY; never write it to the
+  repo, logs, DEVLOG or PROMPTS.md. The voice ID may be stored in
+  LINES.md. No other network calls.
+- Save to voice/<id>.mp3, replacing the silent placeholders. Then run
+  `npm run voice -- --check`: every file must fit its slot; if a line
+  does not fit, tell me which one and by how much, do not re-slot or
+  speed up audio on your own.
+- Fill in the disclosure line in README (synthetic voice, ElevenLabs,
+  designed for this project) and DEVLOG (date, settings, how many
+  takes).
+- Run `npm run voice` to copy into all builds, re-record the shorts
+  v1.3 to v1.6 (and v1.7 if it exists). Report the 17 durations
+  against their slots and STOP. Game code must not change: `git diff`
+  of src/ is empty.
+````

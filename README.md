@@ -19,6 +19,8 @@ npm run fps-check           # headless vs visible window frame rate, on test loa
 npm run chart               # measurements/summary.csv -> out/bloat.png
 npm run short <version>     # 30-second vertical short -> out/shorts/<version>/
 npm run voice               # voice/LINES.md, placeholders, and src/voice/ copied into every build
+npm run voice -- --check    # every voice line against its slot, and every build against src/voice/
+npm run voice -- --record   # record the 17 lines with the ElevenLabs API (needs ELEVENLABS_API_KEY in the environment)
 npm run play-share          # control share in play, from the saved runs of every version
 ```
 
@@ -32,3 +34,10 @@ npm run play-share          # control share in play, from the saved runs of ever
 - `UPDATES.md` the plan for the updates. `PROMPTS.md` every prompt, verbatim. `DEVLOG.md` what happened.
 
 Purchases, currencies and loot boxes in later versions are parody: nothing is sold and nothing goes over the network.
+
+## Disclosure
+
+Warden Snek's 17 voice lines (`src/voice/`, since v1.3) are a synthetic voice: generated with the ElevenLabs
+text-to-speech API (model eleven_v3) in a voice designed for this project with ElevenLabs Voice Design. It is not a
+library voice, not a clone, and not modelled on any actor or character. Date, settings and the exact text of every
+line: `voice/LINES.md` and `voice/RECORDING.json`.
