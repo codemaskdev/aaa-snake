@@ -53,13 +53,16 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
   v1.4, the open world's 256 since v1.5 (where the quest marker always shows the apple, so the probe reports it).
   Since v1.6 also `allowedTurns` (`['right']`, plus `'left'` once "Turn left" is learned; straight is always allowed),
   `level`, `xp`, and on the skill tree `skills` (`{id, name, owned, learnable}` in list order) and `cursor`.
+  Since v1.7 `vision` (the radius in cells within which the apple shows; null once Apple Vision is unlocked), and
+  `apple` is null whenever the apple is farther than that.
 - Screen names `ready` and `play` mean "arrow keys steer the snake right now" and are the only control screens
   (tools/rig/stats.mjs, pre-registered). Never use them for a screen where input does not steer the snake. Every other
   screen gets its own honest name.
 - The bot (tools/rig/bot.mjs) acts only on drawn screens, presses `next` as soon as it is offered, and on control
   screens takes a shortest path to the apple it can see, using only the turns `allowedTurns` allows. On v1.6's skill
   tree it moves the cursor to "Turn left" if it can be learned, otherwise to the first skill that can, then presses
-  `next` (Enter). It acts only through real key presses.
+  `next` (Enter). With no apple in view (v1.7) it goes to the nearest cell it has not seen (UPDATES.md, v1.7). It
+  never presses a buy key. It acts only through real key presses.
 
 ## Numbers
 - Only measured numbers, produced by `npm run measure <version>`, with the command and the raw output saved under

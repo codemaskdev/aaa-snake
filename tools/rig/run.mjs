@@ -1,6 +1,6 @@
 // One measured run: open a build in Chromium, let the bot play, collect the raw data.
 import { chromium } from 'playwright';
-import { decide, KEY_FOR, skillKey } from './bot.mjs';
+import { decide, KEY_FOR, skillKey, makeMemory, remember } from './bot.mjs';
 import {
   CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin, firstMs, playShare,
 } from './stats.mjs';
@@ -102,6 +102,8 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
   let incomplete = false;
   let check = null;
   const steering = { sent: 0, accepted: 0, unchecked: 0 };
+  const searchMemory = makeMemory(); // v1.7: the cells the bot has seen while it searches for the apple
+  let firstSight = null;       // how many cells it had seen when the apple first came into view
   const nextKeys = {};
 
   async function readHeap() {
@@ -146,12 +148,14 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
       const changed = probe.screen !== lastScreen;
       lastScreen = probe.screen;
       if (probe.score > 0) sawApple = true;
+      remember(searchMemory, probe);
+      if (probe.vision && probe.apple && !firstSight) firstSight = { cellsSeen: searchMemory.count, tick: probe.tick, t };
       if (probe.next) nextKeys[probe.screen] = probe.next;
 
       if (CONTROL_SCREENS.has(probe.screen)) {
         if (changed || probe.tick !== lastActedTick) {
           lastActedTick = probe.tick;
-          const dir = decide(probe);
+          const dir = decide(probe, searchMemory);
           // On 'ready' any arrow key starts the game, so always press one.
           if (probe.screen !== 'play' || dir !== probe.heading) {
             await page.keyboard.press(KEY_FOR[dir]);
@@ -227,6 +231,7 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
       controlMs: controlMs(raw.log, session),
       controlShare: controlMs(raw.log, session) / session,
       controlInPlay: playShare(raw.log, end, fpsPlayMs),
+      search: firstSight,
       memory: memory && { ...memory, raw: undefined },
       memoryRaw: memory?.raw ?? null,
       fps,
