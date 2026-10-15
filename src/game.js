@@ -304,7 +304,7 @@ function camera(headAt) {
     x = Math.round(x);
     y = Math.round(y);
   }
-  const seen = half / zoom;
+  const seen = BOARD / 2 / zoom; // the whole board, 480 x 480 px (the camera's margin is only for where it may look)
   return { x, y, zoom, view: { x0: x - seen, y0: y - seen, x1: x + seen, y1: y + seen } };
 }
 
