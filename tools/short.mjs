@@ -13,7 +13,12 @@
 //   B  3-6 s    the new version's patch note, large.
 //   C  6-~22 s  the new version from launch to 2 s before its first apple, sped up so it
 //               fits (see compressSpeed); the speed is shown in small type.
-//   D  last 3 s the new version eats its first apple at real speed.
+//   D  the end  the new version eats its first apple at real speed: from 2 s before it
+//               until Warden Snek's line after it has been said in full (the line starts
+//               600 ms after the apple, story.js's letterbox; since prompt 12), or 1 s after
+//               the apple for a version without voice lines. If that makes the short longer
+//               than 30 s, C goes faster in steps of 0.05 until it fits.
+// Sound: silence, except that line in D (since prompt 12, A carries no voice).
 //
 // Output in out/shorts/<version>/: frames/00001.png..., short-<version>.mp4
 // (1080x1920, 30 fps, H.264), first/middle/last.png and clip.json.
@@ -21,6 +26,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 import { chromium } from 'playwright';
 import { startServer } from './serve.mjs';
 import { listVersions } from './build.mjs';
@@ -35,6 +41,9 @@ export const SAFE = { right: WIDTH * 0.85, bottom: HEIGHT * 0.75 };
 const MAX_APPLE_DRIFT_MS = 50;
 // The fixed plan for every version after v1.0 (ms of clip time).
 export const PLAN = { prevMs: 3000, noteMs: 3000, launchMs: 16000, launchMaxMs: 21000, appleMs: 3000, beforeAppleMs: 2000 };
+// Room kept for the line starting a little later in the replay than in the recorded run (the
+// first apple may be up to MAX_APPLE_DRIFT_MS off, and a line starts on the next 60 Hz frame).
+const LINE_SLACK_MS = 100;
 
 // The one-line patch note of a version, from its section in UPDATES.md:
 // a "## <version> ..." heading and a "**Patch note:** ..." line under it.
@@ -85,14 +94,24 @@ export function compressSpeed(runMs) {
   return speed;
 }
 
+// The line Warden Snek says after the first apple, from a build's story.js: its number, when it
+// starts after the apple (the letterbox), and its recorded length. null for a version without voice.
+export function firstAppleLine(distDir) {
+  const file = path.join(distDir, 'story.js');
+  if (!fs.existsSync(file)) return null;
+  const story = vm.runInContext(`${fs.readFileSync(file, 'utf8')}\n;({ line: LINES.find(l => l.scene.startsWith('After')), LETTERBOX_MS })`, vm.createContext({}));
+  const id = story.line.id;
+  return { id, afterAppleMs: story.LETTERBOX_MS, ms: audioMs(path.join(distDir, 'voice', `${String(id).padStart(2, '0')}.mp3`)) };
+}
+
 // One measured version: its median run and what the short shows of it.
-export function loadVersion(measurementsDir, version, plan, note) {
+export function loadVersion(measurementsDir, version, plan, note, firstLine = null) {
   const result = JSON.parse(fs.readFileSync(path.join(measurementsDir, `${version}.json`), 'utf8'));
   const median = result.median.timeToFirstAppleMs;
   if (result.medianRun === null || median === null) throw new Error(`${version}: no median run with a first apple in the measurements`);
   const raw = JSON.parse(fs.readFileSync(path.join(measurementsDir, version, `run-${result.medianRun}.json`), 'utf8'));
   const apple = raw.log.find(e => e.type === 'apple');
-  return { version, note, plan, result, raw, median, apple: apple.t, start: startTime(plan, raw), runs: result.settings.runs, seed: result.settings.seed };
+  return { version, note, plan, result, raw, median, apple: apple.t, start: startTime(plan, raw), runs: result.settings.runs, seed: result.settings.seed, firstLine };
 }
 
 // v1.0's own clip: its plan's segments, all on the version's own pane.
@@ -110,12 +129,15 @@ export function compareTimeline(prev, cur) {
   const aFrom = Math.max(prev.start, prev.apple - PLAN.beforeAppleMs);
   const dFrom = cur.apple - PLAN.beforeAppleMs;
   if (dFrom <= cur.start) throw new Error(`${cur.version}: the first apple comes too soon after the start for this plan`);
-  const speed = compressSpeed(dFrom - cur.start);
+  const dMs = cur.firstLine ? PLAN.beforeAppleMs + cur.firstLine.afterAppleMs + cur.firstLine.ms : PLAN.appleMs;
+  const room = MAX_CLIP_MS - PLAN.prevMs - PLAN.noteMs - dMs - (cur.firstLine ? LINE_SLACK_MS : 0);
+  let speed = compressSpeed(dFrom - cur.start);
+  while ((dFrom - cur.start) / speed > room) speed = Math.round((speed + 0.05) * 100) / 100; // C faster, so it all fits
   return [
     { name: 'A previous version', kind: 'game', who: 'prev', runFrom: aFrom, clipMs: PLAN.prevMs, speed: 1, counter: 'compare', card: 'prev' },
     { name: 'B patch note', kind: 'note', clipMs: PLAN.noteMs, counter: 'compare-done', card: 'cur-version' },
     { name: 'C launch', kind: 'game', who: 'cur', runFrom: cur.start, clipMs: (dFrom - cur.start) / speed, speed, counter: 'run', card: 'cur' },
-    { name: 'D first apple', kind: 'game', who: 'cur', runFrom: dFrom, clipMs: PLAN.appleMs, speed: 1, counter: 'run', card: 'cur' },
+    { name: 'D first apple', kind: 'game', who: 'cur', runFrom: dFrom, clipMs: dMs, speed: 1, counter: 'run', card: 'cur', untilLine: cur.firstLine },
   ];
 }
 
@@ -150,7 +172,9 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
   if (prev) mounts['/prev'] = distDirs.prev;
   const server = await startServer(mounts);
   const browser = await chromium.launch({ headless: true, channel: 'chromium' });
-  const frames = Math.min(Math.round((clipMs * FPS) / 1000), frameLimit);
+  let frames = Math.min(Math.round((clipMs * FPS) / 1000), frameLimit);
+  const dSeg = timeline.find(s => s.untilLine);
+  if (dSeg && frameLimit === Infinity) frames += Math.ceil((LINE_SLACK_MS * FPS) / 1000); // room to finish the line
   const panes = { cur: { id: 'game', v: cur, now: 0, apple: null }, prev: prev && { id: 'prev', v: prev, now: 0, apple: null } };
   let safeArea;
   try {
@@ -201,6 +225,19 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
         ({ eaten } = await advance(panes[seg.who], runT));
         panes[seg.who].shownUntil = runT;
       }
+      // D ends on the first video frame after the line has been said in full, as the replay plays it.
+      if (seg === dSeg && dSeg.lineEndClipMs === undefined) {
+        const played = await page.evaluate(({ id, line }) => {
+          const w = document.getElementById(id).contentWindow;
+          const url = w.eval(`voice.urls[${line}]`);
+          const p = w.__vclock.plays().find(x => x.src === url);
+          return p ? p.t : null;
+        }, { id: panes.cur.id, line: dSeg.untilLine.id });
+        if (played !== null) {
+          dSeg.lineEndClipMs = dSeg.clipFrom + (played + dSeg.untilLine.ms - dSeg.runFrom);
+          frames = Math.min(Math.ceil((dSeg.lineEndClipMs * FPS) / 1000), frameLimit);
+        }
+      }
       const counter = counterFor(seg, { cur, prev, runT, eaten });
       const card = seg.card === 'prev' ? [prev.version, prev.note] : seg.card === 'cur-version' ? [cur.version, ''] : [cur.version, cur.note];
       await page.evaluate(({ which, card, counter, speed, big }) => {
@@ -220,6 +257,11 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
       if (f === 0) safeArea = rects;
       await page.screenshot({ path: path.join(framesDir, `${String(f + 1).padStart(5, '0')}.png`) });
       if ((f + 1) % 90 === 0 || f === frames - 1) log(`  frame ${f + 1}/${frames}`);
+    }
+    if (dSeg && frameLimit === Infinity && dSeg.lineEndClipMs === undefined) throw new Error(`${cur.version}: line ${dSeg.untilLine.id} did not start in segment D`);
+    if (dSeg) {
+      dSeg.clipMs = (frames * 1000) / FPS - dSeg.clipFrom;
+      dSeg.runTo = dSeg.runFrom + dSeg.clipMs;
     }
     for (const pane of Object.values(panes).filter(Boolean)) {
       pane.log = await page.evaluate(id => document.getElementById(id).contentWindow.snakeGame.log, pane.id);
@@ -291,12 +333,12 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
   return clip;
 }
 
-// The short's sound: silence, except Warden Snek's lines in the segments played at 1x, each from the
-// moment the replay started it, at its recorded length. A line stops where a segment faster than
-// 1x begins, or where the short ends. Versions without voice lines get silence only.
+// The short's sound: silence, except Warden Snek's lines in the new version's segments played at 1x
+// (D), each from the moment the replay started it, at its recorded length. A line stops where a
+// segment faster than 1x begins, or where the short ends. Versions without voice lines get silence.
 export function voiceTrack(timeline, panes, distDirs, clipMs) {
   const out = [];
-  for (const seg of timeline.filter(s => s.kind === 'game' && s.speed === 1)) {
+  for (const seg of timeline.filter(s => s.kind === 'game' && s.speed === 1 && s.who === 'cur')) { // since prompt 12, A carries no voice
     const pane = panes[seg.who];
     const runTo = seg.runFrom + seg.clipMs;
     for (const p of (pane.plays || []).filter(x => x.line !== null && x.t >= seg.runFrom && x.t < runTo)) {
@@ -376,7 +418,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (!plans[v]) throw new Error(`no clip plan for ${v} in tools/short/plans.json`);
     const note = patchNote(updates, v);
     if (!note) throw new Error(`no "**Patch note:**" line for ${v} in UPDATES.md`);
-    return loadVersion(measurements, v, plans[v], note);
+    return loadVersion(measurements, v, plans[v], note, firstAppleLine(path.join(ROOT, 'dist', v)));
   };
   const versions = listVersions();
   const prevVersion = versions[versions.indexOf(version) - 1] || null;
@@ -397,9 +439,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const c of Object.values(clip.checks)) {
     console.log(`${c.version}: first apple replayed at ${c.replayFirstAppleMs} ms, recorded ${c.recordedFirstAppleMs} ms, median ${c.medianFirstAppleMs} ms (counter freezes on the median); ${c.applesReplayed.length} apples shown, same as the recorded run: ${c.sameApplesAsRecordedRun}`);
   }
-  if (!clip.voice.length) console.log('sound: silence (no Warden Snek line starts in a 1x segment)');
+  if (!clip.voice.length) console.log('sound: silence (no Warden Snek line in segment D)');
   for (const v of clip.voice) {
-    console.log(`sound: ${v.version} line ${v.line} (${v.segment}) at ${v.clipAtMs / 1000} s of the short, ${v.heardMs} ms heard of ${v.lengthMs} ms`);
+    console.log(`sound: ${v.version} line ${v.line} (${v.segment}) from ${v.clipAtMs / 1000} s to ${(v.clipAtMs + v.heardMs) / 1000} s of the short, ${v.heardMs} ms heard of ${v.lengthMs} ms${v.heardMs === v.lengthMs ? ' (in full)' : ' (CUT)'}`);
   }
     if (clip.clipMs < 25000 && clip.comparedWith) console.log(`note: the clip is shorter than 25 s because ${version}'s launch is shorter than ${PLAN.launchMs} ms at 1x`);
   console.log(`wrote out/shorts/${version}/short-${version}.mp4, frames/, first.png, middle.png, last.png, clip.json`);

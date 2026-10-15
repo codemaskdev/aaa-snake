@@ -506,3 +506,33 @@ text-not-box checks.
 Report durations for 14 and 16 (every take), the test count, the shorts
 table with voice timestamps, and STOP.
 ````
+
+## 12. Segment D until the line ends; continue v1.7
+
+````text
+Voice report accepted. The shortened spoken line 16 stays as it is in
+v1.3 to v1.6 (subtitle unchanged, slots unchanged).
+
+## Fixed short plan, one change
+Segment D now ends when the first apple's Warden Snek line finishes
+(apple + 600 ms + the line's recorded length), not 1 000 ms after the
+apple. Segment A carries no voice at all. The total still fits 25 to
+30 s by the existing rule: raise the C factor in steps of 0.05 as far
+as needed. Update the plan in README and DEVLOG, re-record shorts v1.3
+to v1.6, and for each report: length, C factor, the second at which the
+line starts and ends, and that the line is heard in full. Shorts v1.0
+to v1.2 are unchanged.
+
+## Continue v1.7
+`git stash pop` and continue v1.7 exactly as prompt 8 says, with two
+additions:
+- In v1.7's story.js the subtitle of line 16 becomes "Another. The
+  orchard remembers." with its slot pinned at 2 800 ms (not recomputed
+  from the word count). Note it in DEVLOG; earlier builds keep the old
+  subtitle.
+- The v1.7 short uses the updated plan above.
+Everything else from prompt 8 stands: radius 6 cells, the bot rule, the
+20-minute run limit, expected directions written before measuring, tag
+v1.7, measure, short, chart, full npm test, STOP, no v1.8. Report as
+prompt 8 asks.
+````

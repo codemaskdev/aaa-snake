@@ -831,3 +831,23 @@ were rendered again (each exit 0); every file now has one H.264 and one AAC stre
 - Where a line is cut at the start of C, the AAC encoding leaves a trace in the first 50 ms after it (max -33.6 dB in
   v1.4's short between 6.00 and 6.05 s; -91.0 dB, silence, from 6.05 s on).
 - The full `npm test` after this prompt: 85 of 85, exit 0.
+
+## Prompt 12: segment D until the line ends; v1.7 continued
+
+### The short plan, one change
+Segment D now runs from 2 s before the first apple until Warden Snek's line after it has been said in full (the line
+starts 600 ms after the apple, story.js's letterbox, and lasts as long as its recording), instead of 1 s after the
+apple; without voice lines (v1.0 to v1.2) D is unchanged. A carries no voice any more. If the short would pass 30 s,
+C goes faster in steps of 0.05x until it fits, with 100 ms kept for the line starting a little later in the replay
+than in the recorded run. The recorder ends D on the first video frame after the line has ended, as the replay plays
+it. README.md has the plan; tests/short.test.mjs checks D's length, the steps of C, and that A is silent.
+
+| Short | Length | C | Line 10 starts | ends | Heard |
+|---|---|---|---|---|---|
+| v1.3 | 29833.333333333332 ms (895 frames) | 4.9x | 25.9877503401408 s | 29.8277503401408 s | 3840 of 3840 ms, in full |
+| v1.4 | 29833.333333333332 ms (895 frames) | 5.8x | 25.97834942528983 s | 29.81834942528983 s | 3840 of 3840 ms, in full |
+| v1.5 | 29833.333333333332 ms (895 frames) | 6.9x | 25.97124589372236 s | 29.81124589372236 s | 3840 of 3840 ms, in full |
+| v1.6 | 29866.666666666668 ms (896 frames) | 7.25x | 25.996522988503195 s | 29.836522988503194 s | 3840 of 3840 ms, in full |
+
+`npm run short v1.3` to `v1.6`, each exit 0. C had been 4.1x, 4.85x, 5.75x and 6.05x. v1.0 to v1.2 were not rendered
+again: they have no voice, so their plan did not change.

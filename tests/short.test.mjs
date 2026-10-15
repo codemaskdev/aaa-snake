@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, checkSafeArea, voiceTrack, PLAN, WIDTH, HEIGHT } from '../tools/short.mjs';
+import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, checkSafeArea, voiceTrack, firstAppleLine, PLAN, WIDTH, HEIGHT } from '../tools/short.mjs';
 import { chromium } from 'playwright';
 import { measure } from '../tools/measure.mjs';
 import { ROOT, tempDir, pngSize } from './helpers.mjs';
@@ -55,7 +55,7 @@ test('every patch note so far fits the card whole (v1.4\'s lost its last word)',
   }
 });
 
-test('the voice track: lines only in 1x segments, from when the replay starts them, cut where a faster segment begins', () => {
+test('the voice track: only the new version\'s lines at 1x (D), from when the replay starts them; A carries none', () => {
   const timeline = [
     { name: 'A previous version', kind: 'game', who: 'prev', runFrom: 1000, clipFrom: 0, clipMs: 3000, speed: 1 },
     { name: 'B patch note', kind: 'note', clipFrom: 3000, clipMs: 3000 },
@@ -68,9 +68,23 @@ test('the voice track: lines only in 1x segments, from when the replay starts th
     cur: { v: { version: 'cur' }, plays: [{ t: 50000, line: 1 }, { t: 101000, line: 12 }, { t: 101500, line: null }] },
   };
   const track = voiceTrack(timeline, panes, { prev: dir, cur: dir }, 29000);
-  assert.deepEqual(track.map(v => [v.version, v.line, v.clipAtMs]), [['prev', 10, 1500], ['cur', 12, 27000]], 'not before A, not in the 5x part, not a sound that is no line');
-  assert.equal(track[0].heardMs, Math.min(track[0].lengthMs, 6000 - 1500), 'A\'s line may run over the patch note, never into C');
-  assert.equal(track[1].heardMs, Math.min(track[1].lengthMs, 2000), 'D\'s line stops where the short ends');
+  assert.deepEqual(track.map(v => [v.version, v.line, v.clipAtMs]), [['cur', 12, 27000]], 'not in A, not in the 5x part, not a sound that is no line');
+  assert.equal(track[0].heardMs, Math.min(track[0].lengthMs, 2000), 'a line stops where the short ends');
+});
+
+test('segment D lasts until the first apple\'s line is said; C speeds up in steps of 0.05 to keep 30 s', () => {
+  const prev = { version: 'v1.2', start: 33, apple: 41000, median: 41000, runs: 5 };
+  const silent = { version: 'v1.3', start: 33, apple: 120033, median: 120000, runs: 5, firstLine: null };
+  const voiced = { ...silent, firstLine: { id: 10, afterAppleMs: 600, ms: 3840 } };
+  const a = compareTimeline(prev, silent);
+  const b = compareTimeline(prev, voiced);
+  assert.equal(a[3].clipMs, 3000, 'no voice: 1 s after the apple, as before');
+  assert.equal(b[3].clipMs, 2000 + 600 + 3840);
+  assert.equal(a[2].speed, 5.65, '118000 ms of launch in 21 s at most');
+  const total = t => t.reduce((sum, seg) => sum + seg.clipMs, 0);
+  assert.ok(total(b) + 100 <= 30000, `${total(b)} ms`);
+  assert.ok(b[2].speed > a[2].speed && Math.abs(b[2].speed * 20 - Math.round(b[2].speed * 20)) < 1e-9, `C at ${b[2].speed}x`);
+  assert.ok(3000 + 3000 + 118000 / (b[2].speed - 0.05) + b[3].clipMs + 100 > 30000, 'and no faster than needed');
 });
 
 test('counter text', () => {

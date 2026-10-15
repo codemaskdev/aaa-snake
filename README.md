@@ -26,6 +26,21 @@ npm run play-share          # control share in play, from the saved runs of ever
 
 `npm run measure` opens visible Chromium windows for its frame-rate runs.
 
+## Shorts
+
+`npm run short <version>` replays the version's median measured run on a virtual clock into a 1080 x 1920 video,
+25 to 30 s. v1.0 has its own plan; every later version follows one fixed plan:
+
+- **A** (3 s): the previous version reaches its first apple at real speed. No voice.
+- **B** (3 s): the new version's patch note.
+- **C**: the new version from launch to 2 s before its first apple, sped up: 16 s of clip at the largest step of
+  0.05x that does not make it shorter, 4x while that fits in 21 s, faster only beyond; and faster again, in steps of
+  0.05x, if the whole short would otherwise pass 30 s. The speed shows in the patch-note card.
+- **D**: the first apple at real speed, from 2 s before it until Warden Snek's line after it has been said in full
+  (it starts 600 ms after the apple); for a version without voice lines, until 1 s after the apple.
+
+The sound track is silence except that line in D, from the moment the replay starts it, at its recorded length.
+
 ## Files
 
 - `src/` the game being worked on; `dist/` every released version.
