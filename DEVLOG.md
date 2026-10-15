@@ -783,3 +783,27 @@ prompt changes no game code; it is still there, untouched.
   have not looked into why.
 - Tests after the recording: tests/v1.3.test.mjs, v1.4, build, size and determinism, 18 of 19; the one that fails is
   the slot test, on 14.mp3 (it stops at the first). I did not run the full `npm test` for this prompt.
+
+## Prompt 11: retakes for lines 14 and 16; voice in the shorts
+
+### Lines 14 and 16
+Same settings as prompt 10 (`npm run voice -- --retake 14,16`, new in tools/voice.mjs: up to three new takes, the
+first that fits is kept, the others deleted; every take's length is in voice/RECORDING.json under `history`).
+- **Line 14** ("[dry] I am getting longer. That is either growth or regret.", slot 4800 ms): take 1 (prompt 10) 5520
+  ms; take 2 4880 ms, deleted; **take 3 4640 ms, kept**. 3 takes in all.
+- **Line 16** ("[solemn] Another one. The orchard remembers.", slot 2800 ms): take 1 (prompt 10) 3600 ms; takes 2, 3
+  and 4 3520 ms each, deleted. No take fitted after three, so, as asked, the line is now said shorter, same meaning,
+  same tag: "[solemn] Another. The orchard remembers." Take 5 2960 ms, deleted; **take 6 2640 ms, kept**. 6 takes in
+  all.
+- **What changed and what did not:** only the words sent to the voice changed (SPOKEN in tools/voice.mjs). I did not
+  change the line in src/story.js: the slot is computed from that text's words (5 words: 2000 ms + 800 ms), so
+  shortening it there would shorten the slot, and every build from v1.3 on has its own story.js anyway. So the
+  subtitle still reads "Another one. The orchard remembers." while the voice says "Another. The orchard remembers."
+  voice/LINES.md has both, in "Said shorter than the subtitle". No slot changed; no take was sped up or cut.
+- `npm run voice -- --check`: exit 0, all 17 fit. `npm run voice` copied 14 and 16 into dist/v1.3 to v1.6 (8 files).
+- The Voice Design description in voice/LINES.md is now marked "proposed, not confirmed".
+- **Why the v1.3 to v1.5 shorts changed in prompt 10 and v1.6's did not: unexplained** within the 15 minutes. What I
+  found: rendering v1.3's short twice in a row gives the same file byte for byte, so the recorder is repeatable; one
+  lead, not checked: the loading screen's "Voice lines: N of 17" depends on when the real downloads of the voice files
+  finish during the replay (the first loading frame of v1.3's short shows "0 of 17", the next "17 of 17"), and those
+  files changed.

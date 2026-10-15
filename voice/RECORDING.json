@@ -128,10 +128,37 @@
       "id": 14,
       "file": "src/voice/14.mp3",
       "text": "[dry] I am getting longer. That is either growth or regret.",
-      "takes": 1,
-      "bytes": 44765,
-      "durationMs": 5520,
-      "slotMs": 4800
+      "takes": 3,
+      "bytes": 37660,
+      "durationMs": 4640,
+      "slotMs": 4800,
+      "history": [
+        {
+          "take": 1,
+          "date": "2026-10-14",
+          "durationMs": 5520,
+          "bytes": 44765,
+          "kept": false,
+          "text": "[dry] I am getting longer. That is either growth or regret."
+        },
+        {
+          "take": 2,
+          "date": "2026-10-15",
+          "durationMs": 4880,
+          "bytes": 39541,
+          "kept": false,
+          "text": "[dry] I am getting longer. That is either growth or regret."
+        },
+        {
+          "take": 3,
+          "date": "2026-10-15",
+          "durationMs": 4640,
+          "bytes": 37660,
+          "kept": true,
+          "text": "[dry] I am getting longer. That is either growth or regret."
+        }
+      ],
+      "keptTake": 3
     },
     {
       "id": 15,
@@ -145,11 +172,62 @@
     {
       "id": 16,
       "file": "src/voice/16.mp3",
-      "text": "[solemn] Another one. The orchard remembers.",
-      "takes": 1,
-      "bytes": 29301,
-      "durationMs": 3600,
-      "slotMs": 2800
+      "text": "[solemn] Another. The orchard remembers.",
+      "takes": 6,
+      "bytes": 21777,
+      "durationMs": 2640,
+      "slotMs": 2800,
+      "history": [
+        {
+          "take": 1,
+          "date": "2026-10-14",
+          "durationMs": 3600,
+          "bytes": 29301,
+          "kept": false,
+          "text": "[solemn] Another one. The orchard remembers."
+        },
+        {
+          "take": 2,
+          "date": "2026-10-15",
+          "durationMs": 3520,
+          "bytes": 28674,
+          "kept": false,
+          "text": "[solemn] Another one. The orchard remembers."
+        },
+        {
+          "take": 3,
+          "date": "2026-10-15",
+          "durationMs": 3520,
+          "bytes": 28674,
+          "kept": false,
+          "text": "[solemn] Another one. The orchard remembers."
+        },
+        {
+          "take": 4,
+          "date": "2026-10-15",
+          "durationMs": 3520,
+          "bytes": 28674,
+          "kept": false,
+          "text": "[solemn] Another one. The orchard remembers."
+        },
+        {
+          "take": 5,
+          "date": "2026-10-15",
+          "text": "[solemn] Another. The orchard remembers.",
+          "durationMs": 2960,
+          "bytes": 24285,
+          "kept": false
+        },
+        {
+          "take": 6,
+          "date": "2026-10-15",
+          "text": "[solemn] Another. The orchard remembers.",
+          "durationMs": 2640,
+          "bytes": 21777,
+          "kept": true
+        }
+      ],
+      "keptTake": 6
     },
     {
       "id": 17,

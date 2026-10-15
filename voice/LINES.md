@@ -16,7 +16,7 @@ shows each line for its slot whether or not the sound plays. Check with `npm run
 - Tool: ElevenLabs (web app), Text to Speech
 - Model: Eleven v3 (eleven_v3)
 - Voice: one voice made with Voice Design from the description below; not a library voice and not a clone of anyone
-- Voice Design description: "An old man in his seventies, a retired orchard warden. Low, warm, slightly gravelly voice. Slow and tired, with a gentle, dry sense of humour. Neutral English accent. Quiet, as if remembering. Not theatrical, not military, not an impression of any actor or character."
+- Voice Design description (proposed, not confirmed: the voice in use is the author's own, and its prompt is not recorded here yet): "An old man in his seventies, a retired orchard warden. Low, warm, slightly gravelly voice. Slow and tired, with a gentle, dry sense of humour. Neutral English accent. Quiet, as if remembering. Not theatrical, not military, not an impression of any actor or character."
 - Stability: Natural (0.5)
 - Language: English
 - Output format: MP3, 44.1 kHz, 64 kbps (mp3_44100_64)
@@ -29,6 +29,16 @@ shows each line for its slot whether or not the sound plays. Check with `npm run
 | Date | Tool and version as shown in its UI | Exact prompt (Voice Design description, and each line's text) |
 |---|---|---|
 | 2026-10-14 | ElevenLabs text-to-speech API (v1), model eleven_v3, voice S44KQ3oLFckbxgyKfold (Voice Design, the author's own); no UI was used | each line's text as in the table below, with its emotion as an audio tag in front, e.g. "[weary] There was an orchard here once."; the voice's own Voice Design prompt is the author's |
+
+## Said shorter than the subtitle
+
+A take must fit its slot, and slots never change (they set the length of every cutscene, and so every measured number
+since v1.3). When no take of a line fits, the line is said shorter, with the same meaning and emotion; the subtitle in
+the game, and so the slot, stay as they are (prompt 11).
+
+| # | Subtitle (src/story.js) | Said |
+|---|---|---|
+| 16 | Another one. The orchard remembers. | Another. The orchard remembers. |
 
 ## Lines
 
@@ -47,7 +57,7 @@ shows each line for its slot whether or not the sound plays. Check with `npm run
 | 11 | After an apple | nostalgic | It tastes like the old days. Crisp. A little sour. | 4.8 | src/voice/11.mp3 | 4000 |
 | 12 | After an apple | rueful | I used to count them. Now I just eat them. | 4.8 | src/voice/12.mp3 | 3440 |
 | 13 | After an apple | defiant | They can take the trees. They cannot take the taste. | 4.8 | src/voice/13.mp3 | 3600 |
-| 14 | After an apple | dry | I am getting longer. That is either growth or regret. | 4.8 | src/voice/14.mp3 | 5520 |
+| 14 | After an apple | dry | I am getting longer. That is either growth or regret. | 4.8 | src/voice/14.mp3 | 4640 |
 | 15 | After an apple | tender | Somewhere, a tree is proud of me. | 3.6 | src/voice/15.mp3 | 2720 |
-| 16 | After an apple | solemn | Another one. The orchard remembers. | 2.8 | src/voice/16.mp3 | 3600 |
+| 16 | After an apple | solemn | Another one. The orchard remembers. | 2.8 | src/voice/16.mp3 | 2640 |
 | 17 | After an apple | tired | My back hurts. I do not have a back. It still hurts. | 5.6 | src/voice/17.mp3 | 5360 |

@@ -9,6 +9,9 @@
 //                            voice/RECORDING.json (what was asked for, when, and how long each take is).
 //                            The API key comes only from the environment variable ELEVENLABS_API_KEY;
 //                            it is never written anywhere. The only network calls are the 17 requests.
+//   npm run voice -- --retake 14,16  up to three new takes of each listed line, same settings; the first
+//                            take that fits its slot is kept, the others are deleted; every take's length
+//                            goes into voice/RECORDING.json. Slots never change; audio is never sped up or cut.
 // src/voice/ is the only place the lines live: every version from v1.3 on plays them from there,
 // through its build. Old builds are never rebuilt, but their voice files are kept in step with it.
 // Placeholders are silence, MP3 44.1 kHz mono at 64 kbps constant bitrate, the format the
@@ -74,8 +77,15 @@ export function readRecording(file = RECORDING_FILE) {
   return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
 }
 
-// The text sent for a line: its emotion as an audio tag, then the line.
-export const promptFor = line => `[${line.emotion}] ${line.text}`;
+// Spoken words that differ from the subtitle (src/story.js): a line whose takes would not fit its
+// slot is said shorter, with the same meaning and emotion (prompt 11). The subtitle, and so the
+// slot, stay as they are.
+export const SPOKEN = {
+  16: 'Another. The orchard remembers.', // subtitle: "Another one. The orchard remembers."; 4 takes of it ran 3520 to 3600 ms in its 2800 ms slot
+};
+
+// The text sent for a line: its emotion as an audio tag, then the words.
+export const promptFor = line => `[${line.emotion}] ${SPOKEN[line.id] || line.text}`;
 
 export const ELEVENLABS = {
   tool: 'ElevenLabs (web app), Text to Speech',
@@ -102,6 +112,20 @@ shows each line for its slot whether or not the sound plays. Check with \`npm ru
 (never longer), so the build and the rig work. A slot is the line's words at ${SPEAKING_RATE} words per second, rounded to 0.1 s, plus ${LINE_PAUSE / 1000} s;
 the game shows each line for its slot whether or not the sound plays, so a recording that fits its slot does not
 change any timing. Check with \`npm run voice -- --check\`.`;
+  const changed = LINES.filter(line => SPOKEN[line.id]);
+  const spokenSection = changed.length
+    ? `## Said shorter than the subtitle
+
+A take must fit its slot, and slots never change (they set the length of every cutscene, and so every measured number
+since v1.3). When no take of a line fits, the line is said shorter, with the same meaning and emotion; the subtitle in
+the game, and so the slot, stay as they are (prompt 11).
+
+| # | Subtitle (src/story.js) | Said |
+|---|---|---|
+${changed.map(line => `| ${line.id} | ${line.text} | ${SPOKEN[line.id]} |`).join('\n')}
+
+`
+    : '';
   const disclosure = recording
     ? `| ${recording.date} | ${recording.service}, model ${recording.model}, voice ${recording.voiceId} (Voice Design, the author's own); no UI was used | each line's text as in the table below, with its emotion as an audio tag in front, e.g. "${promptFor(LINES[0])}"; the voice's own Voice Design prompt is the author's |`
     : '| | | |';
@@ -119,7 +143,7 @@ ${status}
 - Tool: ${ELEVENLABS.tool}
 - Model: ${ELEVENLABS.model}
 - Voice: ${ELEVENLABS.voice}
-- Voice Design description: "${ELEVENLABS.voiceDesign}"
+- Voice Design description (proposed, not confirmed: the voice in use is the author's own, and its prompt is not recorded here yet): "${ELEVENLABS.voiceDesign}"
 - Stability: ${ELEVENLABS.stability}
 - Language: ${ELEVENLABS.language}
 - Output format: ${ELEVENLABS.output}
@@ -133,7 +157,7 @@ ${status}
 |---|---|---|
 ${disclosure}
 
-## Lines
+${spokenSection}## Lines
 
 | # | Scene | Emotion | Line | Slot (s) | File |${recording ? ' Take (ms) |' : ''}
 |---|---|---|---|---|---|${recording ? '---|' : ''}
@@ -141,21 +165,26 @@ ${rows.join('\n')}
 `;
 }
 
-// Record every line through the API, over the placeholders. One request a line; nothing else goes out.
-async function record(story) {
+// One request to the API for one line; returns the MP3's bytes. Nothing else goes out.
+async function speakLine(text) {
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) throw new Error('set ELEVENLABS_API_KEY in the environment (it is never read from or written to a file)');
+  const response = await fetch(`${RECORDING.endpoint}/${RECORDING.voiceId}?output_format=${RECORDING.output}`, {
+    method: 'POST',
+    headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+    body: JSON.stringify({ text, model_id: RECORDING.model, voice_settings: { stability: RECORDING.stability } }),
+  });
+  if (!response.ok) throw new Error(`the API answered ${response.status}: ${(await response.text()).slice(0, 300)}`);
+  return Buffer.from(await response.arrayBuffer());
+}
+
+// Record every line through the API, over the placeholders. One request a line.
+async function record(story) {
   const date = new Date().toISOString().slice(0, 10);
   const lines = [];
   for (const line of story.LINES) {
     const text = promptFor(line);
-    const response = await fetch(`${RECORDING.endpoint}/${RECORDING.voiceId}?output_format=${RECORDING.output}`, {
-      method: 'POST',
-      headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
-      body: JSON.stringify({ text, model_id: RECORDING.model, voice_settings: { stability: RECORDING.stability } }),
-    });
-    if (!response.ok) throw new Error(`line ${line.id}: the API answered ${response.status}: ${(await response.text()).slice(0, 300)}`);
-    const bytes = Buffer.from(await response.arrayBuffer());
+    const bytes = await speakLine(text);
     const file = path.join(VOICE_DIR, fileFor(line));
     fs.writeFileSync(file, bytes);
     const take = { id: line.id, file: `src/voice/${fileFor(line)}`, text, takes: 1, bytes: bytes.length, durationMs: durationMs(file), slotMs: story.slotMs(line) };
@@ -168,9 +197,48 @@ async function record(story) {
   console.log('wrote src/voice/*.mp3, voice/RECORDING.json and voice/LINES.md; now run npm run voice -- --check');
 }
 
+// New takes of some lines, up to `most` each: the first that fits its slot replaces the file;
+// the others are deleted. voice/RECORDING.json keeps every take's length.
+async function retake(story, ids, most = 3) {
+  const recording = readRecording();
+  if (!recording) throw new Error('nothing recorded yet: run npm run voice -- --record first');
+  const date = new Date().toISOString().slice(0, 10);
+  for (const id of ids) {
+    const line = story.LINES.find(l => l.id === id);
+    const entry = recording.lines.find(t => t.id === id);
+    const slot = story.slotMs(line);
+    entry.history = entry.history || [{ take: 1, date: recording.date, text: entry.text, durationMs: entry.durationMs, bytes: entry.bytes, kept: false }];
+    entry.text = promptFor(line);
+    let kept = null;
+    for (let n = 1; n <= most && !kept; n++) {
+      const bytes = await speakLine(promptFor(line));
+      const trial = path.join(VOICE_DIR, `take-${fileFor(line)}`);
+      fs.writeFileSync(trial, bytes);
+      const ms = durationMs(trial);
+      const take = { take: entry.history.length + 1, date, text: promptFor(line), durationMs: ms, bytes: bytes.length, kept: ms <= slot };
+      entry.history.push(take);
+      console.log(`${fileFor(line)}  take ${take.take}: ${ms} ms of a ${slot} ms slot  ${take.kept ? 'fits, kept' : 'does not fit, deleted'}`);
+      if (take.kept) {
+        fs.renameSync(trial, path.join(VOICE_DIR, fileFor(line)));
+        kept = take;
+      } else {
+        fs.unlinkSync(trial);
+      }
+    }
+    entry.takes = entry.history.length;
+    if (kept) Object.assign(entry, { durationMs: kept.durationMs, bytes: kept.bytes, keptTake: kept.take });
+    else console.log(`${fileFor(line)}: no take fits after ${most} more; the text has to be shortened (prompt 11)`);
+  }
+  fs.writeFileSync(RECORDING_FILE, JSON.stringify(recording, null, 2) + '\n');
+  fs.writeFileSync(path.join(ROOT, 'voice/LINES.md'), linesMarkdown(story));
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const story = loadStory();
-  if (process.argv.includes('--record')) {
+  const retakeAt = process.argv.indexOf('--retake');
+  if (retakeAt !== -1) {
+    await retake(story, process.argv[retakeAt + 1].split(',').map(Number));
+  } else if (process.argv.includes('--record')) {
     await record(story);
   } else if (process.argv.includes('--check')) {
     let bad = 0;

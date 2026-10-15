@@ -469,3 +469,40 @@ Record the Warden Snek voice. ElevenLabs voice ID: S44KQ3oLFckbxgyKfold
   against their slots and STOP. Game code must not change: `git diff`
   of src/ is empty.
 ````
+
+## 11. Retakes for lines 14 and 16; voice in the shorts
+
+````text
+Voice report accepted. Do not touch the stash or v1.7 yet.
+
+## Lines 14 and 16
+Slots stay as they are: they set cutscene length and therefore every
+measured number since v1.3. For each of the two lines record up to three
+new takes with the same settings; keep the first take that fits its slot
+and delete the others (log take count in RECORDING.json and DEVLOG). If
+no take fits after three, shorten the text instead, keeping the meaning
+and the emotion tag, re-record up to three takes, and note the old and
+new text in LINES.md and DEVLOG. Never change a slot, never speed up or
+trim audio. Then `npm run voice -- --check` must return 0, `npm run
+voice` recopies into all builds, and the full `npm test` must pass.
+
+## Voice in the shorts
+Add an audio track to `npm run short`: silence throughout, except that
+in every segment played at 1x (segment D, and A if a line falls there)
+each Warden Snek line plays at the moment the replay triggers it, at its
+recorded length. Segments played faster than 1x carry no voice. Shorts
+for versions without voice (v1.0 to v1.2) get a silent track so all
+files have the same structure. Re-record shorts v1.3 to v1.6 and state
+for each which line(s) are heard and at what second. Keep the existing
+text-not-box checks.
+
+## Housekeeping
+- The v1.3 to v1.5 mp4 files changed while v1.6 did not: find out why in
+  at most 15 minutes and write one line in DEVLOG; if it takes longer,
+  write that it is unexplained and move on.
+- Leave the Voice Design description in LINES.md marked "proposed, not
+  confirmed" until I send the actual prompt.
+
+Report durations for 14 and 16 (every take), the test count, the shorts
+table with voice timestamps, and STOP.
+````
