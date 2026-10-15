@@ -915,3 +915,7 @@ accepted.
 | Frame rate 5th percentile | unchanged or slightly down | the same |
 | Requests to another origin | zero | nothing is loaded from anywhere; the shop is a screen |
 | Deaths | none expected | the timed run had none; a death would mean a loot box, a wardrobe and a new search |
+- **Correction, written while `npm run measure v1.7` was running, before any of its output:** the Assets row above is
+  wrong. The voice files are now the recordings (since prompt 10), 529875 bytes in src/voice/ against the
+  placeholders' 629368, so I expect assets **down** (99493 bytes less), and download down by about as much, offset by
+  season.js and skins.js (21032 bytes): **download down** too, not up.
