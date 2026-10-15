@@ -675,3 +675,126 @@ published on its own), record the trailer, and report per file: length,
 C factor, the second at which the voice line starts and ends, and the
 frame you consider the best still for each. STOP.
 ````
+
+## 17. The host's voice in the shorts and the trailer
+
+````text
+Prompt 13 accepted, including the 15 / 5 / 10 s trailer timing and the
+"0.320 s" counter. Before recording: set the short patch names in
+UPDATES.md and on the cards to exactly these; they must match the host
+lines: 1.1 cinematic intro · 1.2 day-one patch · 1.3 story and voice ·
+1.4 online only · 1.5 open world · 1.6 skill tree · 1.7 Season One ·
+1.9 Remastered · 2.0 Game of the Year Edition. Then do the host voice.
+
+Host voice for the shorts. The host is Justin, the CodeMask voice: use
+the same ElevenLabs voice ID as episodes 1 to 3 (it is in the CodeMask
+repo's episode config; tell me the ID you found before recording).
+Same pipeline as Warden Snek: `npm run voice -- --record host`, key only
+from ELEVENLABS_API_KEY, eleven_v3, the stability the earlier episodes
+used, mp3_44100_64, one take per line, every request logged in
+voice/RECORDING.json, disclosure line in README.
+
+Lines: voice/HOST.md, pasted below. Four lines per short for v1.1 to
+v2.0 and five for the trailer, verbatim, no edits of your own. Read
+numbers as written in words.
+
+Timing in a short: line 1 starts at 0 s over segment A; line 2 over the
+patch card (the card stays until the line ends, then C starts); line 3
+over C; nothing from the host during D (Snek's line plays alone);
+line 4 starts right after D, over a freeze of the last frame, and the
+short ends when line 4 ends. Host and Snek never overlap. The 25-30 s
+target no longer applies: the short is as long as the lines need, but
+tell me any short over 45 s. Do not cut lines or speed up audio.
+Trailer: line 1 at 0 s, line 2 when v1.0 eats, line 3 over the
+compressed middle, line 4 over the cabinet, line 5 over THE END with a
+freeze until it ends. Mix: host at full level, Snek as recorded.
+
+Re-record all shorts and the trailer with the host track and report per
+file: total length, start and end second of each host line, Snek line
+timing, C factor. STOP.
+
+## HOST.md
+
+### v1.1
+1. I'm turning Snake into a AAA game. Patch 1.1.
+2. A real game doesn't just start. It has a publisher, a studio and an engine, and you see all three first.
+3. Four logos you can't skip. First apple moves from zero point three seconds to nineteen.
+4. Next patch: a day-one patch. Subscribe so you don't miss it, like it if you've ever skipped a logo, and tell me in the comments what else a real launch needs.
+
+### v1.2
+1. I'm turning Snake into a AAA game. Patch 1.2.
+2. Big games ship, then patch themselves on day one. So Snake now updates before it runs.
+3. The patch is two thousand bytes. Downloading it costs four and a half thousand. The headers are bigger than the fix.
+4. Next patch: a story. Subscribe for it, like it if you've waited for a patch on launch night, and comment what the snake's backstory should be.
+
+### v1.3
+1. I'm turning Snake into a AAA game. Patch 1.3.
+2. Every AAA hero has a voice, a past and a wound. Meet Warden Snek. He had an orchard. They took it.
+3. The opening is forty-four seconds. You control the snake eight percent of the time. The rest is cinema.
+4. Next patch: online. Yes, for a single-player snake. Subscribe, like it if you skip cutscenes, and comment which feature is still missing.
+
+### v1.4
+1. I'm turning Snake into a AAA game. Patch 1.4.
+2. Every big release is online now, even the single-player ones. So Snake has a login, a queue and terms of service.
+3. There's no one else on the server. You still wait seven seconds. Industry standard.
+4. Next patch: an open world. Subscribe for it, like it if you've been in a queue for a single-player game, and comment how big the world should be.
+
+### v1.5
+1. I'm turning Snake into a AAA game. Patch 1.5.
+2. A twenty-by-twenty field is not content. So the field is now two hundred fifty-six by two hundred fifty-six, with six hundred map markers.
+3. One hundred sixty chests. All empty. One apple. Fast travel is coming in a future update.
+4. Next patch: a skill tree. Subscribe, like it if you've opened an empty chest, and comment which skill the snake should unlock first.
+
+### v1.6
+1. I'm turning Snake into a AAA game. Patch 1.6.
+2. AAA games don't give you abilities. You unlock them. So turning is now a skill tree.
+3. Left turn: level five. Before that, you earn it. That's called progression.
+4. Next patch: a battle pass. You knew it was coming. Subscribe, like it if you've grinded for a basic move, and comment what goes in the loot boxes.
+
+### v1.7
+1. I'm turning Snake into a AAA game. Patch 1.7. Season One.
+2. A game needs a season, a pass and loot boxes. Cosmetics only, of course. Twelve skins. The legendary one is the snake you started with.
+3. The apple is now hidden. The top reward of the pass is the ability to see it. First apple: eighteen minutes.
+4. Next patch: the remaster. The game is a week old. Subscribe, like it if you've bought a skin, and comment: one patch is yours, what should it add?
+
+### v1.9
+1. I'm turning Snake into a AAA game. Patch 1.9. Remastered.
+2. Every classic gets a remaster. Bloom, grain, chromatic aberration, and hair physics on a twenty-by-twenty grid.
+3. Four graphics presets. All of them are Ultra. The apple is in the same place.
+4. Next patch: the Game of the Year Edition. We haven't won anything. Subscribe for the finale, like it if you've bought a remaster of a game you own, and comment your patch: it's still open.
+
+### v2.0
+1. I'm turning Snake into a AAA game. Patch 2.0. The final one.
+2. Every big game ends with a nostalgia piece: a little arcade cabinet with the original inside. So I put Snake 1.0 in Snake.
+3. Walk six steps, press Enter, and you're playing the real thing. First apple: one hundred and seven seconds. You control the snake for less than one of them.
+4. That's the whole game. Play any version: the link is in the description. Subscribe for the full video, like it if you'd play the cabinet, and comment the one patch you want: I'll build it.
+
+### trailer
+1. This is Snake. This is Snake after I made it AAA.
+2. Done.
+3. Logos, a day-one patch, a story, a login, an open world, a skill tree, a season, a remaster.
+4. The only way to eat the apple is the arcade cabinet with the old game inside.
+5. Same code. Same seed. Same apple. Ten patches. Subscribe: one patch a day, and one of them is yours. Comment it.
+````
+
+The answer to the questions (the voice ID found, four timing conflicts, the numbers to check):
+
+````text
+Yes, go. Settings as you found them: voice uFIXVu9mmnDZ7dTKCBTX,
+eleven_v3, stability 0, similarity 0.75, style 0.2, speed 1,
+mp3_44100_64. Key from the MCP entry, environment only, as before.
+
+Timing: do 1 to 4 as you proposed.
+
+Numbers:
+- "Ten patches" stays: v1.8 is the viewers' patch, the slot is in
+  UPDATES.md, so the series is ten patches.
+- "Four logos": count them in v1.1. If it is three logos and a warning,
+  change line 3 of v1.1 to "Three logos and a warning you can't skip.
+  First apple moves from zero point three seconds to nineteen." That
+  is the only line you may change; everything else, report and leave.
+- Send the list of other mismatches before recording, I'll answer in
+  one message.
+
+Order as you wrote it: names → number check → voice → re-record.
+````

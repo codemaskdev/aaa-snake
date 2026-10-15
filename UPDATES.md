@@ -8,7 +8,7 @@ Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10
 v1.6's skill-tree rule (2026-10-15, PROMPTS.md #7); what "seen" and "nearest" mean in v1.7's search rule (2026-10-15,
 PROMPTS.md #8); v1.7's skins and their drop odds (2026-10-15, PROMPTS.md #9); v2.0's cabinet, its bot rule and the
 ending (2026-10-15, PROMPTS.md #14 and #15); a short name for every version, for the shorts' patch line
-(2026-10-15, PROMPTS.md #16).
+(2026-10-15, PROMPTS.md #16), set to the names the host says (2026-10-15, PROMPTS.md #17).
 
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
@@ -76,7 +76,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.1 — Launch experience
 
-- **Short name:** launch experience
+- **Short name:** cinematic intro
 - **Cliché:** studio logos you cannot skip, a health and safety warning, "Press any key", an autosave notice.
 - **What changes:** before the board, three invented studio logos, each animated and unskippable; a photosensitivity
   warning that can be dismissed only after a few seconds; a title screen that says "Press any key" but only starts
@@ -110,7 +110,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.3 — Story mode: Warden Snek
 
-- **Short name:** story mode
+- **Short name:** story and voice
 - **Cliché:** the gritty hero with a tragic backstory, voiced cutscenes, and the cinematic quick-time event.
 - **What changes:** the snake becomes Warden Snek, a retired orchard warden: the apples were taken,
   the orchard is gone, and only Snek remembers. An opening cutscene, voiced, skippable only "after your first
@@ -168,7 +168,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.6 — Progression
 
-- **Short name:** XP and level-ups
+- **Short name:** skill tree
 - **Cliché:** XP, level-ups, and a skill tree that sells you back things the game used to do.
 - **What changes:** Snek earns XP for moving and eating. "Turn left" (turning counter-clockwise) is a skill unlocked at
   level 5; until then only right turns work, so going left means three rights, and a locked turn shows "Skill locked:
@@ -189,7 +189,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.7 — Season 1 (parody battle pass and loot boxes)
 
-- **Short name:** Season 1 battle pass
+- **Short name:** Season One
 - **Cliché:** the battle pass, the premium currency, the loot box, the "free" tier.
 - **What changes:** the apple is visible only within a small vision radius around Snek. The top reward of the Season 1
   battle pass is "Apple Vision: the ability to see the apple". Tiers fill from XP, or "can be bought" with a premium
@@ -229,7 +229,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.9 — Remastered
 
-- **Short name:** remastered edition
+- **Short name:** Remastered
 - **Cliché:** the remaster: the same game, with cinematic effects, sold again.
 - **What changes:** an "Upgrade to Remastered" screen (PARODY, nothing to pay), then the same game through the one
   allowed WebGL post-processing pass: bloom, vignette, film grain, chromatic aberration at the edges, a color grade, and
@@ -246,7 +246,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v2.0 — Game of the Year Edition
 
-- **Short name:** Game of the Year
+- **Short name:** Game of the Year Edition
 - **Cliché:** the complete edition: everything bundled, plus a museum piece.
 - **What changes:** all previous content, plus an arcade cabinet in the world near the start. Its screen runs dist/v1.0
   unmodified. Walking up to it and pressing a key enters it; inside, the arrow keys steer v1.0's snake (a control

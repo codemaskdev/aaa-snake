@@ -37,8 +37,6 @@ test('every patch line and patch note so far fits the card whole, under the prem
     assert.equal(PREMISE, 'I turned Snake into a AAA game.');
     for (const version of versions) {
       const name = shortName(md, version);
-      const words = name.split(/\s+/).length;
-      assert.ok(words >= 2 && words <= 4, `${version}: "${name}" is ${words} words`);
       const line = patchLine({ version, shortName: name });
       const note = patchNote(md, version);
       await page.evaluate(([l, n]) => { window.layout.setCard(l, n); window.layout.setBigNote(l, n); window.layout.setSpeed('12.35x'); }, [line, note]);
@@ -46,6 +44,10 @@ test('every patch line and patch note so far fits the card whole, under the prem
       assert.deepEqual(await page.evaluate(() => ['premise', 'version', 'note'].map(id => document.getElementById(id).textContent)), [PREMISE, line, note], version);
     }
     assert.equal(patchLine({ version: 'v1.4', shortName: shortName(md, 'v1.4') }), 'Patch 1.4: online only.');
+    // The names the host says (prompt 17), word for word.
+    const said = { 'v1.1': 'cinematic intro', 'v1.2': 'day-one patch', 'v1.3': 'story and voice', 'v1.4': 'online only', 'v1.5': 'open world',
+      'v1.6': 'skill tree', 'v1.7': 'Season One', 'v1.9': 'Remastered', 'v2.0': 'Game of the Year Edition' };
+    for (const [version, name] of Object.entries(said)) assert.equal(shortName(md, version), name, version);
     // The speed label never covers the game (its top bar included), the premise's words or the card.
     const boxes = await page.evaluate(() => {
       const r = id => document.getElementById(id).getBoundingClientRect().toJSON();
