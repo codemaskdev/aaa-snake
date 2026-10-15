@@ -1401,3 +1401,32 @@ requests. v1.3's short re-rendered: 35433.333333333336 ms (1063 frames), 700 ms 
 lasts as long as line 2. C 12.85x, as before. Host 1 from 0 to 3.68 s, host 2 3.98 to 12.54 s, host 3 12.84 to 19.16
 s, Snek's line 10 22.09186900130252 to 25.93186900130252 s, host 4 26.23333333333333 to 35.43333333333333 s. The
 backup outside the repository was brought up to date, and its SHA256SUMS were made again and verified.
+
+## Prompt 20: the trailer stacked, and no dead air after "Done."
+
+### Layout
+v1.0 on top, v2.0 below, each panel the full 1080 width, each counter under its panel, the premise in a divider
+between them (tools/short/trailer.html). The prompt pictured two panels of about 1080 x 1080. Two of them take 2160 px,
+more than the frame's 1920, and the text has to stay above y = 1440, as in every short. The second counter sits under
+the second panel, so the panels are 600 tall. The game pages keep their own shape (480 x 512), so each game shows at
+562.5 x 600 in a full-width black strip; the 480 px under y = 1440 stay empty. Bigger panels are possible only by
+letting v2.0's counter fall below y = 1440, into YouTube's caption area.
+Text is checked as in every short (inside the safe area, nothing spilling out of its box; both names and both
+counters included), every frame. The panels are checked to be inside the frame. A test loads the real layout with
+the longest texts.
+
+### Timing
+The first part ends 1 s after "Done." ends: 3600 + 300 + 560 + 1000 = 5460 ms, instead of 15000 ms. The middle starts
+there and lasts as long as line 3 needs, at the largest step of 0.05x: 10.85x (it was 9.8x). The last part is
+unchanged.
+
+### The trailer, re-rendered (no new voice requests)
+34400 ms (1032 frames); it was 43966.666666666664 ms.
+- First part from 0 s (run 0 to 5460 ms, 1x).
+- Middle from 5.46 s (run 5460 to 103670.10000002384 ms, 10.85x, 9051.622119817866 ms of clip).
+- Last part from 14.511622119817867 s (run 103670.10000002384 to 114307.10000002384 ms, 1x).
+- Freeze from 25.133333333333332 s (the last real-time frame, counted in whole video frames).
+
+Host 1 from 0 to 3.6 s, host 2 3.9 to 4.46 s, host 3 5.46 to 14.18 s, host 4 14.511622119817867 to 18.431622119817867 s.
+Snek's line 10 from 18.731122119794033 to 22.571122119794033 s. Host 5 from 24.14862211981787 to 34.38862211981787 s.
+Frame 1 is black: neither game has drawn at 0 ms of its run.

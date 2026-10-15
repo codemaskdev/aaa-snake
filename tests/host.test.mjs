@@ -50,7 +50,8 @@ test('the trailer with the host: line 3 fits the middle, line 4 ends before Snek
   const host = [line('t1', 3600), line('t2', 560), line('t3', 8720), line('t4', 3920), line('t5', 10240)];
   const segs = trailerTimeline(right, TRAILER, host);
   const [first, middle, last] = segs;
-  assert.equal(first.clipMs, TRAILER.firstMs);
+  assert.equal(first.clipMs, 3600 + HOST_GAP_MS + 560 + TRAILER.afterDoneMs, 'the first part ends 1 s after "Done." (prompt 20)');
+  assert.equal(middle.runFrom, first.clipMs);
   assert.ok(middle.clipMs >= 8720 + HOST_GAP_MS);
   assert.equal(last.runFrom + 3920 + HOST_GAP_MS, 107290 + 600, 'line 4 ends HOST_GAP_MS before Snek starts');
   const [h1, h2, h3, h4, h5] = segs.host;

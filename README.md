@@ -77,8 +77,12 @@ applies.
 
 ### The trailer
 
-`npm run short -- trailer v1.0 v2.0` puts both versions side by side, each replaying its median measured run from
-the same seed, on one shared virtual clock, 1080 x 1920. Top: the premise line. Bottom: two counters, "Snake: first
+`npm run short -- trailer v1.0 v2.0` puts both versions on screen at once, each replaying its median measured run
+from the same seed, on one shared virtual clock, 1080 x 1920. Since prompt 20 they are stacked: v1.0 on top, v2.0
+below, each panel the full 1080 width and 600 tall (the game keeps its own 480 x 512 shape: 562.5 x 600 in the
+middle of a black strip), each with its counter under it and the premise line in the divider between them. Every
+piece of text stays in the safe area (nothing below y = 1440 or right of x = 918); the panels only need to be inside
+the frame. Two counters, "Snake: first
 apple in", which stops on v1.0's measured median once v1.0 eats, and "AAA Snake: first apple in", which runs until
 v2.0's own first apple. Timing (tools/trailer.mjs, `TRAILER`): the first 15 s at real time; the last 10 s at real
 time, ending 1 s after THE END, so they hold the inner apple, the line, THE END and the counter's real value; the
@@ -86,8 +90,8 @@ middle sped up at the smallest step of 0.05x that keeps the whole within 30 s, t
 for 20 s at the start; 20 + 10 s at real time leave no room for the middle within 30 s, so the start is 15 s. The sound
 is Warden Snek's lines that start in a real-time part.
 
-With the host (five lines): line 1 at 0 s and line 2 ("Done.") right after it, when v1.0 has already eaten; line 3
-over the middle, which lasts at least line 3 (its factor the largest step of 0.05x that allows it); line 4 starts the
+With the host (five lines): line 1 at 0 s and line 2 ("Done.") right after it, when v1.0 has already eaten; the
+first part then ends 1 s after "Done." (prompt 20, instead of at 15 s); line 3 over the middle, which lasts at least line 3 (its factor the largest step of 0.05x that allows it); line 4 starts the
 last real-time part, timed to end 0.3 s before Warden Snek's line, so it plays over the walk to the cabinet; line 5
 when THE END shows, over a freeze of the last frame until it ends. The 30 s limit does not apply.
 

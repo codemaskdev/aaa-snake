@@ -25,3 +25,28 @@ test('the trailer counters run on the shared clock until each version\'s own fir
   assert.equal(trailerCounter(v20, null, 60000, 'AAA Snake').value, '1:00.000');
   assert.equal(trailerCounter(v20, 107290, 110000, 'AAA Snake').value, '1:47.290');
 });
+
+test('the stacked trailer layout: both panels full width inside the frame, every text inside the safe area and its box (prompt 20)', async () => {
+  const { chromium } = await import('playwright');
+  const path = await import('node:path');
+  const { ROOT } = await import('./helpers.mjs');
+  const { checkSafeAreaOf } = await import('../tools/trailer.mjs');
+  const { PREMISE, WIDTH, HEIGHT } = await import('../tools/short.mjs');
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } });
+    await page.goto(`file://${path.join(ROOT, 'tools/short/trailer.html')}`);
+    await page.evaluate(p => {
+      window.trailer.setText(p, 'Snake (v1.0)', 'AAA Snake (v2.0)');
+      window.trailer.setCounter('left', { label: 'Snake: first apple in', value: '0.320 s', frozen: true });
+      window.trailer.setCounter('right', { label: 'AAA Snake: first apple in', value: '1:47.290', frozen: true });
+      window.trailer.setSpeed('12.35x');
+    }, PREMISE);
+    await checkSafeAreaOf(page);
+    const r = await page.evaluate(() => ['left', 'right'].map(id => document.getElementById(id).getBoundingClientRect().toJSON()));
+    assert.deepEqual(r.map(x => [x.width, x.left]), [[1080, 0], [1080, 0]], 'each panel the full width');
+    assert.ok(r[0].bottom <= r[1].top, 'v1.0 on top, v2.0 below');
+  } finally {
+    await browser.close();
+  }
+});

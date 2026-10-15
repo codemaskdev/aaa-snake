@@ -1,12 +1,12 @@
 // `npm run short -- trailer v1.0 v2.0`: the trailer (prompt 16). v1.0 and v2.0 side by side from the
 // same seed, each replaying its measured run (as the shorts do) on one shared virtual clock, in
-// tools/short/trailer.html (1080 x 1920). Real time for the first TRAILER.firstMs and the last
+// tools/short/trailer.html (1080 x 1920; since prompt 20 stacked, v1.0 on top, each full width). Real time for the first TRAILER.firstMs and the last
 // TRAILER.lastMs, which hold v2.0's inner apple, its line and THE END; the middle sped up by the
 // smallest step of 0.05x that keeps the whole within TRAILER.totalMs, the factor on screen. Prompt 16
 // asked for the first 20 s at real time; with the last 10 s at real time that leaves no middle within
 // 30 s, so the first part is 15 s (DEVLOG.md, prompt 16).
 // With the host (prompt 17, voice/HOST.md "trailer"): line 1 at 0 s, line 2 right after it (v1.0 has
-// eaten by then); line 3 over the middle, which lasts at least line 3 (its factor the largest step of
+// eaten by then); the first part ends 1 s after line 2 (prompt 20); line 3 over the middle, which lasts at least line 3 (its factor the largest step of
 // 0.05x that allows it); line 4 starts the last real-time part, timed to end HOST_GAP_MS before Warden
 // Snek's line (so it plays over the walk to the cabinet); line 5 when THE END shows, over a freeze of
 // the last frame until it ends. The 30 s limit does not apply.
@@ -22,7 +22,7 @@ import {
 } from './short.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-export const TRAILER = { firstMs: 15000, lastMs: 10000, totalMs: 30000, afterEndMs: 1000 };
+export const TRAILER = { firstMs: 15000, lastMs: 10000, totalMs: 30000, afterEndMs: 1000, afterDoneMs: 1000 };
 
 // The three parts, in run time and clip time. The last part ends TRAILER.afterEndMs after THE END.
 export function trailerTimeline(right, t = TRAILER, host = null) {
@@ -52,13 +52,14 @@ function hostTimeline(right, theEnd, t, host) {
   if (!right.firstLine) throw new Error(`${right.version}: no Warden Snek line after the apple`);
   const snekAt = right.apple + right.firstLine.afterAppleMs;
   const lastFrom = snekAt - HOST_GAP_MS - host[3].ms;
-  if (host[0].ms + HOST_GAP_MS + host[1].ms + HOST_GAP_MS > t.firstMs) throw new Error('host lines 1 and 2 do not fit in the first part');
-  const span = lastFrom - t.firstMs;
+  // The first part ends t.afterDoneMs after line 2 ("Done.") ends (prompt 20: no dead air).
+  const firstMs = host[0].ms + HOST_GAP_MS + host[1].ms + t.afterDoneMs;
+  const span = lastFrom - firstMs;
   const need = host[2].ms + HOST_GAP_MS;
   const speed = Math.max(1, Math.floor((span / need) * 20 + 1e-9) / 20);
   const segs = [
-    { name: 'first', runFrom: 0, clipMs: t.firstMs, speed: 1 },
-    { name: 'middle', runFrom: t.firstMs, clipMs: span / speed, speed },
+    { name: 'first', runFrom: 0, clipMs: firstMs, speed: 1 },
+    { name: 'middle', runFrom: firstMs, clipMs: span / speed, speed },
     { name: 'last', runFrom: lastFrom, clipMs: theEnd.t + t.afterEndMs - lastFrom, speed: 1 },
   ];
   let at = 0;
@@ -82,13 +83,23 @@ export function trailerCounter(v, appleAt, t, name) {
   return { label: `${name}: first apple in`, value: formatTime(eaten ? v.median : Math.min(t, v.median)), frozen: eaten };
 }
 
-async function checkSafeAreaOf(page, ids) {
-  const rects = await page.evaluate(({ ids, right, bottom }) => ids.map(id => {
-    const el = document.getElementById(id);
-    const r = el.getBoundingClientRect();
-    const spills = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
-    return { id, inside: r.right <= right && r.bottom <= bottom && !spills };
-  }), { ids, ...SAFE });
+// Text: inside the safe area and not spilling out of its box. The game panels (prompt 20, full width):
+// inside the frame.
+export const TRAILER_TEXT = ['premise', 'speed', 'leftname', 'rightname', 'leftcounter', 'rightcounter', 'leftlabel', 'rightlabel', 'leftvalue', 'rightvalue'];
+export const TRAILER_PANELS = ['left', 'right'];
+export async function checkSafeAreaOf(page, ids = TRAILER_TEXT, panels = TRAILER_PANELS) {
+  const rects = await page.evaluate(({ ids, panels, right, bottom, width, height }) => [
+    ...ids.map(id => {
+      const el = document.getElementById(id);
+      const r = el.getBoundingClientRect();
+      const spills = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+      return { id, inside: r.right <= right && r.bottom <= bottom && !spills };
+    }),
+    ...panels.map(id => {
+      const r = document.getElementById(id).getBoundingClientRect();
+      return { id, inside: r.left >= 0 && r.top >= 0 && r.right <= width && r.bottom <= height };
+    }),
+  ], { ids, panels, ...SAFE, width: WIDTH, height: HEIGHT });
   const outside = rects.filter(r => !r.inside);
   if (outside.length) throw new Error(`trailer layout outside the safe area or text spilling out: ${outside.map(r => r.id).join(', ')}`);
 }
@@ -143,7 +154,7 @@ export async function recordTrailer({ left, right, host = null, distDirs, outDir
         r: trailerCounter(right, panes.right.apple, runT, 'AAA Snake'),
         speed: seg.speed > 1 ? speedText(seg.speed) : '',
       });
-      await checkSafeAreaOf(page, ['premise', 'speed', 'leftname', 'rightname', 'left', 'right', 'leftcounter', 'rightcounter', 'leftlabel', 'rightlabel']);
+      await checkSafeAreaOf(page);
       await page.screenshot({ path: path.join(framesDir, `${String(f + 1).padStart(5, '0')}.png`) });
       if ((f + 1) % 90 === 0 || f === frames - 1) log(`  frame ${f + 1}/${frames}`);
     }

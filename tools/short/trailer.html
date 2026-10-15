@@ -4,38 +4,46 @@
 <meta charset="utf-8">
 <title>Trailer layout</title>
 <style>
-  /* The trailer (prompt 16): 1080 x 1920, v1.0 and v2.0 side by side on one virtual clock.
-     Safe area as in every short: nothing important below y = 1440 or right of x = 918. */
+  /* The trailer (prompt 20): 1080 x 1920, v1.0 on top and v2.0 below, each panel the full 1080 width, each
+     with its counter under it, the premise in the divider between them. The games may run under the right-hand
+     buttons; every piece of text stays in the safe area, as in every short: nothing below y = 1440 or right of
+     x = 918. The game pages keep their own shape (480 x 512) and letterbox in black, so a 1080 x 600 panel shows
+     a 562.5 x 600 game in the middle of a full-width black strip. */
   :root { --bg: #0b0d13; --panel: #141824; --line: #262c3d; --cyan: #00f0ff; --yellow: #ffd23f; --text: #e8ecf5; --muted: #8a93a8; }
   html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
   body { position: relative; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--text); }
-  #premise { position: absolute; left: 54px; top: 120px; width: 864px; height: 64px; box-sizing: border-box; padding-right: 150px;
+  .game { position: absolute; left: 0; width: 1080px; height: 600px; border: 0; background: #000; }
+  #left { top: 0; }
+  #right { top: 760px; }
+  .name { position: absolute; left: 24px; height: 40px; max-width: 400px; padding: 0 12px; border-radius: 6px; background: rgba(0, 0, 0, 0.7);
+    font: 700 26px/40px Menlo, monospace; color: var(--cyan); white-space: nowrap; overflow: hidden; }
+  #leftname { top: 16px; }
+  #rightname { top: 776px; }
+  .counter { position: absolute; left: 54px; width: 864px; height: 80px; box-sizing: border-box; padding: 0 26px;
+    display: flex; align-items: center; justify-content: space-between; background: var(--panel); border: 2px solid var(--line); border-radius: 14px; }
+  #leftcounter { top: 604px; }
+  #rightcounter { top: 1360px; }
+  .counter .label { font-size: 28px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+  .counter .value { font: 700 52px Menlo, monospace; color: var(--yellow); white-space: nowrap; }
+  .counter.frozen { border-color: var(--yellow); }
+  /* The divider: thin lines above and below, the premise between them. */
+  #divider { position: absolute; left: 0; top: 688px; width: 1080px; height: 68px; border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); box-sizing: border-box; }
+  #premise { position: absolute; left: 54px; top: 690px; width: 864px; height: 64px; box-sizing: border-box; padding-right: 150px;
     font: 700 44px/64px "Helvetica Neue", Helvetica, Arial, sans-serif; white-space: nowrap; overflow: hidden; }
-  #speed { position: absolute; top: 134px; right: 162px; padding: 4px 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.7);
+  #speed { position: absolute; top: 704px; right: 162px; padding: 4px 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.7);
     font: 700 24px Menlo, monospace; color: var(--yellow); }
   .hidden { visibility: hidden; }
-  .name { position: absolute; top: 230px; width: 424px; height: 40px; font: 700 28px/40px Menlo, monospace; color: var(--cyan);
-    white-space: nowrap; overflow: hidden; }
-  .game { position: absolute; top: 280px; width: 424px; height: 452px; border: 0; border-radius: 6px; background: #000; }
-  #leftname, #left { left: 54px; }
-  #rightname, #right { left: 494px; }
-  .counter { position: absolute; left: 54px; width: 864px; height: 110px; box-sizing: border-box; padding: 0 30px;
-    display: flex; align-items: center; justify-content: space-between; background: var(--panel); border: 2px solid var(--line); border-radius: 18px; }
-  #leftcounter { top: 780px; }
-  #rightcounter { top: 910px; }
-  .counter .label { font-size: 30px; color: var(--muted); white-space: nowrap; overflow: hidden; }
-  .counter .value { font: 700 60px Menlo, monospace; color: var(--yellow); white-space: nowrap; }
-  .counter.frozen { border-color: var(--yellow); }
 </style>
 </head>
 <body>
-  <div id="premise"></div>
-  <div id="speed" class="hidden"></div>
-  <div class="name" id="leftname"></div>
-  <div class="name" id="rightname"></div>
   <iframe class="game" id="left" scrolling="no"></iframe>
   <iframe class="game" id="right" scrolling="no"></iframe>
+  <div class="name" id="leftname"></div>
+  <div class="name" id="rightname"></div>
   <div class="counter" id="leftcounter"><div class="label" id="leftlabel"></div><div class="value" id="leftvalue"></div></div>
+  <div id="divider"></div>
+  <div id="premise"></div>
+  <div id="speed" class="hidden"></div>
   <div class="counter" id="rightcounter"><div class="label" id="rightlabel"></div><div class="value" id="rightvalue"></div></div>
 <script>
   // The recorder fills these in. Nothing here keeps time by itself.
@@ -51,14 +59,16 @@
       $('premise').textContent = premise;
       fit($('premise'), 44, 24);
       $('leftname').textContent = left;
+      fit($('leftname'), 26, 16);
       $('rightname').textContent = right;
+      fit($('rightname'), 26, 16);
     },
     // which: 'left' or 'right'; { label, value, frozen }
     setCounter(which, c) {
       $(`${which}label`).textContent = c.label;
       $(`${which}value`).textContent = c.value;
       $(`${which}counter`).classList.toggle('frozen', Boolean(c.frozen));
-      fit($(`${which}label`), 30, 18);
+      fit($(`${which}label`), 28, 18);
     },
     setSpeed(text) {
       $('speed').textContent = text;

@@ -838,3 +838,24 @@ Use take 3 for v1.3 line 2 (whisper doesn't know the word "Snek"; the
 takes are fine). Re-render v1.3, update RECORDING.json and the backup,
 no new voice requests. STOP.
 ````
+
+## 20. The trailer stacked, and no dead air after "Done."
+
+````text
+Trailer, two changes; shorts are not touched.
+
+1. Layout: stacked, not side by side. v1.0 on top, v2.0 below, each
+   using the full 1080 width (square game area, so each panel is about
+   1080x1080 with a thin divider; the premise line sits in the divider
+   or over the top edge, the two counters under their own panels). The
+   text-not-box checks apply to both panels.
+2. No dead air after "Done.": the first real-time part ends 1 s after
+   line 2 ("Done.") ends, not at 15 s. The compressed middle starts
+   there and runs as long as line 3 needs (same rule as segment C);
+   the last part is unchanged: real time from the approach to the
+   cabinet through THE END, line 4 before Snek, line 5 over the freeze.
+
+Re-render the trailer, no new voice requests, and report: length, the
+second each part starts, the middle's factor, and the first still of
+the stacked layout. STOP.
+````
