@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SRC = path.join(ROOT, 'src');
@@ -46,6 +47,23 @@ ${items}
 `);
 }
 
+// v2.0's arcade cabinet runs the real v1.0: its files come out of git, from the v1.0 tag
+// (dist/v1.0/ as tagged), into <out>/cabinet/, byte for byte. Nothing of v1.0 is copied into src/.
+export const CABINET_FROM = 'v1.0';
+export function exportCabinet(out, tag = CABINET_FROM) {
+  const git = args => execFileSync('git', args, { cwd: ROOT });
+  const files = git(['ls-tree', '-r', '--name-only', tag, '--', `dist/${tag}`]).toString().split('\n').filter(Boolean);
+  fs.mkdirSync(path.join(out, 'cabinet'), { recursive: true });
+  for (const file of files) fs.writeFileSync(path.join(out, 'cabinet', path.relative(`dist/${tag}`, file)), git(['show', `${tag}:${file}`]));
+  return files.map(f => path.relative(`dist/${tag}`, f));
+}
+
+// Copy src/ into a build folder, with the cabinet when the game has one (v2.0 on).
+export function buildInto(out) {
+  fs.cpSync(SRC, out, { recursive: true, filter: src => path.basename(src) !== '.DS_Store' });
+  if (fs.readFileSync(path.join(SRC, 'index.html'), 'utf8').includes('cabinet/index.html')) exportCabinet(out);
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const version = process.argv[2];
   if (!/^v\d+\.\d+$/.test(version || '')) {
@@ -62,7 +80,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.error(`dist/${version}/ already exists. Old builds are never overwritten.`);
     process.exit(1);
   }
-  fs.cpSync(SRC, out, { recursive: true, filter: src => path.basename(src) !== '.DS_Store' });
+  buildInto(out);
   writeIndex();
   console.log(`built dist/${version}/: ${fs.readdirSync(out).join(', ')}`);
 }

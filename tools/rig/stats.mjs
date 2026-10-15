@@ -3,7 +3,7 @@
 // Pre-registered: the screens on which the player's input steers the snake.
 // A new update must use these names only when arrow keys really steer the snake;
 // any other screen name counts as "not in control".
-export const CONTROL_SCREENS = new Set(['ready', 'play']);
+export const CONTROL_SCREENS = new Set(['ready', 'play', 'cabinet']); // 'cabinet' since v2.0: the arrow keys steer v1.0's snake
 
 // Name for the time before the game reports its first screen.
 export const PAGE_LOAD = '(page load)';
@@ -94,6 +94,22 @@ export function playShare(log, end, amount) {
   const fromMs = window[0][0];
   const toMs = window[window.length - 1][1];
   return { controlMs: controlled, fromMs, toMs, share: controlled / (toMs - fromMs) };
+}
+
+// Since v2.0 (prompt 15): when the game ends (THE END) before `amount` of control, control share in
+// play is taken over the actual window: from the first control frame to the end screen.
+export function playShareUntilEnd(log, endScreenMs) {
+  const intervals = controlIntervals(log, endScreenMs);
+  if (!intervals.length) return null;
+  const controlled = intervals.reduce((sum, [a, b]) => sum + b - a, 0);
+  const fromMs = intervals[0][0];
+  return { controlMs: controlled, fromMs, toMs: endScreenMs, share: controlled / (endScreenMs - fromMs), endedGame: true };
+}
+
+// When the game ended: the first frame of its end screen (THE END), or null.
+export function gameEndedMs(log) {
+  const entry = log.find(e => e.type === 'screen' && e.name === 'the-end');
+  return entry ? entry.t : null;
 }
 
 export function firstApple(log) {

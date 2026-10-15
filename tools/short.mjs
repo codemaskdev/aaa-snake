@@ -129,15 +129,20 @@ export function compareTimeline(prev, cur) {
   const aFrom = Math.max(prev.start, prev.apple - PLAN.beforeAppleMs);
   const dFrom = cur.apple - PLAN.beforeAppleMs;
   if (dFrom <= cur.start) throw new Error(`${cur.version}: the first apple comes too soon after the start for this plan`);
-  const dMs = cur.firstLine ? PLAN.beforeAppleMs + cur.firstLine.afterAppleMs + cur.firstLine.ms : PLAN.appleMs;
-  const room = MAX_CLIP_MS - PLAN.prevMs - PLAN.noteMs - dMs - (cur.firstLine ? LINE_SLACK_MS : 0);
+  // D ends when the line after the apple has been said (prompt 12), or, for a plan with `until` (v2.0's
+  // ending), that long after a screen of the run first shows (prompt 14: the inner apple and the ending).
+  const until = cur.plan?.until && cur.raw.log.find(e => e.type === 'screen' && e.name === cur.plan.until.screen);
+  if (cur.plan?.until && !until) throw new Error(`${cur.version}: the run never shows screen '${cur.plan.until.screen}'`);
+  const dMs = until ? until.t + cur.plan.until.afterMs - dFrom
+    : cur.firstLine ? PLAN.beforeAppleMs + cur.firstLine.afterAppleMs + cur.firstLine.ms : PLAN.appleMs;
+  const room = MAX_CLIP_MS - PLAN.prevMs - PLAN.noteMs - dMs - (cur.firstLine && !until ? LINE_SLACK_MS : 0);
   let speed = compressSpeed(dFrom - cur.start);
   while ((dFrom - cur.start) / speed > room) speed = Math.round((speed + 0.05) * 100) / 100; // C faster, so it all fits
   return [
     { name: 'A previous version', kind: 'game', who: 'prev', runFrom: aFrom, clipMs: PLAN.prevMs, speed: 1, counter: 'compare', card: 'prev' },
     { name: 'B patch note', kind: 'note', clipMs: PLAN.noteMs, counter: 'compare-done', card: 'cur-version' },
     { name: 'C launch', kind: 'game', who: 'cur', runFrom: cur.start, clipMs: (dFrom - cur.start) / speed, speed, counter: 'run', card: 'cur' },
-    { name: 'D first apple', kind: 'game', who: 'cur', runFrom: dFrom, clipMs: dMs, speed: 1, counter: 'run', card: 'cur', untilLine: cur.firstLine },
+    { name: 'D first apple', kind: 'game', who: 'cur', runFrom: dFrom, clipMs: dMs, speed: 1, counter: 'run', card: 'cur', untilLine: until ? null : cur.firstLine },
   ];
 }
 

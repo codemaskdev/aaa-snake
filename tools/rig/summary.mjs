@@ -43,7 +43,7 @@ export function rowFor(result, fpsWindow) {
     fps_window: fpsWindow,
     runs: result.settings.runs,
     measured_at: result.measuredAt,
-    kind: kindOf(result.settings.runs),
+    kind: kindOf(result.settings.runs) + (result.median.endedAtMs ? ` / game ended at ${result.median.endedAtMs / 1000} s` : ''),
   };
 }
 

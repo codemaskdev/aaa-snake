@@ -117,6 +117,11 @@
         const due = rafs;
         rafs = [];
         for (const r of due) r.cb(now);
+        // Frames inside this one (v2.0's arcade cabinet runs v1.0 in an iframe) keep the same time.
+        for (const f of document.querySelectorAll('iframe')) {
+          const child = f.contentWindow;
+          if (child && child !== window && child.__vclock) child.__vclock.advanceTo(frameTime);
+        }
       }
       pressKeysUntil(t);
       runTimersUntil(t);

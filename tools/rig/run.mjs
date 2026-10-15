@@ -3,6 +3,7 @@ import { chromium } from 'playwright';
 import { decide, KEY_FOR, skillKey, makeMemory, remember } from './bot.mjs';
 import {
   CONTROL_SCREENS, segments, controlMs, controlIntervals, firstApple, loadMs, frameRate, offOrigin, firstMs, playShare,
+  playShareUntilEnd, gameEndedMs,
 } from './stats.mjs';
 
 // Injected before any game code. It records the time of every animation frame
@@ -156,8 +157,9 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
         if (changed || probe.tick !== lastActedTick) {
           lastActedTick = probe.tick;
           const dir = decide(probe, searchMemory);
-          // On 'ready' any arrow key starts the game, so always press one.
-          if (probe.screen !== 'play' || dir !== probe.heading) {
+          // On 'ready' (and v1.0's ready inside v2.0's cabinet) any arrow key starts the game, so always press one.
+          const waiting = probe.screen === 'ready' || (probe.screen === 'cabinet' && probe.cabinetReady);
+          if (waiting || dir !== probe.heading) {
             await page.keyboard.press(KEY_FOR[dir]);
             if (probe.screen === 'play') {
               steering.sent++;
@@ -176,6 +178,12 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
     }
 
     if (!memory && controlSoFar >= playMsForMemory) memory = await readHeap();
+    // v2.0: the game can end (THE END, then the credits) before 60 s of control. The run ends with it;
+    // the heap is read then if it was not read yet (README.md, Methods).
+    if (probe && probe.ended) {
+      if (!memory && playMsForMemory !== Infinity) memory = await readHeap();
+      break;
+    }
     if (stopAfterControlMs !== null && controlSoFar >= stopAfterControlMs) break;
     // Go on for 1 s of control past the 60 s window, so the game's own log (which the window
     // is cut from) has all of it too: the bot's count of control and the log's differ by ms.
@@ -207,7 +215,9 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
   const origin = new URL(url).origin;
   const requestList = [...requests.values()];
   const apple = firstApple(raw.log);
-  const session = Math.min(sessionMs, end);
+  // A game that ended (v2.0) before the session's 180 s: both control shares stop at its end screen (prompt 15).
+  const endedAtMs = gameEndedMs(raw.log);
+  const session = Math.min(sessionMs, end, endedAtMs ?? Infinity);
   // Frame rate over the first fpsPlayMs of control (by the game's screen log): the same 60 s of play as the heap.
   const fpsWindow = firstMs(controlIntervals(raw.log, end), fpsPlayMs);
   const fps = {
@@ -230,7 +240,8 @@ export async function runOnce({ url, mode = 'headless', sessionMs = 180000, play
       sessionMs: session,
       controlMs: controlMs(raw.log, session),
       controlShare: controlMs(raw.log, session) / session,
-      controlInPlay: playShare(raw.log, end, fpsPlayMs),
+      controlInPlay: playShare(raw.log, end, fpsPlayMs) ?? (endedAtMs !== null ? playShareUntilEnd(raw.log, endedAtMs) : null),
+      endedAtMs,
       search: firstSight,
       memory: memory && { ...memory, raw: undefined },
       memoryRaw: memory?.raw ?? null,

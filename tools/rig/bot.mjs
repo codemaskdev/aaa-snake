@@ -6,6 +6,8 @@
 //     using only the turns the probe says are allowed (v1.6: right only, until "Turn left").
 //   - With no apple in view (v1.7: only within a vision radius), it goes to the nearest cell it
 //     has not yet seen, ties broken by a fixed order (exploreStep).
+//   - v2.0: with the arcade cabinet on screen, it goes for whichever apple is fewer moves away: the
+//     world's, or the cabinet's (the moves to the cabinet plus 3 inside).
 //   - On any other screen it presses the key the screen offers to leave it
 //     (skip, continue, restart) as soon as it is offered.
 //   - On v1.6's skill tree it spends the point on "Turn left" first, then on whatever
@@ -82,7 +84,13 @@ export function pathWithTurns({ snake, apple, grid, heading, allowedTurns }) {
 // The first move of a shortest path (in moves, using only the allowed turns) to the first cell that
 // isTarget(cell) accepts, or null. Of several equally near cells, the first one the search reaches
 // wins: the search tries straight, then right, then left, from every state, in the order it reached them.
-function firstMoveTo({ snake, grid, heading, allowedTurns }, isTarget) {
+function firstMoveTo(probe, isTarget) {
+  const found = searchTo(probe, isTarget);
+  return found ? found.first : null;
+}
+
+// The same search, with the number of moves the path takes: { first, moves }, or null.
+function searchTo({ snake, grid, heading, allowedTurns }, isTarget) {
   const cells = grid * grid;
   const freeAt = new Int32Array(cells); // the move from which a body cell is free (0: free now)
   snake.forEach((part, i) => { freeAt[part.y * grid + part.x] = snake.length - i; });
@@ -108,7 +116,7 @@ function firstMoveTo({ snake, grid, heading, allowedTurns }, isTarget) {
   };
   const h = snake[0];
   for (const d of next[DIRS.indexOf(heading)]) {
-    if (enter(h.x + dx[d], h.y + dy[d], d, 1, d)) return DIRS[d];
+    if (enter(h.x + dx[d], h.y + dy[d], d, 1, d)) return { first: DIRS[d], moves: 1 };
   }
   for (let at = 0; at < tail; at++) {
     const state = queue[at];
@@ -118,7 +126,7 @@ function firstMoveTo({ snake, grid, heading, allowedTurns }, isTarget) {
     const k = depth[state] + 1;
     const first = firstOf[state];
     for (const d of next[state & 3]) {
-      if (enter(x + dx[d], y + dy[d], d, k, first)) return DIRS[first];
+      if (enter(x + dx[d], y + dy[d], d, k, first)) return { first: DIRS[first], moves: k };
     }
   }
   return null;
@@ -186,7 +194,25 @@ function roomAfter({ snake, grid }, dir) {
 
 // The direction the bot wants next on a control screen.
 // Shortest path to the apple if there is one; otherwise the move with the most room.
+// v2.0 (UPDATES.md): the arcade cabinet's apple counts as one the bot can see while the cabinet is on
+// screen, and costs the moves to the cabinet's cell plus CABINET_MOVES inside (v1.0's first apple).
+export const CABINET_MOVES = 3;
+export function toCabinet(probe) {
+  if (!probe.cabinet) return null;
+  const target = probe.cabinet.y * probe.grid + probe.cabinet.x;
+  const cabinet = searchTo({ ...probe, allowedTurns: probe.allowedTurns || ['right', 'left'] }, cell => cell === target);
+  if (!cabinet) return null;
+  if (probe.apple) {
+    const atApple = probe.apple.y * probe.grid + probe.apple.x;
+    const apple = searchTo({ ...probe, allowedTurns: probe.allowedTurns || ['right', 'left'] }, cell => cell === atApple);
+    if (apple && apple.moves <= cabinet.moves + CABINET_MOVES) return null; // the world apple is as near, or nearer
+  }
+  return cabinet.first;
+}
+
 export function decide(probe, memory = null) {
+  const viaCabinet = toCabinet(probe);
+  if (viaCabinet) return viaCabinet;
   const limited = Array.isArray(probe.allowedTurns);
   const toApple = limited ? pathWithTurns(probe) : pathToApple(probe);
   if (toApple) return toApple;

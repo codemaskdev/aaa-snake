@@ -146,6 +146,7 @@ export async function measure(opts) {
       fpsP5: median(fpsRuns.map(r => r.p5)),
       headlessFpsMedian: pick(r => r.fps.median),
       headlessFpsP5: pick(r => r.fps.p5),
+      endedAtMs: pick(r => r.endedAtMs), // since v2.0: when the game ended (THE END), or null
     },
     checks: {
       firstAppleTicks: runs.map(r => r.firstAppleTick),
@@ -176,8 +177,14 @@ export async function measure(opts) {
   const medianScreens = runs.find(r => r.run === result.medianRun)?.screensBeforeFirstApple || [];
   for (const s of medianScreens) say(`    ${s.screen.padEnd(16)} ${s.ms} ms`);
   say(`  load time             ${m.loadMs} ms`);
-  say(`  control share         ${m.controlShare} (of ${o.sessionMs} ms)`);
-  say(`  control share in play ${m.controlShareInPlay} (first ${o.fpsPlayMs} ms of control, from the first control frame)`);
+  if (m.endedAtMs !== null) {
+    say(`  game ended at ${m.endedAtMs / 1000} s (THE END), before ${o.fpsPlayMs} ms of control: both control shares are over the time until then (prompt 15)`);
+    say(`  control share         ${m.controlShare} (of ${Math.min(o.sessionMs, m.endedAtMs)} ms)`);
+    say(`  control share in play ${m.controlShareInPlay} (from the first control frame to THE END)`);
+  } else {
+    say(`  control share         ${m.controlShare} (of ${o.sessionMs} ms)`);
+    say(`  control share in play ${m.controlShareInPlay} (first ${o.fpsPlayMs} ms of control, from the first control frame)`);
+  }
   say(`  JS heap after GC      ${m.heapUsedAfterGcBytes} bytes`);
   say(`  download              ${m.downloadBytes} bytes`);
   say(`  frame rate (${o.fpsMode})  median ${m.fpsMedian} fps, p5 ${m.fpsP5} fps`);
