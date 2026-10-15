@@ -34,11 +34,12 @@ shows each line for its slot whether or not the sound plays. Check with `npm run
 
 A take must fit its slot, and slots never change (they set the length of every cutscene, and so every measured number
 since v1.3). When no take of a line fits, the line is said shorter, with the same meaning and emotion; the subtitle in
-the game, and so the slot, stay as they are (prompt 11).
+the game, and so the slot, stayed as they were (prompt 11). From v1.7 the subtitle reads as the line is said, with
+the old slot pinned (prompt 12); v1.3 to v1.6 keep their own story.js and so the old subtitle.
 
-| # | Subtitle (src/story.js) | Said |
-|---|---|---|
-| 16 | Another one. The orchard remembers. | Another. The orchard remembers. |
+| # | Subtitle (src/story.js) | Said | Subtitle before |
+|---|---|---|---|
+| 16 | Another. The orchard remembers. | Another. The orchard remembers. | Another one. The orchard remembers. (up to v1.6; from v1.7: slot pinned at 2800 ms, the slot of the old text) |
 
 ## Lines
 
@@ -59,5 +60,5 @@ the game, and so the slot, stay as they are (prompt 11).
 | 13 | After an apple | defiant | They can take the trees. They cannot take the taste. | 4.8 | src/voice/13.mp3 | 3600 |
 | 14 | After an apple | dry | I am getting longer. That is either growth or regret. | 4.8 | src/voice/14.mp3 | 4640 |
 | 15 | After an apple | tender | Somewhere, a tree is proud of me. | 3.6 | src/voice/15.mp3 | 2720 |
-| 16 | After an apple | solemn | Another one. The orchard remembers. | 2.8 | src/voice/16.mp3 | 2640 |
+| 16 | After an apple | solemn | Another. The orchard remembers. | 2.8 | src/voice/16.mp3 | 2640 |
 | 17 | After an apple | tired | My back hurts. I do not have a back. It still hurts. | 5.6 | src/voice/17.mp3 | 5360 |

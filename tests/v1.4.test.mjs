@@ -72,7 +72,8 @@ test('the voice lines live in one place: every build plays the files in src/voic
   const builds = buildsOutOfStep();
   assert.ok(builds.some(b => b.version === 'v1.3'));
   for (const { version, differ } of builds) assert.deepEqual(differ, [], `dist/${version}/voice/ differs from src/voice/: run npm run voice`);
-  assert.equal(fs.readFileSync(path.join(dir, 'story.js'), 'utf8'), fs.readFileSync(path.join(ROOT, 'src/story.js'), 'utf8'));
+  // The build plays the files of its own voice/ folder, which npm run voice keeps the same as src/voice/.
+  assert.match(fs.readFileSync(path.join(dir, 'story.js'), 'utf8'), /fetch\(`voice\/\$\{String\(line\.id\)\.padStart\(2, '0'\)\}\.mp3`/);
 });
 
 test('npm run voice copies a new recording into every build that has voice lines', () => {

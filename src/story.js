@@ -25,7 +25,9 @@ const LINES = [
   { id: 13, scene: 'After an apple', emotion: 'defiant', text: 'They can take the trees. They cannot take the taste.' },
   { id: 14, scene: 'After an apple', emotion: 'dry', text: 'I am getting longer. That is either growth or regret.' },
   { id: 15, scene: 'After an apple', emotion: 'tender', text: 'Somewhere, a tree is proud of me.' },
-  { id: 16, scene: 'After an apple', emotion: 'solemn', text: 'Another one. The orchard remembers.' },
+  // Since v1.7 the subtitle reads as the line is said (prompt 12); its slot stays the 2800 ms it had
+  // as "Another one. The orchard remembers." (v1.3 to v1.6), so no cutscene changes length.
+  { id: 16, scene: 'After an apple', emotion: 'solemn', text: 'Another. The orchard remembers.', slot: 2800 },
   { id: 17, scene: 'After an apple', emotion: 'tired', text: 'My back hurts. I do not have a back. It still hurts.' },
 ];
 const OPENING = LINES.filter(line => line.scene.startsWith('Opening'));
@@ -35,6 +37,7 @@ const REFLECTIONS = LINES.filter(line => line.scene.startsWith('After'));
 const FINISHER = { slowMs: 800, biteMs: 1500, key: 'KeyE' };
 
 function slotMs(line) {
+  if (line.slot) return line.slot; // a pinned slot (line 16)
   const words = line.text.split(/\s+/).length;
   return Math.round((words / SPEAKING_RATE) * 10) * 100 + LINE_PAUSE;
 }

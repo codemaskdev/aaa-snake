@@ -18,6 +18,7 @@ const PATCH_NOTES = [
   ['v1.4', "Always-online connectivity keeps you close to the Snake community, even when you'd rather play."],
   ['v1.5', 'The world is now bigger than ever. The apple is the same size as before.'],
   ['v1.6', 'Turning left is now a skill. Progression is now a feature.'],
+  ['v1.7', 'Season 1 is here! Unlock exclusive rewards, including the ability to see the apple.'],
 ];
 
 const patch = { total: null, pieces: [], received: 0, requested: 0, installed: false, failed: null };

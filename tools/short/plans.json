@@ -27,5 +27,8 @@
   },
   "v1.6": {
     "start": "screen:update-required"
+  },
+  "v1.7": {
+    "start": "screen:update-required"
   }
 }

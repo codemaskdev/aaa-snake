@@ -1,14 +1,15 @@
-// AAA Snake v1.6: the screen, the keys and the game loop.
+// AAA Snake v1.7: the screen, the keys and the game loop.
 // The rules live in rules.js, the day-one update in update.js, the story in story.js,
 // SnakeNet in online.js, the open world in world.js, XP and skills in progress.js,
-// the launch experience in launch.js. The shadows arrive in the day-one patch.
+// Season 1 in season.js and skins.js, the launch experience in launch.js.
+// The shadows arrive in the day-one patch.
 
-const VERSION = 'v1.6';
+const VERSION = 'v1.7';
 const CELL = 24;        // each cell is 24 x 24 pixels
 const HUD = 32;         // a strip at the top for the score
 const BOARD = GRID * CELL;
 const TICK_MS = 100;    // the snake moves one cell every 100 ms (10 per second)
-const COLORS = { snake: '#3b3', head: '#8f8', apple: '#e33', text: '#fff', eye: '#fff', pupil: '#000' };
+const COLORS = { apple: '#e33', text: '#fff', eye: '#fff', pupil: '#000' }; // the snake's colours come from its skin
 const DARKNESS = 'rgba(0, 0, 0, 0.82)'; // the field at night
 const LIGHT = 110;                     // radius of the light around Warden Snek's head, in pixels
                                        // (the opening is at night; the world after it is in daylight)
@@ -34,6 +35,7 @@ const seed = Number(new URLSearchParams(location.search).get('seed') || 1) >>> 0
 const random = makeRandom(seed);
 let game = newGame(random, WORLD.size, WORLD.appleFar);
 startOnline(seed);
+startWardrobe(seed);
 let before = copySnake();  // where the snake was before its last move, for smooth drawing
 let reflection = null;     // the line of the cutscene after an apple
 let best = 0;
@@ -48,6 +50,14 @@ window.addEventListener('keydown', event => {
   if (screen === 'terms' && TERMS_KEYS[event.code]) {
     event.preventDefault();
     scrollTerms(TERMS_KEYS[event.code]);
+  } else if (['battle-pass', 'parody-shop', 'loot-box', 'wardrobe'].includes(screen)) {
+    const to = seasonKey(screen, event.code, screenTime);
+    if (to === 'carry-on') carryOn();
+    else if (to === 'new-game') {
+      game = newGame(random, WORLD.size, WORLD.appleFar);
+      before = copySnake();
+      setScreen('autosave'); // the notice comes back before every game
+    } else if (to) setScreen(to);
   } else if (screen === 'level-up') {
     if (event.code === 'Enter' && screenTime >= PROGRESS.levelUpListensAfter) setScreen('skill-tree');
   } else if (screen === 'skill-tree') {
@@ -70,9 +80,7 @@ window.addEventListener('keydown', event => {
   } else if (screen === 'finisher' && event.code === FINISHER.key && screenTime >= FINISHER.slowMs) {
     setScreen('finisher-bite');
   } else if (screen === 'gameover' && (event.code === 'Enter' || event.code === 'Space')) {
-    game = newGame(random, WORLD.size, WORLD.appleFar);
-    before = copySnake();
-    setScreen('autosave'); // the notice comes back before every game
+    setScreen('loot-box'); // a loot box after every game over, then the wardrobe, then a new game
   }
 });
 
@@ -134,16 +142,19 @@ function tick() {
     const found = visitCell(game.snake[0]); // a map marker on this cell
     if (found) toast(found);
     gainXp(PROGRESS.xp.move);
+    passCheck(progression.xp);
     if (connectionDrops()) dropPending = true; // the game pauses until SnakeNet "reconnects"
-    if (progression.pending > 0 || dropPending) carryOn();
+    if (progression.pending > 0 || season.pending > 0 || dropPending) carryOn();
   }
 }
 
 // After anything that stops play: a level-up waiting comes first (LEVEL UP!, then the skill tree),
-// then a connection drop waiting, then play.
+// then a battle-pass tier, then a connection drop waiting, then play.
 function carryOn() {
   if (progression.pending > 0) {
     setScreen('level-up');
+  } else if (season.pending > 0) {
+    setScreen('battle-pass');
   } else if (dropPending) {
     dropPending = false;
     report('reconnect', { playTicks: online.playTicks, ms: online.dropMs });
@@ -158,7 +169,8 @@ function bite() {
   before = copySnake();
   step(game, random);
   report('apple', { score: game.score, tick: game.tick });
-  gainXp(PROGRESS.xp.apple); // a level-up it makes waits for the reflection
+  gainXp(PROGRESS.xp.apple); // a level-up or a tier it makes waits for the reflection
+  passCheck(progression.xp);
   reflection = REFLECTIONS[(game.score - 1) % REFLECTIONS.length];
   setScreen('reflection');
 }
@@ -171,6 +183,7 @@ function setScreen(name) {
   onlineScreen(name);
   worldScreen(name);
   progressScreen(name);
+  seasonScreen(name);
   report('screen', { name });
 }
 
@@ -181,7 +194,15 @@ function copySnake() {
 function draw() {
   if (screen === 'world-map') {
     const head = game.snake[0];
-    drawWorldMap(ctx, screenTime, canvas.width, canvas.height, head, game.apple, questDistance());
+    const seen = appleVisible(head, game.apple); // since v1.7 the maps show the apple only once it is in view
+    drawWorldMap(ctx, screenTime, canvas.width, canvas.height, head, seen ? game.apple : null, seen ? questDistance() : null);
+    drawToasts(ctx, canvas.width);
+    reportFirstFrame();
+    return;
+  }
+  const seasonScreens = { 'battle-pass': drawBattlePass, 'parody-shop': drawParodyShop, 'loot-box': drawLootBox, wardrobe: drawWardrobe };
+  if (seasonScreens[screen]) {
+    seasonScreens[screen](ctx, screenTime, canvas.width, canvas.height);
     drawToasts(ctx, canvas.width);
     reportFirstFrame();
     return;
@@ -226,16 +247,19 @@ function draw() {
   drawWorld(ctx, cam.view); // only the cells the camera sees
   if (progression.skills.shadow) withShadow(ctx, () => drawSnake(path, headAt)); // soft shadows, from the day-one patch
   else drawSnake(path, headAt); // the shadow is a skill now
-  if (game.apple) drawApple(game.apple, appleScale, true);
+  const seen = appleVisible(game.snake[0], game.apple); // only within VISION cells, until Apple Vision
+  if (seen) drawApple(game.apple, appleScale, true);
   drawClouds(ctx, cam.view);
   ctx.restore();
   if (screen === 'opening') drawDarkness(toScreen(headAt), LIGHT); // the opening is still at night
 
   if (['ready', 'play', 'reconnecting', 'gameover'].includes(screen) && game.apple) {
-    drawWorldHud(ctx, questDistance(), HUD);
+    drawVision(ctx, toScreen(headAt), cam.zoom);
+    drawWorldHud(ctx, seen ? questDistance() : null, HUD);
+    drawSeasonHud(ctx, HUD);
     drawXpBar(ctx, 14, HUD + BOARD - 16, BOARD - WORLD.minimap.px - 50, world.time);
-    drawMinimap(ctx, game.snake[0], game.apple, BOARD - WORLD.minimap.px - 10, HUD + BOARD - WORLD.minimap.px - 24);
-    drawQuestMarker(ctx, toScreen(center(game.apple)), toScreen(headAt), { x: 0, y: HUD, w: BOARD, h: BOARD });
+    drawMinimap(ctx, game.snake[0], seen ? game.apple : null, BOARD - WORLD.minimap.px - 10, HUD + BOARD - WORLD.minimap.px - 24);
+    if (seen) drawQuestMarker(ctx, toScreen(center(game.apple)), toScreen(headAt), { x: 0, y: HUD, w: BOARD, h: BOARD });
   }
   if (screen === 'opening' || screen === 'reflection') {
     const lines = screen === 'opening' ? OPENING : [reflection];
@@ -271,7 +295,7 @@ function camera(headAt) {
   if (screen === 'opening' || screen === 'reflection') zoom = 2.5;
   if (screen === 'finisher') zoom = 1 + 1.5 * Math.min(1, screenTime / FINISHER.slowMs); // the slow push-in
   if (screen === 'finisher-bite') zoom = 2.5;
-  const half = BOARD / 2;
+  const half = BOARD / 2 - 3 * CELL; // since v1.7 the camera may look 3 cells past the edge, so Snek never hides under the HUD
   const edge = v => Math.max(half, Math.min(WORLD.size * CELL - half, v));
   const close = (zoom - 1) / 1.5; // 0 at normal zoom, 1 in a close-up, which centres on the head
   let x = edge(headAt.x) + (headAt.x - edge(headAt.x)) * close;
@@ -318,16 +342,10 @@ function center(cell) {
   return { x: cell.x * CELL + CELL / 2, y: cell.y * CELL + CELL / 2 };
 }
 
+// The snake, in the skin it wears (src/skins.js; drawing only).
 function drawSnake(path, headAt) {
   const points = [headAt, ...path.slice(1).map(center)];
-  ctx.strokeStyle = COLORS.snake;
-  ctx.lineWidth = CELL - 4;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
-  points.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
-  ctx.stroke();
-  drawHead(headAt);
+  if (drawSkinnedSnake(ctx, points, world.time)) drawHead(headAt);
 }
 
 // The head, with two eyes that look the way the snake is about to go
@@ -335,7 +353,7 @@ function drawSnake(path, headAt) {
 function drawHead(p) {
   const heading = game.turns.length > 0 ? game.turns[0] : game.direction;
   const look = DIRECTIONS[heading];
-  ctx.fillStyle = COLORS.head;
+  ctx.fillStyle = wornSkin().head;
   ctx.beginPath();
   ctx.arc(p.x, p.y, CELL / 2, 0, Math.PI * 2);
   ctx.fill();
@@ -412,6 +430,7 @@ function nextKey() {
   if (screen === 'gameover') return 'Enter';
   if (screen === 'level-up' && screenTime >= PROGRESS.levelUpListensAfter) return 'Enter';
   if (screen === 'skill-tree') return skillTreeNext(screenTime);
+  if (['battle-pass', 'parody-shop', 'loot-box', 'wardrobe'].includes(screen)) return seasonNext(screen, screenTime);
   if (screen === 'finisher' && screenTime >= FINISHER.slowMs) return FINISHER.key;
   return null;
 }
@@ -435,7 +454,8 @@ window.snakeGame = {
     tick: game.tick,
     heading: game.turns.length > 0 ? game.turns[game.turns.length - 1] : game.direction,
     snake: game.snake,
-    apple: game.apple,
+    apple: appleVisible(game.snake[0], game.apple) ? game.apple : null, // since v1.7, only within the vision radius
+    vision: hasAppleVision() ? null : VISION,
     score: game.score,
     grid: game.size, // since v1.5, the open world (the quest marker always shows where the apple is)
     allowedTurns: allowedTurns(), // since v1.6: 'right' always, 'left' once learned (going straight is always allowed)

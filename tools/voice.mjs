@@ -81,7 +81,11 @@ export function readRecording(file = RECORDING_FILE) {
 // slot is said shorter, with the same meaning and emotion (prompt 11). The subtitle, and so the
 // slot, stay as they are.
 export const SPOKEN = {
-  16: 'Another. The orchard remembers.', // subtitle: "Another one. The orchard remembers."; 4 takes of it ran 3520 to 3600 ms in its 2800 ms slot
+  16: 'Another. The orchard remembers.', // 4 takes of "Another one. The orchard remembers." ran 3520 to 3600 ms in its 2800 ms slot
+};
+// Subtitles that changed after a version was built: older builds keep their own story.js.
+export const SUBTITLE_HISTORY = {
+  16: { until: 'v1.6', text: 'Another one. The orchard remembers.', since: 'v1.7', note: 'slot pinned at 2800 ms, the slot of the old text' },
 };
 
 // The text sent for a line: its emotion as an audio tag, then the words.
@@ -112,17 +116,21 @@ shows each line for its slot whether or not the sound plays. Check with \`npm ru
 (never longer), so the build and the rig work. A slot is the line's words at ${SPEAKING_RATE} words per second, rounded to 0.1 s, plus ${LINE_PAUSE / 1000} s;
 the game shows each line for its slot whether or not the sound plays, so a recording that fits its slot does not
 change any timing. Check with \`npm run voice -- --check\`.`;
-  const changed = LINES.filter(line => SPOKEN[line.id]);
+  const changed = LINES.filter(line => (SPOKEN[line.id] && SPOKEN[line.id] !== line.text) || SUBTITLE_HISTORY[line.id]);
   const spokenSection = changed.length
     ? `## Said shorter than the subtitle
 
 A take must fit its slot, and slots never change (they set the length of every cutscene, and so every measured number
 since v1.3). When no take of a line fits, the line is said shorter, with the same meaning and emotion; the subtitle in
-the game, and so the slot, stay as they are (prompt 11).
+the game, and so the slot, stayed as they were (prompt 11). From v1.7 the subtitle reads as the line is said, with
+the old slot pinned (prompt 12); v1.3 to v1.6 keep their own story.js and so the old subtitle.
 
-| # | Subtitle (src/story.js) | Said |
-|---|---|---|
-${changed.map(line => `| ${line.id} | ${line.text} | ${SPOKEN[line.id]} |`).join('\n')}
+| # | Subtitle (src/story.js) | Said | Subtitle before |
+|---|---|---|---|
+${changed.map(line => {
+  const was = SUBTITLE_HISTORY[line.id];
+  return `| ${line.id} | ${line.text} | ${SPOKEN[line.id] || line.text} | ${was ? `${was.text} (up to ${was.until}; from ${was.since}: ${was.note})` : ''} |`;
+}).join('\n')}
 
 `
     : '';

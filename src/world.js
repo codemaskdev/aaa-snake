@@ -490,9 +490,9 @@ function drawWorldHud(ctx, distance, top) {
   ctx.fillText('QUEST: The last apple', 16, top + 20);
   ctx.fillStyle = '#ddd';
   ctx.font = '12px Helvetica, Arial, sans-serif';
-  ctx.fillText(`${distance} m away`, 16, top + 38);
-  ctx.drawImage(world.sprites.acorn, 98, top + 23, 20, 20);
-  ctx.fillText(`${world.found.acorn} / ${WORLD.markers.acorn}`, 120, top + 38);
+  ctx.fillText(distance === null ? 'Location unknown' : `${distance} m away`, 16, top + 38);
+  ctx.drawImage(world.sprites.acorn, 120, top + 23, 20, 20);
+  ctx.fillText(`${world.found.acorn} / ${WORLD.markers.acorn}`, 142, top + 38);
   ctx.restore();
 }
 
@@ -511,15 +511,17 @@ function drawMinimap(ctx, head, apple, x, y) {
   ctx.beginPath();
   ctx.rect(x, y, px, px);
   ctx.clip();
-  const ax = Math.max(x + 4, Math.min(x + px - 4, x + (apple.x - sx + 0.5) * scale));
-  const ay = Math.max(y + 4, Math.min(y + px - 4, y + (apple.y - sy + 0.5) * scale));
-  ctx.fillStyle = GOLD;
-  ctx.beginPath();
-  ctx.moveTo(ax, ay - 5);
-  ctx.lineTo(ax + 5, ay);
-  ctx.lineTo(ax, ay + 5);
-  ctx.lineTo(ax - 5, ay);
-  ctx.fill();
+  if (apple) { // since v1.7 only once the apple is in view
+    const ax = Math.max(x + 4, Math.min(x + px - 4, x + (apple.x - sx + 0.5) * scale));
+    const ay = Math.max(y + 4, Math.min(y + px - 4, y + (apple.y - sy + 0.5) * scale));
+    ctx.fillStyle = GOLD;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay - 5);
+    ctx.lineTo(ax + 5, ay);
+    ctx.lineTo(ax, ay + 5);
+    ctx.lineTo(ax - 5, ay);
+    ctx.fill();
+  }
   ctx.fillStyle = '#fff';
   ctx.beginPath();
   ctx.arc(x + (head.x - sx + 0.5) * scale, y + (head.y - sy + 0.5) * scale, 3, 0, Math.PI * 2);
@@ -568,36 +570,19 @@ function drawWorldMap(ctx, time, width, height, head, apple, distance) {
   ctx.textAlign = 'right';
   ctx.fillStyle = GOLD;
   ctx.font = 'bold 13px Helvetica, Arial, sans-serif';
-  ctx.fillText(`QUEST: The last apple, ${distance} m`, width - 16, 22);
+  ctx.fillText(distance === null ? 'QUEST: The last apple, location unknown' : `QUEST: The last apple, ${distance} m`, width - 16, 22);
   if (world.mapView) ctx.drawImage(world.mapView, MAP_BOX.x, MAP_BOX.y);
   ctx.strokeStyle = '#333';
   ctx.strokeRect(MAP_BOX.x - 0.5, MAP_BOX.y - 0.5, MAP_BOX.size + 1, MAP_BOX.size + 1);
   const scale = MAP_BOX.size / WORLD.size;
   const at = cell => ({ x: MAP_BOX.x + (cell.x + 0.5) * scale, y: MAP_BOX.y + (cell.y + 0.5) * scale });
   const pulse = 0.5 + 0.5 * Math.sin(time / 200);
-  const q = at(apple);
-  ctx.strokeStyle = GOLD;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(q.x, q.y, 10 + pulse * 6, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.fillStyle = GOLD;
-  ctx.beginPath();
-  ctx.moveTo(q.x, q.y - 7);
-  ctx.lineTo(q.x + 7, q.y);
-  ctx.lineTo(q.x, q.y + 7);
-  ctx.lineTo(q.x - 7, q.y);
-  ctx.fill();
-  ctx.textAlign = q.x > width / 2 ? 'right' : 'left';
-  ctx.font = 'bold 12px Helvetica, Arial, sans-serif';
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 3;
-  const labelX = q.x + (q.x > width / 2 ? -14 : 14);
-  ctx.strokeText('The last apple', labelX, q.y);
-  ctx.fillText('The last apple', labelX, q.y);
+  if (apple) drawMapQuest(ctx, at(apple), pulse, width);
   const you = at(head);
   ctx.fillStyle = '#fff';
   ctx.strokeStyle = '#000';
+  ctx.lineWidth = 3;
+  ctx.font = 'bold 12px Helvetica, Arial, sans-serif';
   ctx.beginPath();
   ctx.arc(you.x, you.y, 5, 0, Math.PI * 2);
   ctx.stroke();
@@ -631,5 +616,31 @@ function drawWorldMap(ctx, time, width, height, head, apple, distance) {
     ctx.font = '13px Helvetica, Arial, sans-serif';
     ctx.fillText('Press Enter to continue', width - 16, 488);
   }
+  ctx.restore();
+}
+
+// The quest's marker on the world map, with its label.
+function drawMapQuest(ctx, q, pulse, width) {
+  ctx.save();
+  ctx.textBaseline = 'middle';
+  ctx.strokeStyle = GOLD;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(q.x, q.y, 10 + pulse * 6, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = GOLD;
+  ctx.beginPath();
+  ctx.moveTo(q.x, q.y - 7);
+  ctx.lineTo(q.x + 7, q.y);
+  ctx.lineTo(q.x, q.y + 7);
+  ctx.lineTo(q.x - 7, q.y);
+  ctx.fill();
+  ctx.textAlign = q.x > width / 2 ? 'right' : 'left';
+  ctx.font = 'bold 12px Helvetica, Arial, sans-serif';
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 3;
+  const labelX = q.x + (q.x > width / 2 ? -14 : 14);
+  ctx.strokeText('The last apple', labelX, q.y);
+  ctx.fillText('The last apple', labelX, q.y);
   ctx.restore();
 }
