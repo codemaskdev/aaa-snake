@@ -1,10 +1,10 @@
-// AAA Snake v1.7: the screen, the keys and the game loop.
+// AAA Snake v1.9: the screen, the keys and the game loop.
 // The rules live in rules.js, the day-one update in update.js, the story in story.js,
 // SnakeNet in online.js, the open world in world.js, XP and skills in progress.js,
-// Season 1 in season.js and skins.js, the launch experience in launch.js.
-// The shadows arrive in the day-one patch.
+// Season 1 in season.js and skins.js, the hair in hair.js, the remaster's WebGL pass in
+// remaster.js, the launch experience in launch.js. The shadows arrive in the day-one patch.
 
-const VERSION = 'v1.7';
+const VERSION = 'v1.9';
 const CELL = 24;        // each cell is 24 x 24 pixels
 const HUD = 32;         // a strip at the top for the score
 const BOARD = GRID * CELL;
@@ -36,6 +36,8 @@ const random = makeRandom(seed);
 let game = newGame(random, WORLD.size, WORLD.appleFar);
 startOnline(seed);
 startWardrobe(seed);
+startHair(seed);
+startRemaster(canvas);
 let before = copySnake();  // where the snake was before its last move, for smooth drawing
 let reflection = null;     // the line of the cutscene after an apple
 let best = 0;
@@ -94,6 +96,7 @@ canvas.addEventListener('wheel', event => {
 // The snake moves on a fixed beat (TICK_MS), however fast the screen draws.
 let lastFrame = null;
 let waited = 0;
+let frameElapsed = 0; // ms of animation since the last frame, for the hair
 function frame(now) {
   const elapsed = lastFrame === null ? 0 : Math.min(now - lastFrame, 250); // after a long pause, don't jump ahead
   lastFrame = now;
@@ -120,7 +123,9 @@ function frame(now) {
       tick();
     }
   }
+  frameElapsed = elapsed;
   draw();
+  presentRemaster(canvas); // the 2D frame, through the one WebGL pass, onto the screen
   requestAnimationFrame(frame);
 }
 
@@ -304,7 +309,7 @@ function camera(headAt) {
     x = Math.round(x);
     y = Math.round(y);
   }
-  const seen = half / zoom;
+  const seen = BOARD / 2 / zoom; // the whole board (v1.7 used the edge margin here and drew only its middle)
   return { x, y, zoom, view: { x0: x - seen, y0: y - seen, x1: x + seen, y1: y + seen } };
 }
 
@@ -342,10 +347,24 @@ function center(cell) {
   return { x: cell.x * CELL + CELL / 2, y: cell.y * CELL + CELL / 2 };
 }
 
-// The snake, in the skin it wears (src/skins.js; drawing only).
+// The snake, in the skin it wears (src/skins.js; drawing only). Since v1.9 with motion blur: two
+// fading copies a third and two thirds of a move behind, in play.
 function drawSnake(path, headAt) {
+  if (screen === 'play' && progression.skills.smooth) {
+    const progress = Math.min(waited / TICK_MS, 1);
+    [[0.66, 0.12], [0.33, 0.22]].forEach(([behind, alpha]) => {
+      const ghost = snakePath(Math.max(0, progress - behind));
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      drawSkinnedSnake(ctx, [center(ghost[0]), ...ghost.slice(1).map(center)], world.time, true);
+      ctx.restore();
+    });
+  }
   const points = [headAt, ...path.slice(1).map(center)];
   if (drawSkinnedSnake(ctx, points, world.time)) drawHead(headAt);
+  const heading = DIRECTIONS[game.turns.length > 0 ? game.turns[0] : game.direction];
+  hairWork(frameElapsed, { x: headAt.x / CELL, y: headAt.y / CELL }, heading); // since v1.9: simulated hair
+  drawHair(ctx, CELL);
 }
 
 // The head, with two eyes that look the way the snake is about to go

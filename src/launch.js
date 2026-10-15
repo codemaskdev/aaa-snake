@@ -1,9 +1,10 @@
-// AAA Snake v1.5: the launch experience.
+// AAA Snake v1.9: the launch experience.
 // Everything you sit through before the snake: the day-one update (update.js), three
 // studio logos you cannot skip, a health warning, a title screen, the online screens
 // (online.js: connecting, signing in, the queue, the terms of service), a loading screen
 // with tips (it loads the voice lines), the opening cutscene (story.js), an autosave
-// notice before every game, and the world map with the quest (world.js).
+// notice before every game, and the world map with the quest (world.js). Since v1.9, after the
+// title, the REMASTERED screen (remaster.js).
 // The studio names are invented. Times are in ms of animation frames, never the clock.
 
 const LAUNCH = {
@@ -15,7 +16,8 @@ const LAUNCH = {
   'studio-logo':     { lasts: 3000, then: 'engine-logo' },  // cannot be skipped
   'engine-logo':     { lasts: 3000, then: 'warning' },      // cannot be skipped
   'warning':         { listensAfter: 4000, then: 'title' }, // any key, once it listens
-  'title':           { listensAfter: 2500, then: 'connecting' }, // after the title animation
+  'title':           { listensAfter: 2500, then: 'remastered' }, // after the title animation
+  'remastered':      { listensAfter: REMASTER.listensAfter, key: 'Enter', then: 'connecting' }, // requirements, all Ultra
   'connecting':      { lasts: ONLINE.connectMs, then: 'sign-in' }, // a stub: no request is made
   'sign-in':         { listensAfter: ONLINE.signInListensAfter, key: 'Enter', then: 'signing-in' },
   'signing-in':      { lasts: ONLINE.signingInMs, then: 'queue' },
@@ -70,6 +72,7 @@ function drawLaunch(ctx, screen, time, width, height) {
   if (screen === 'engine-logo') drawEngine(ctx, time, width, height);
   if (screen === 'warning') drawWarning(ctx, time, width, height);
   if (screen === 'title') drawTitle(ctx, time, width, height);
+  if (screen === 'remastered') drawRemastered(ctx, time, width, height);
   if (ONLINE_SCREENS.includes(screen)) drawOnline(ctx, screen, time, width, height);
   if (screen === 'loading') drawLoading(ctx, time, width, height);
   if (screen === 'autosave') drawAutosave(ctx, time, width, height);

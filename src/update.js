@@ -19,6 +19,7 @@ const PATCH_NOTES = [
   ['v1.5', 'The world is now bigger than ever. The apple is the same size as before.'],
   ['v1.6', 'Turning left is now a skill. Progression is now a feature.'],
   ['v1.7', 'Season 1 is here! Unlock exclusive rewards, including the ability to see the apple.'],
+  ['v1.9', 'Remastered from the ground up with cinematic visuals. Gameplay faithfully preserved.'],
 ];
 
 const patch = { total: null, pieces: [], received: 0, requested: 0, installed: false, failed: null };

@@ -53,8 +53,9 @@ function openLootBox() {
   return skin;
 }
 
-// The snake in its skin. points: the body's centres, head first, in world px.
-function drawSkinnedSnake(ctx, points, time) {
+// The snake in its skin. points: the body's centres, head first, in world px. A ghost (v1.9's
+// motion blur) leaves no trail.
+function drawSkinnedSnake(ctx, points, time, ghost = false) {
   const skin = wornSkin();
   if (skin.classic) { // v1.0: square cells, no curves, no eyes
     points.slice().reverse().forEach((p, i) => {
@@ -63,7 +64,7 @@ function drawSkinnedSnake(ctx, points, time) {
     });
     return false; // no round head to draw
   }
-  if (skin.trail) drawTrail(ctx, points[0], time);
+  if (skin.trail && !ghost) drawTrail(ctx, points[0], time);
   ctx.save();
   if (skin.glow) {
     ctx.shadowColor = skin.glow;
