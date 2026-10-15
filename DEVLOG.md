@@ -941,3 +941,37 @@ overnight, before release (not run yet). README.md, "Methods", has it.
 (only its printed line, in the stopped output), so v1.7 is measured again under the new rule, one headless and one
 visible run. The game and the bot are deterministic, so I expect the same tick (7595) and, but for timer noise, the
 same times.
+
+### v1.9, the plan (written before coding)
+v1.8 is the viewers' open slot and is not built; v1.9 follows v1.7. **"Remaster" in code** means the same game, the
+same files doing the same things, with three additions on top, and nothing under them touched: rules.js, world.js,
+the bot, the seed, the screens of v1.7 stay as they are, so the first apple's tick stays 7595.
+
+1. **One WebGL post-processing pass** (src/remaster.js). The game keeps drawing into its 2D canvas, now hidden; a
+   second canvas, WebGL, shows it. Every frame the 2D canvas is uploaded as one texture and drawn once with one
+   fragment shader, at the screen's own resolution (Retina: 2 pixels per point): a bloom (bright parts blurred in a
+   13-tap kernel inside the same shader, then added back), a vignette, film grain (from a frame counter, not a clock),
+   chromatic aberration growing toward the edges, and a warm colour grade. One program, one draw call, no framebuffers,
+   no second pass, no 3D. UPDATES.md also lists motion blur; a real one needs the previous frame, so a second pass,
+   so it is drawn in the 2D canvas instead: two fading copies of the snake one tick behind ("on a snake that moves one
+   cell at a time").
+2. **Hair physics** (src/hair.js): a tuft on Warden Snek's head, simulated, not animated. The number of strands (5 to
+   8), their lengths and stiffness come from the seed (their own generator). Each strand is a chain of points moved by
+   Verlet integration with drag and gravity toward the back of the head, its segments held at their length by
+   constraints, at a fixed step (8 ms of animation time; the frame time only decides how many steps run), in the cell
+   units of the 20 x 20 view. The root follows the head's drawn position, which comes from the game state and the
+   tick's progress, so the same run gives the same hair. About 50 points: a few microseconds a frame. Drawing only.
+3. **"Minimum requirements"**, inside one new launch screen, "REMASTERED" (after the title, so load time is not
+   touched), which also holds the two things UPDATES.md lists for v1.9: "Upgrade to Remastered" with a PARODY label and
+   nothing to pay, and a graphics settings row where every preset is called "Ultra". The requirements are this build's
+   **download bytes, JS heap after GC and asset bytes as measured for the version before it** (v1.7):
+   `npm run requirements` (tools/requirements.mjs) reads measurements/v1.7.json and writes src/requirements.js; the
+   screen shows those numbers as they are; a test checks them against the file. Enter after 3000 ms; the bot presses
+   it, as on every screen.
+
+**Budget:** median at least 50 fps, 5th percentile at least 30 fps in the visible window. If the measured frame rate
+falls below, the pass drops to a lower internal resolution (it renders into a smaller WebGL canvas that the page
+scales up), in steps, until it fits, and DEVLOG says by how much.
+
+**Test for the tick:** tests/v1.9.test.mjs runs the bot's search offline on v1.9's own rules.js and world size and
+checks the first apple on tick 7595, and checks that rules.js, world.js and season.js are byte for byte v1.7's.
