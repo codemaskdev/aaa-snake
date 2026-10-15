@@ -1,0 +1,1101 @@
+{
+  "version": "v1.9",
+  "command": "npm run measure v1.9",
+  "measuredAt": "2026-10-15T14:15:57.765Z",
+  "git": {
+    "head": "a26038d",
+    "tag": {
+      "name": "v1.9",
+      "commit": "8170bab"
+    },
+    "buildSameAsTag": true,
+    "buildUncommitted": false
+  },
+  "machine": {
+    "model": "MacBook Air",
+    "modelIdentifier": "MacBookAir10,1",
+    "chip": "Apple M1",
+    "cores": 8,
+    "ramBytes": 17179869184,
+    "os": "macOS 26.3.1 (25D771280a)",
+    "node": "v24.15.0",
+    "ram": "16 GB"
+  },
+  "browser": {
+    "name": "Chromium",
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "headless": {
+      "mode": "new headless (Playwright channel \"chromium\")",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        800
+      ],
+      "devicePixelRatio": 2
+    },
+    "fpsWindow": {
+      "mode": "visible",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        700
+      ],
+      "devicePixelRatio": 2
+    }
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1,
+    "sessionMs": 180000,
+    "playMsForMemory": 60000,
+    "fpsRuns": 1,
+    "fpsPlayMs": 60000,
+    "frameRateMethod": 2
+  },
+  "method": {
+    "timeToFirstApple": "performance.now() in the page when the game logs its first apple; 0 is navigation start.",
+    "screensBeforeFirstApple": "Segments of the game's screen log between navigation start and the first apple. \"(page load)\" is the time before the game reports its first screen.",
+    "bot": "tools/rig/bot.mjs. Seed 1. It acts only on screens already drawn, presses the key a screen offers to leave it (skip/continue/restart) at once, and on control screens takes a shortest path to the apple (breadth-first search). Keys are real key presses (Playwright keyboard). It polls the game every 4 ms.",
+    "controlShareInPlay": "Since prompt 5: from the first drawn frame of a control screen until the bot has had 60000 ms of control (the heap's and the frame rate's window), control time divided by the time that passed. The launch screens are left out; what stops play after the first control frame (finishing moves, cutscenes, deaths, reconnects) counts against it (tools/rig/stats.mjs playShare).",
+    "controlShare": "Time in control screens (ready, play) divided by the session, over the first sessionMs from navigation start. Control screens are those where arrow keys steer the snake; the list is fixed in tools/rig/stats.mjs.",
+    "search": "Since v1.7 the apple shows only within a vision radius. The bot counts the cells it has seen (within the radius of every cell its head has been on, since the apple appeared); search.cellsSeen is that count on the bot's first look at the game that shows the apple, with the tick and the time.",
+    "steering": "In play, every turn key the bot sends is checked on the next look at the game: accepted means the game now heads that way. A turn sent just before the snake died, or on the last look at the game in a run, cannot be checked and is counted as unchecked.",
+    "load": "performance.now() of the first drawn frame of a screen that accepts any key: the first frame of a control screen, or the game's first \"accepts\" log entry (the first drawn frame where another screen starts reacting to a key), whichever comes first.",
+    "memory": "CDP Runtime.getHeapUsage().usedSize of the page, read right after CDP HeapProfiler.collectGarbage, at the moment the bot has had playMsForMemory of control. The value before garbage collection is kept too.",
+    "origin": "Every request of every run must go to the page's own origin (scheme, host and port of the game); any other request is listed in checks.externalRequests and fails the checks (tools/rig/stats.mjs offOrigin).",
+    "download": "Sum of CDP Network.loadingFinished encodedDataLength over every request of the session (headers + body; no compression, browser cache disabled).",
+    "size": "Files in dist/<version>/. js = .js and .mjs; code = js + .html + .css; assets = every other file. Lines = newline characters, like wc -l (tools/rig/size.mjs).",
+    "frameRate": "Method 2 (since 2026-10-14, prompt 4): over the first 60 s of play, the same window as the heap. Every requestAnimationFrame timestamp is recorded by a script injected before the game; only frames inside control screens count, taken in order from navigation start until 60000 ms of control (by the game's screen log), and frames within the heap read (+500 ms) are left out. Per run: median = median of per-second frame counts (1-second windows, like an FPS counter); p5 = 5th percentile (nearest rank) of per-frame values, 1000 / interval between two frames. The version's figure is the median over runs. Per-frame values are not used for the median because rAF timestamps snap to the 60 Hz display: a 25 ms frame shows up as 16.7 and 33.3 ms intervals in turn. Method 1 took the control frames of the first 60 s from navigation start; its files are in measurements/old-method/.",
+    "frameRateWindow": "Frame rate is measured in a visible Chromium window, not headless: on this Mac, headless and visible medians agreed on CPU and GPU loads, but the 5th percentile did not (see measurements/fps-check.json). The headless runs' frame rate is kept as headlessFps for comparison.",
+    "medians": "Median over runs: the middle value of 5 (mean of the two middle values for an even count)."
+  },
+  "size": {
+    "tool": "tools/rig/size.mjs: newline characters per file, like wc -l",
+    "jsLines": 3316,
+    "codeLines": 3350,
+    "jsBytes": 137892,
+    "assetBytes": 529875,
+    "buildBytes": 669078,
+    "files": [
+      {
+        "path": "game.js",
+        "bytes": 21716,
+        "lines": 489
+      },
+      {
+        "path": "hair.js",
+        "bytes": 3917,
+        "lines": 95
+      },
+      {
+        "path": "index.html",
+        "bytes": 1311,
+        "lines": 34
+      },
+      {
+        "path": "launch.js",
+        "bytes": 9851,
+        "lines": 211
+      },
+      {
+        "path": "online.js",
+        "bytes": 16306,
+        "lines": 380
+      },
+      {
+        "path": "patch/day-one.js",
+        "bytes": 2126,
+        "lines": 62
+      },
+      {
+        "path": "progress.js",
+        "bytes": 11985,
+        "lines": 291
+      },
+      {
+        "path": "remaster.js",
+        "bytes": 7316,
+        "lines": 171
+      },
+      {
+        "path": "requirements.js",
+        "bytes": 350,
+        "lines": 10
+      },
+      {
+        "path": "rules.js",
+        "bytes": 3888,
+        "lines": 101
+      },
+      {
+        "path": "season.js",
+        "bytes": 15835,
+        "lines": 415
+      },
+      {
+        "path": "skins.js",
+        "bytes": 5271,
+        "lines": 122
+      },
+      {
+        "path": "story.js",
+        "bytes": 5557,
+        "lines": 112
+      },
+      {
+        "path": "update.js",
+        "bytes": 8522,
+        "lines": 211
+      },
+      {
+        "path": "voice/01.mp3",
+        "bytes": 18434,
+        "lines": null
+      },
+      {
+        "path": "voice/02.mp3",
+        "bytes": 40795,
+        "lines": null
+      },
+      {
+        "path": "voice/03.mp3",
+        "bytes": 29928,
+        "lines": null
+      },
+      {
+        "path": "voice/04.mp3",
+        "bytes": 33271,
+        "lines": null
+      },
+      {
+        "path": "voice/05.mp3",
+        "bytes": 23658,
+        "lines": null
+      },
+      {
+        "path": "voice/06.mp3",
+        "bytes": 23031,
+        "lines": null
+      },
+      {
+        "path": "voice/07.mp3",
+        "bytes": 40795,
+        "lines": null
+      },
+      {
+        "path": "voice/08.mp3",
+        "bytes": 32017,
+        "lines": null
+      },
+      {
+        "path": "voice/09.mp3",
+        "bytes": 41421,
+        "lines": null
+      },
+      {
+        "path": "voice/10.mp3",
+        "bytes": 31181,
+        "lines": null
+      },
+      {
+        "path": "voice/11.mp3",
+        "bytes": 32644,
+        "lines": null
+      },
+      {
+        "path": "voice/12.mp3",
+        "bytes": 28047,
+        "lines": null
+      },
+      {
+        "path": "voice/13.mp3",
+        "bytes": 29301,
+        "lines": null
+      },
+      {
+        "path": "voice/14.mp3",
+        "bytes": 37660,
+        "lines": null
+      },
+      {
+        "path": "voice/15.mp3",
+        "bytes": 22404,
+        "lines": null
+      },
+      {
+        "path": "voice/16.mp3",
+        "bytes": 21777,
+        "lines": null
+      },
+      {
+        "path": "voice/17.mp3",
+        "bytes": 43511,
+        "lines": null
+      },
+      {
+        "path": "world.js",
+        "bytes": 25252,
+        "lines": 646
+      }
+    ]
+  },
+  "median": {
+    "timeToFirstAppleMs": 1107972.7999999821,
+    "loadMs": 30154.29999998212,
+    "controlShare": 0.278013333333532,
+    "controlShareInPlay": 0.6722515834327185,
+    "heapUsedAfterGcBytes": 2027288,
+    "downloadBytes": 677222,
+    "fpsMedian": 60,
+    "fpsP5": 57.471264367787256,
+    "headlessFpsMedian": 60,
+    "headlessFpsP5": 59.88023952091634
+  },
+  "checks": {
+    "firstAppleTicks": [
+      7595
+    ],
+    "sameFirstAppleTickInAllRuns": true,
+    "sameApplesBeforeFirstDeathInAllRuns": true,
+    "externalRequests": [],
+    "failedRequests": [],
+    "pageErrors": [],
+    "steering": {
+      "sent": 66,
+      "accepted": 66,
+      "unchecked": 0
+    },
+    "incompleteRuns": [],
+    "pass": true
+  },
+  "runs": [
+    {
+      "run": 1,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v1.9",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 1107978.5,
+      "incomplete": false,
+      "timeToFirstAppleMs": 1107972.7999999821,
+      "firstAppleTick": 7595,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 49.39999997615814
+        },
+        {
+          "screen": "update-required",
+          "ms": 1988.2000000178814
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9016.299999982119
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3016.9000000059605
+        },
+        {
+          "screen": "preparing",
+          "ms": 3016.9000000059605
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3016.5999999940395
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3016.2000000178814
+        },
+        {
+          "screen": "warning",
+          "ms": 4023.199999988079
+        },
+        {
+          "screen": "title",
+          "ms": 2513.800000011921
+        },
+        {
+          "screen": "remastered",
+          "ms": 3020.7999999821186
+        },
+        {
+          "screen": "connecting",
+          "ms": 3009.300000011921
+        },
+        {
+          "screen": "sign-in",
+          "ms": 1521.699999988079
+        },
+        {
+          "screen": "signing-in",
+          "ms": 2010.800000011921
+        },
+        {
+          "screen": "queue",
+          "ms": 7316.0999999940395
+        },
+        {
+          "screen": "terms",
+          "ms": 1785.199999988079
+        },
+        {
+          "screen": "loading",
+          "ms": 5020
+        },
+        {
+          "screen": "opening",
+          "ms": 44010.30000001192
+        },
+        {
+          "screen": "autosave",
+          "ms": 3019.300000011921
+        },
+        {
+          "screen": "world-map",
+          "ms": 3019.2999999821186
+        },
+        {
+          "screen": "ready",
+          "ms": 22.700000017881393
+        },
+        {
+          "screen": "play",
+          "ms": 5005.0999999940395
+        },
+        {
+          "screen": "level-up",
+          "ms": 2004
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1004.6999999880791
+        },
+        {
+          "screen": "play",
+          "ms": 10006.59999999404
+        },
+        {
+          "screen": "level-up",
+          "ms": 2024.1000000238419
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1286.5
+        },
+        {
+          "screen": "play",
+          "ms": 4405.5999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4317.299999982119
+        },
+        {
+          "screen": "play",
+          "ms": 10599.600000023842
+        },
+        {
+          "screen": "level-up",
+          "ms": 2022.2999999821186
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1540.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 7502.9000000059605
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4215.5
+        },
+        {
+          "screen": "play",
+          "ms": 12499.90000000596
+        },
+        {
+          "screen": "level-up",
+          "ms": 2022.2999999821186
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1786.9000000059605
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1511.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 9212.299999982119
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5515.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 15799.09999999404
+        },
+        {
+          "screen": "level-up",
+          "ms": 2022.2000000178814
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 2049.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 11010.90000000596
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4216.5
+        },
+        {
+          "screen": "play",
+          "ms": 14000
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1504.5
+        },
+        {
+          "screen": "play",
+          "ms": 5012
+        },
+        {
+          "screen": "level-up",
+          "ms": 2021
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 2300.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 1094.199999988079
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5617
+        },
+        {
+          "screen": "play",
+          "ms": 25099.40000000596
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5216.5
+        },
+        {
+          "screen": "play",
+          "ms": 8799.699999988079
+        },
+        {
+          "screen": "level-up",
+          "ms": 2020.800000011921
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1020.7999999821186
+        },
+        {
+          "screen": "play",
+          "ms": 6407.800000011921
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3616.199999988079
+        },
+        {
+          "screen": "play",
+          "ms": 3600
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1524.300000011921
+        },
+        {
+          "screen": "play",
+          "ms": 26408.19999998808
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3815.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 3600.5999999940395
+        },
+        {
+          "screen": "level-up",
+          "ms": 2019.5999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1016.2000000178814
+        },
+        {
+          "screen": "play",
+          "ms": 17713.40000000596
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3716.5
+        },
+        {
+          "screen": "play",
+          "ms": 2283.199999988079
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1504.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 19311.59999999404
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5816.300000011921
+        },
+        {
+          "screen": "play",
+          "ms": 5698.899999976158
+        },
+        {
+          "screen": "level-up",
+          "ms": 2022.800000011921
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 999.3000000119209
+        },
+        {
+          "screen": "play",
+          "ms": 20912.09999999404
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4416.299999982119
+        },
+        {
+          "screen": "play",
+          "ms": 4099.5
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1521.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 12243.300000011921
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5316.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 12900
+        },
+        {
+          "screen": "level-up",
+          "ms": 2021.0999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 999.1999999880791
+        },
+        {
+          "screen": "play",
+          "ms": 9011.90000000596
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4917.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 15999.300000011921
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1505.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 2110.5999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4816.300000011921
+        },
+        {
+          "screen": "play",
+          "ms": 15699
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5617.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 12199.40000000596
+        },
+        {
+          "screen": "level-up",
+          "ms": 2020.0999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1014.5
+        },
+        {
+          "screen": "play",
+          "ms": 7714.0999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3716.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 12299.399999976158
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1525.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 3207.5999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3717.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 26298.59999999404
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3116.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 10499.09999999404
+        },
+        {
+          "screen": "level-up",
+          "ms": 2005.5
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1017.8000000119209
+        },
+        {
+          "screen": "play",
+          "ms": 4910.199999988079
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3116.5
+        },
+        {
+          "screen": "play",
+          "ms": 5099.300000011921
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1525
+        },
+        {
+          "screen": "play",
+          "ms": 11308.300000011921
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5216
+        },
+        {
+          "screen": "play",
+          "ms": 15099.899999976158
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3716
+        },
+        {
+          "screen": "play",
+          "ms": 19799.20000001788
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 6017
+        },
+        {
+          "screen": "play",
+          "ms": 3799.7999999821186
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1520.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 5011.5999999940395
+        },
+        {
+          "screen": "level-up",
+          "ms": 2004.5999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1017.1000000238419
+        },
+        {
+          "screen": "play",
+          "ms": 12711.399999976158
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4916.700000017881
+        },
+        {
+          "screen": "play",
+          "ms": 24998.59999999404
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4016.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 7298.9000000059605
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1504
+        },
+        {
+          "screen": "play",
+          "ms": 16012.799999982119
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4815.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 8999.700000017881
+        },
+        {
+          "screen": "level-up",
+          "ms": 2023.0999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 996
+        },
+        {
+          "screen": "play",
+          "ms": 7415.0999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5416
+        },
+        {
+          "screen": "play",
+          "ms": 17599.40000000596
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1520.300000011921
+        },
+        {
+          "screen": "play",
+          "ms": 6012.699999988079
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4115.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 19699.59999999404
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5415.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 20599.79999998212
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3216.2000000178814
+        },
+        {
+          "screen": "play",
+          "ms": 3700.199999988079
+        },
+        {
+          "screen": "level-up",
+          "ms": 2007.300000011921
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1014.5999999940395
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1499.5
+        },
+        {
+          "screen": "play",
+          "ms": 23110.5
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3816.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 26899.19999998808
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1504.5
+        },
+        {
+          "screen": "play",
+          "ms": 2195.5999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5816.5
+        },
+        {
+          "screen": "play",
+          "ms": 24698.80000001192
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 2999.699999988079
+        },
+        {
+          "screen": "play",
+          "ms": 3099.600000023842
+        },
+        {
+          "screen": "level-up",
+          "ms": 2021.7999999821186
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 997.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 13713.200000017881
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3717.199999988079
+        },
+        {
+          "screen": "play",
+          "ms": 6298.800000011921
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1524
+        },
+        {
+          "screen": "play",
+          "ms": 11009.5
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5515.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 21700
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5515.5
+        },
+        {
+          "screen": "play",
+          "ms": 17300.19999998808
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1525
+        },
+        {
+          "screen": "play",
+          "ms": 308.19999998807907
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5216
+        },
+        {
+          "screen": "play",
+          "ms": 9199.90000000596
+        },
+        {
+          "screen": "finisher",
+          "ms": 807.3000000119209
+        },
+        {
+          "screen": "finisher-bite",
+          "ms": 1521.699999988079
+        }
+      ],
+      "loadMs": 30154.29999998212,
+      "sessionMs": 180000,
+      "controlMs": 50042.40000003576,
+      "controlShare": 0.278013333333532,
+      "controlInPlay": {
+        "controlMs": 60000,
+        "fromMs": 106406.29999998212,
+        "toMs": 195658.59999996424,
+        "share": 0.6722515834327185
+      },
+      "search": {
+        "cellsSeen": 52228,
+        "tick": 7589,
+        "t": 1105046.699999988
+      },
+      "memory": {
+        "atMs": 195710.89999997616,
+        "controlMsAtRead": 60001.0000000298,
+        "usedSizeAfterGc": 2027288,
+        "totalSizeAfterGc": 2883584,
+        "usedSizeBeforeGc": 5367648,
+        "framesExcluded": [
+          195710.89999997616,
+          196223.89999997616
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 5367648,
+          "totalSize": 11272192,
+          "embedderHeapUsedSize": 5875160,
+          "backingStorageSize": 411715
+        },
+        "afterGc": {
+          "usedSize": 2027288,
+          "totalSize": 2883584,
+          "embedderHeapUsedSize": 1664552,
+          "backingStorageSize": 411312
+        }
+      },
+      "fps": {
+        "frames": 3594,
+        "seconds": 57,
+        "median": 60,
+        "p5": 59.88023952091634,
+        "medianPerFrame": 59.8802395210207,
+        "longestFrameMs": 16.800000000017462,
+        "window": {
+          "controlMs": 60000,
+          "from": 106406.29999998212,
+          "to": 195658.59999996424
+        }
+      },
+      "steering": {
+        "sent": 66,
+        "accepted": 66,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "remastered": "Enter",
+        "sign-in": "Enter",
+        "terms": "Enter",
+        "loading": "Enter",
+        "world-map": "Enter",
+        "level-up": "Enter",
+        "skill-tree": "Enter",
+        "battle-pass": "Enter",
+        "finisher": "KeyE"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 7595
+        }
+      ],
+      "deathsInSession": 0,
+      "requests": {
+        "count": 50,
+        "bytes": 677222,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    }
+  ],
+  "fpsRuns": [
+    {
+      "run": 1,
+      "mode": "visible",
+      "frames": 3594,
+      "seconds": 56,
+      "median": 60,
+      "p5": 57.471264367787256,
+      "medianPerFrame": 59.8802395210207,
+      "longestFrameMs": 17.79999999998836,
+      "window": {
+        "controlMs": 60000,
+        "from": 106201.80000001192,
+        "to": 195390
+      },
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 700,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v1.9",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 196444.40000000596,
+      "errors": []
+    }
+  ],
+  "medianRun": 1,
+  "budget": {
+    "fpsMedianMin": 50,
+    "fpsP5Min": 30,
+    "pass": true
+  }
+}

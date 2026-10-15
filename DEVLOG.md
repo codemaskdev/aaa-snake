@@ -1039,3 +1039,36 @@ finds the first apple on tick 7595.
 | Frame rate median | down, or unchanged at 60 | every frame now uploads the 2D canvas (480 x 512) and runs the shader over the whole Retina window; and v1.9 draws the whole board again, about 21 x 21 tiles where v1.7 drew about 15 x 15 |
 | Frame rate 5th percentile | down | the same; if it falls under 30 fps (or the median under 50), the pass gets a lower internal resolution, as planned |
 | Requests to another origin | zero | nothing loaded from anywhere |
+
+### v1.9, measured (`npm run measure v1.9`, a single run) against the expectations written before measuring
+| Metric | Expected | v1.7 (single run) | v1.9 (single run) | Direction |
+|---|---|---|---|---|
+| First apple's tick | 7595 | 7595 | 7595 | as expected |
+| Time to first apple | up, about 3 s | 1104846.900000006 ms | 1107972.7999999821 ms | up 3125.899999976158 ms, as expected (REMASTERED took 3020.7999999821186 ms) |
+| Load time | unchanged | 30163 ms | 30154.29999998212 ms | unchanged, as expected |
+| Control share (first 180 s) | down, a little | 0.29396666666633553 | 0.278013333333532 | down a little, as expected |
+| Control share in play | unchanged | 0.6723608157078272 | 0.6722515834327185 | unchanged, as expected |
+| Download | up | 663192 bytes | 677222 bytes | up (14030 bytes), as expected |
+| JS lines / bytes | up | 3016 / 124762 | 3316 / 137892 | up, as expected |
+| Assets | unchanged | 529875 bytes | 529875 bytes | unchanged, as expected |
+| JS heap after GC | up, a little | 1854092 bytes | 2027288 bytes | up (173196 bytes), more than v1.7 added; not looked into |
+| Frame rate median | down, or unchanged at 60 | 60 fps | 60 fps | unchanged |
+| Frame rate 5th percentile | down | 57.47126436783532 fps | 57.471264367787256 fps | the same to the 10th decimal: not down, as I expected it to be |
+| Requests to another origin | zero | 0 | 0 | zero, as expected |
+
+Checks: tick 7595; 66 of 66 turns accepted; 0 requests outside the origin; 0 failed requests; 0 page errors. **Budget:
+pass, with the pass at full resolution** (REMASTER.scale = 1, ANGLE Metal on the M1, device pixel ratio 2 in a 1280 x
+700 window): no scaling down was needed. 50 requests: v1.7's 47 plus the three new scripts.
+- The short (`npm run short v1.9`): the launch and the search at 63.35x, 29900 ms; line 10 from 26.03454490925201 s to
+  29.87454490925201 s, in full.
+
+### What broke while measuring
+- **The first short of v1.9 failed:** "line 10 did not start in segment D". The replay had missed the apple: at the
+  recorded apple time it was on tick 7648 with no apple eaten. The headless run had one frame of 383.4 ms (v1.7's
+  longest: 50 ms); the game counts at most 250 ms of a frame, so its clock fell about 133 ms behind the page's, and
+  the bot's later key presses were recorded that much later against the game's ticks. The replay, which has no long
+  frame, pressed them by their recorded time, a tick late, and the snake went another way. tools/short/vclock.js now
+  presses a key recorded in play when the game reaches the tick it was pressed on (other screens' keys still go by
+  time). The second attempt replayed the apple at 1107950 ms against 1107972.7999999821 recorded. The shorts of v1.0
+  to v1.7 were made with the old rule and are not rendered again.
+- The full `npm test` after it: 104 of 104, exit 0.

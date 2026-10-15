@@ -1,0 +1,193 @@
+$ npm run measure v1.9
+machine: MacBook Air (MacBookAir10,1), Apple M1, 17179869184 bytes RAM, macOS 26.3.1 (25D771280a), Node v24.15.0
+size: js 3316 lines / 137892 bytes; code 3350 lines; assets 529875 bytes; build 669078 bytes (32 files)
+run 1/1 headless: first apple 1107972.7999999821 ms (tick 7595), load 30154.29999998212 ms, control 50042.40000003576 / 180000 ms = 0.278013333333532, control in play 60000 / 89252.29999998212 ms = 0.6722515834327185, heap 2027288 bytes after GC (5367648 before) at 60001.0000000298 ms of control, download 677222 bytes in 50 requests, headless fps median 60 p5 59.88023952091634, steering 66/66 (0 unchecked), deaths 0, errors 0, apple first seen after 52228 cells seen (tick 7589, 1105046.699999988 ms)
+  screens before the first apple: (page load) 49.39999997615814 ms -> update-required 1988.2000000178814 ms -> patch-download 9016.299999982119 ms -> patch-install 3016.9000000059605 ms -> preparing 3016.9000000059605 ms -> publisher-logo 3016.5999999940395 ms -> studio-logo 3016 ms -> engine-logo 3016.2000000178814 ms -> warning 4023.199999988079 ms -> title 2513.800000011921 ms -> remastered 3020.7999999821186 ms -> connecting 3009.300000011921 ms -> sign-in 1521.699999988079 ms -> signing-in 2010.800000011921 ms -> queue 7316.0999999940395 ms -> terms 1785.199999988079 ms -> loading 5020 ms -> opening 44010.30000001192 ms -> autosave 3019.300000011921 ms -> world-map 3019.2999999821186 ms -> ready 22.700000017881393 ms -> play 5005.0999999940395 ms -> level-up 2004 ms -> skill-tree 1004.6999999880791 ms -> play 10006.59999999404 ms -> level-up 2024.1000000238419 ms -> skill-tree 1286.5 ms -> play 4405.5999999940395 ms -> reconnecting 4317.299999982119 ms -> play 10599.600000023842 ms -> level-up 2022.2999999821186 ms -> skill-tree 1540.9000000059605 ms -> play 7502.9000000059605 ms -> reconnecting 4215.5 ms -> play 12499.90000000596 ms -> level-up 2022.2999999821186 ms -> skill-tree 1786.9000000059605 ms -> battle-pass 1511.9000000059605 ms -> play 9212.299999982119 ms -> reconnecting 5515.9000000059605 ms -> play 15799.09999999404 ms -> level-up 2022.2000000178814 ms -> skill-tree 2049.5999999940395 ms -> play 11010.90000000596 ms -> reconnecting 4216.5 ms -> play 14000 ms -> battle-pass 1504.5 ms -> play 5012 ms -> level-up 2021 ms -> skill-tree 2300.4000000059605 ms -> play 1094.199999988079 ms -> reconnecting 5617 ms -> play 25099.40000000596 ms -> reconnecting 5216.5 ms -> play 8799.699999988079 ms -> level-up 2020.800000011921 ms -> skill-tree 1020.7999999821186 ms -> play 6407.800000011921 ms -> reconnecting 3616.199999988079 ms -> play 3600 ms -> battle-pass 1524.300000011921 ms -> play 26408.19999998808 ms -> reconnecting 3815.800000011921 ms -> play 3600.5999999940395 ms -> level-up 2019.5999999940395 ms -> skill-tree 1016.2000000178814 ms -> play 17713.40000000596 ms -> reconnecting 3716.5 ms -> play 2283.199999988079 ms -> battle-pass 1504.4000000059605 ms -> play 19311.59999999404 ms -> reconnecting 5816.300000011921 ms -> play 5698.899999976158 ms -> level-up 2022.800000011921 ms -> skill-tree 999.3000000119209 ms -> play 20912.09999999404 ms -> reconnecting 4416.299999982119 ms -> play 4099.5 ms -> battle-pass 1521.800000011921 ms -> play 12243.300000011921 ms -> reconnecting 5316.5999999940395 ms -> play 12900 ms -> level-up 2021.0999999940395 ms -> skill-tree 999.1999999880791 ms -> play 9011.90000000596 ms -> reconnecting 4917.0999999940395 ms -> play 15999.300000011921 ms -> battle-pass 1505.9000000059605 ms -> play 2110.5999999940395 ms -> reconnecting 4816.300000011921 ms -> play 15699 ms -> reconnecting 5617.0999999940395 ms -> play 12199.40000000596 ms -> level-up 2020.0999999940395 ms -> skill-tree 1014.5 ms -> play 7714.0999999940395 ms -> reconnecting 3716.800000011921 ms -> play 12299.399999976158 ms -> battle-pass 1525.4000000059605 ms -> play 3207.5999999940395 ms -> reconnecting 3717.4000000059605 ms -> play 26298.59999999404 ms -> reconnecting 3116.9000000059605 ms -> play 10499.09999999404 ms -> level-up 2005.5 ms -> skill-tree 1017.8000000119209 ms -> play 4910.199999988079 ms -> reconnecting 3116.5 ms -> play 5099.300000011921 ms -> battle-pass 1525 ms -> play 11308.300000011921 ms -> reconnecting 5216 ms -> play 15099.899999976158 ms -> reconnecting 3716 ms -> play 19799.20000001788 ms -> reconnecting 6017 ms -> play 3799.7999999821186 ms -> battle-pass 1520.800000011921 ms -> play 5011.5999999940395 ms -> level-up 2004.5999999940395 ms -> skill-tree 1017.1000000238419 ms -> play 12711.399999976158 ms -> reconnecting 4916.700000017881 ms -> play 24998.59999999404 ms -> reconnecting 4016.9000000059605 ms -> play 7298.9000000059605 ms -> battle-pass 1504 ms -> play 16012.799999982119 ms -> reconnecting 4815.5999999940395 ms -> play 8999.700000017881 ms -> level-up 2023.0999999940395 ms -> skill-tree 996 ms -> play 7415.0999999940395 ms -> reconnecting 5416 ms -> play 17599.40000000596 ms -> battle-pass 1520.300000011921 ms -> play 6012.699999988079 ms -> reconnecting 4115.9000000059605 ms -> play 19699.59999999404 ms -> reconnecting 5415.9000000059605 ms -> play 20599.79999998212 ms -> reconnecting 3216.2000000178814 ms -> play 3700.199999988079 ms -> level-up 2007.300000011921 ms -> skill-tree 1014.5999999940395 ms -> battle-pass 1499.5 ms -> play 23110.5 ms -> reconnecting 3816.4000000059605 ms -> play 26899.19999998808 ms -> battle-pass 1504.5 ms -> play 2195.5999999940395 ms -> reconnecting 5816.5 ms -> play 24698.80000001192 ms -> reconnecting 2999.699999988079 ms -> play 3099.600000023842 ms -> level-up 2021.7999999821186 ms -> skill-tree 997.5999999940395 ms -> play 13713.200000017881 ms -> reconnecting 3717.199999988079 ms -> play 6298.800000011921 ms -> battle-pass 1524 ms -> play 11009.5 ms -> reconnecting 5515.9000000059605 ms -> play 21700 ms -> reconnecting 5515.5 ms -> play 17300.19999998808 ms -> battle-pass 1525 ms -> play 308.19999998807907 ms -> reconnecting 5216 ms -> play 9199.90000000596 ms -> finisher 807.3000000119209 ms -> finisher-bite 1521.699999988079 ms
+fps run 1/1 visible: median 60 fps, p5 57.471264367787256 fps, 3594 frames over 60000 ms of play, longest frame 17.79999999998836 ms
+
+single run (v1.9):
+  time to first apple   1107972.7999999821 ms (run 1)
+    (page load)      49.39999997615814 ms
+    update-required  1988.2000000178814 ms
+    patch-download   9016.299999982119 ms
+    patch-install    3016.9000000059605 ms
+    preparing        3016.9000000059605 ms
+    publisher-logo   3016.5999999940395 ms
+    studio-logo      3016 ms
+    engine-logo      3016.2000000178814 ms
+    warning          4023.199999988079 ms
+    title            2513.800000011921 ms
+    remastered       3020.7999999821186 ms
+    connecting       3009.300000011921 ms
+    sign-in          1521.699999988079 ms
+    signing-in       2010.800000011921 ms
+    queue            7316.0999999940395 ms
+    terms            1785.199999988079 ms
+    loading          5020 ms
+    opening          44010.30000001192 ms
+    autosave         3019.300000011921 ms
+    world-map        3019.2999999821186 ms
+    ready            22.700000017881393 ms
+    play             5005.0999999940395 ms
+    level-up         2004 ms
+    skill-tree       1004.6999999880791 ms
+    play             10006.59999999404 ms
+    level-up         2024.1000000238419 ms
+    skill-tree       1286.5 ms
+    play             4405.5999999940395 ms
+    reconnecting     4317.299999982119 ms
+    play             10599.600000023842 ms
+    level-up         2022.2999999821186 ms
+    skill-tree       1540.9000000059605 ms
+    play             7502.9000000059605 ms
+    reconnecting     4215.5 ms
+    play             12499.90000000596 ms
+    level-up         2022.2999999821186 ms
+    skill-tree       1786.9000000059605 ms
+    battle-pass      1511.9000000059605 ms
+    play             9212.299999982119 ms
+    reconnecting     5515.9000000059605 ms
+    play             15799.09999999404 ms
+    level-up         2022.2000000178814 ms
+    skill-tree       2049.5999999940395 ms
+    play             11010.90000000596 ms
+    reconnecting     4216.5 ms
+    play             14000 ms
+    battle-pass      1504.5 ms
+    play             5012 ms
+    level-up         2021 ms
+    skill-tree       2300.4000000059605 ms
+    play             1094.199999988079 ms
+    reconnecting     5617 ms
+    play             25099.40000000596 ms
+    reconnecting     5216.5 ms
+    play             8799.699999988079 ms
+    level-up         2020.800000011921 ms
+    skill-tree       1020.7999999821186 ms
+    play             6407.800000011921 ms
+    reconnecting     3616.199999988079 ms
+    play             3600 ms
+    battle-pass      1524.300000011921 ms
+    play             26408.19999998808 ms
+    reconnecting     3815.800000011921 ms
+    play             3600.5999999940395 ms
+    level-up         2019.5999999940395 ms
+    skill-tree       1016.2000000178814 ms
+    play             17713.40000000596 ms
+    reconnecting     3716.5 ms
+    play             2283.199999988079 ms
+    battle-pass      1504.4000000059605 ms
+    play             19311.59999999404 ms
+    reconnecting     5816.300000011921 ms
+    play             5698.899999976158 ms
+    level-up         2022.800000011921 ms
+    skill-tree       999.3000000119209 ms
+    play             20912.09999999404 ms
+    reconnecting     4416.299999982119 ms
+    play             4099.5 ms
+    battle-pass      1521.800000011921 ms
+    play             12243.300000011921 ms
+    reconnecting     5316.5999999940395 ms
+    play             12900 ms
+    level-up         2021.0999999940395 ms
+    skill-tree       999.1999999880791 ms
+    play             9011.90000000596 ms
+    reconnecting     4917.0999999940395 ms
+    play             15999.300000011921 ms
+    battle-pass      1505.9000000059605 ms
+    play             2110.5999999940395 ms
+    reconnecting     4816.300000011921 ms
+    play             15699 ms
+    reconnecting     5617.0999999940395 ms
+    play             12199.40000000596 ms
+    level-up         2020.0999999940395 ms
+    skill-tree       1014.5 ms
+    play             7714.0999999940395 ms
+    reconnecting     3716.800000011921 ms
+    play             12299.399999976158 ms
+    battle-pass      1525.4000000059605 ms
+    play             3207.5999999940395 ms
+    reconnecting     3717.4000000059605 ms
+    play             26298.59999999404 ms
+    reconnecting     3116.9000000059605 ms
+    play             10499.09999999404 ms
+    level-up         2005.5 ms
+    skill-tree       1017.8000000119209 ms
+    play             4910.199999988079 ms
+    reconnecting     3116.5 ms
+    play             5099.300000011921 ms
+    battle-pass      1525 ms
+    play             11308.300000011921 ms
+    reconnecting     5216 ms
+    play             15099.899999976158 ms
+    reconnecting     3716 ms
+    play             19799.20000001788 ms
+    reconnecting     6017 ms
+    play             3799.7999999821186 ms
+    battle-pass      1520.800000011921 ms
+    play             5011.5999999940395 ms
+    level-up         2004.5999999940395 ms
+    skill-tree       1017.1000000238419 ms
+    play             12711.399999976158 ms
+    reconnecting     4916.700000017881 ms
+    play             24998.59999999404 ms
+    reconnecting     4016.9000000059605 ms
+    play             7298.9000000059605 ms
+    battle-pass      1504 ms
+    play             16012.799999982119 ms
+    reconnecting     4815.5999999940395 ms
+    play             8999.700000017881 ms
+    level-up         2023.0999999940395 ms
+    skill-tree       996 ms
+    play             7415.0999999940395 ms
+    reconnecting     5416 ms
+    play             17599.40000000596 ms
+    battle-pass      1520.300000011921 ms
+    play             6012.699999988079 ms
+    reconnecting     4115.9000000059605 ms
+    play             19699.59999999404 ms
+    reconnecting     5415.9000000059605 ms
+    play             20599.79999998212 ms
+    reconnecting     3216.2000000178814 ms
+    play             3700.199999988079 ms
+    level-up         2007.300000011921 ms
+    skill-tree       1014.5999999940395 ms
+    battle-pass      1499.5 ms
+    play             23110.5 ms
+    reconnecting     3816.4000000059605 ms
+    play             26899.19999998808 ms
+    battle-pass      1504.5 ms
+    play             2195.5999999940395 ms
+    reconnecting     5816.5 ms
+    play             24698.80000001192 ms
+    reconnecting     2999.699999988079 ms
+    play             3099.600000023842 ms
+    level-up         2021.7999999821186 ms
+    skill-tree       997.5999999940395 ms
+    play             13713.200000017881 ms
+    reconnecting     3717.199999988079 ms
+    play             6298.800000011921 ms
+    battle-pass      1524 ms
+    play             11009.5 ms
+    reconnecting     5515.9000000059605 ms
+    play             21700 ms
+    reconnecting     5515.5 ms
+    play             17300.19999998808 ms
+    battle-pass      1525 ms
+    play             308.19999998807907 ms
+    reconnecting     5216 ms
+    play             9199.90000000596 ms
+    finisher         807.3000000119209 ms
+    finisher-bite    1521.699999988079 ms
+  load time             30154.29999998212 ms
+  control share         0.278013333333532 (of 180000 ms)
+  control share in play 0.6722515834327185 (first 60000 ms of control, from the first control frame)
+  JS heap after GC      2027288 bytes
+  download              677222 bytes
+  frame rate (visible)  median 60 fps, p5 57.471264367787256 fps
+  frame rate (headless) median 60 fps, p5 59.88023952091634 fps
+  js 3316 lines, 137892 bytes; code 3350 lines; assets 529875 bytes; build 669078 bytes
+checks: first apple tick 7595 (same in all runs: true); external requests 0; failed requests 0; page errors 0; steering 66/66 turns accepted (0 sent just before a death or the end of a run, not checkable); incomplete runs 0
+checks: PASS
+performance budget (median >= 50 fps, p5 >= 30 fps): PASS
+wrote measurements/v1.9.json, measurements/v1.9/ (raw runs and this output), measurements/summary.csv

@@ -56,6 +56,12 @@
   // A recorded key is pressed at its recorded time, but never before the game is on the
   // screen (and, in play, at the tick) where the bot pressed it. Frame timing in the
   // replay can differ by a few ms from the run, and a key on the wrong screen is lost.
+  // A key pressed in play is replayed by its tick alone (since prompt 13): a run whose game
+  // lost time to a long frame (the game counts at most 250 ms a frame) has its later keys
+  // recorded late against the game's ticks, and replayed by time they would land a tick late.
+  function byTick(k) {
+    return k.screen === 'play' && k.tick != null;
+  }
   function ready(k) {
     const game = window.snakeGame && window.snakeGame.probe();
     if (!game || k.screen == null) return true;
@@ -63,10 +69,10 @@
   }
 
   function pressKeysUntil(t) {
-    while (keyIndex < keys.length && keys[keyIndex].t <= t && ready(keys[keyIndex])) {
+    while (keyIndex < keys.length && (keys[keyIndex].t <= t || byTick(keys[keyIndex])) && ready(keys[keyIndex])) {
       const k = keys[keyIndex++];
-      runTimersUntil(Math.max(now, k.t));
-      now = Math.max(now, k.t);
+      runTimersUntil(Math.max(now, Math.min(k.t, t)));
+      now = Math.max(now, Math.min(k.t, t));
       window.dispatchEvent(new KeyboardEvent('keydown', { code: k.code, key: k.code, bubbles: true, cancelable: true }));
     }
   }
