@@ -571,3 +571,53 @@ bytes and heap up, time to first apple: say what you expect from the new
 screen). Tag v1.9, measure (single run), short, chart, full npm test,
 STOP. Do not start v2.0: its ending is not decided yet.
 ````
+
+## 14. Fix the v1.7 camera inside v1.7; v2.0 with the ending decided
+
+````text
+v1.9 accepted. Two jobs, in this order.
+
+## 1. Fix the v1.7 camera inside v1.7
+Decision: no new version, no hotfix patch; v1.7 is simply rebuilt
+correct. Apply the same camera fix v1.9 has to the v1.7 sources (the
+visible rectangle covers all 480x480 pixels; the test from v1.9 runs
+for v1.7 too). Rebuild dist/v1.7, move the v1.7 tag to the fixing
+commit (say the old and new commit ids in DEVLOG and in the report;
+nothing else in v1.7 changes, the first apple's tick stays 7595, the
+rules files stay byte-identical), re-measure v1.7 (single run),
+re-record its short with the tick-based key rule, re-run
+`npm run requirements v1.7` so v1.9's REMASTERED screen shows the new
+v1.7 numbers, and update the chart. Report the new v1.7 numbers next to
+the old ones, plus the v1.7 tables that never reached me: skins with
+rarities, drop odds, bytes added by skins, and v1.7's "what broke".
+
+## 2. Build v2.0 as frozen in UPDATES.md, with the ending decided
+The ending: inside the AAA game there is an arcade cabinet that runs
+Snake v1.0. The snake eats the apple there, and that is the end of the
+game.
+- The cabinet runs the real v1.0 code: import the v1.0 modules from the
+  repository history or the shared sources, do not copy them; a test
+  proves the inner game reaches its apple at tick 3 with the v1.0 bot
+  rule, exactly as dist/v1.0 does.
+- Write in DEVLOG before building: where the cabinet stands (I have not
+  decided: ask me first if you need it before you can plan; otherwise
+  plan both and I will choose), how the bot reaches it (the bot rule
+  goes into UPDATES.md before measuring, as always), what key enters it,
+  and that arrow keys inside the cabinet count as control for both
+  control-share metrics.
+- After the inner apple: the game ends. Default: a THE END screen, then
+  real credits that double as disclosure (Claude Code wrote the code,
+  ElevenLabs voice designed for this project, who did what), no further
+  screens, no restart loop. If I give you a different ending screen, use
+  that.
+- Measurement: the first apple of v2.0 is the one eaten inside the
+  cabinet; the rig records the path to the cabinet as screens like any
+  other. Expected directions for every metric written before measuring,
+  including which way time to first apple moves for each cabinet
+  placement.
+- The v2.0 short's segment D is the inner apple and the ending, real
+  time, with its voice line if one triggers.
+No other features, no new jokes of your own: build what is written.
+Tag v2.0, measure (single run), short, chart, full npm test, STOP.
+Do not start v1.8.
+````
