@@ -536,3 +536,38 @@ Everything else from prompt 8 stands: radius 6 cells, the bot rule, the
 v1.7, measure, short, chart, full npm test, STOP, no v1.8. Report as
 prompt 8 asks.
 ````
+
+## 13. One run while building; close v1.7; v1.9 Remastered
+
+````text
+Stop the running measurement now (Ctrl-C it). New rule from this moment,
+written into README (methods) and DEVLOG: during the build
+`npm run measure <version>` does ONE headless run and ONE visible run;
+summary.csv marks such rows "single run". The bot is deterministic (v1.7
+runs 1 and 2: tick 7595 both), so repeats only measure timer noise. The
+5-run medians for every version come later from a new
+`npm run measure:final`, run once overnight before release. Do not run
+it now.
+
+## Close v1.7
+Use headless run 1 as v1.7's numbers, do one visible run for FPS, then
+the short, the chart, full npm test, tag v1.7. Short report: the usual
+table, cells explored before the apple was first seen, the skin and odds
+tables, what broke. Do not stop after it.
+
+## v1.9 (remaster) right after
+Write the plan in DEVLOG before coding: what "remaster" means in code,
+exactly one lightweight WebGL post-process pass (bloom or similar; no 3D
+engines), snake "hair physics" as a real simulation on the 20x20 grid
+(cheap, deterministic, from the seed), and a "Minimum requirements"
+screen whose numbers are the real ones: this build's download bytes, JS
+heap after GC and asset size, read from the previous measurement, never
+typed by hand. Budget as before: median >= 50 fps, p5 >= 30 fps on this
+Mac; if the remaster drops below, scale the effect down until it fits
+and say by how much. Nothing else changes: same world, same bot, same
+rules, so the first apple's tick must stay 7595; a test checks that.
+Expected directions for every metric written before measuring (FPS down,
+bytes and heap up, time to first apple: say what you expect from the new
+screen). Tag v1.9, measure (single run), short, chart, full npm test,
+STOP. Do not start v2.0: its ending is not decided yet.
+````

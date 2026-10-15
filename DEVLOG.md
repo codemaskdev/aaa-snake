@@ -922,3 +922,22 @@ accepted.
 - (On that correction: "before any of its output" is not exact. The measurement prints its size line first, and that
   line, with assets 529875 bytes, had already been written when I committed the correction; I had not read it. The
   529875 came from adding up src/voice/ myself.)
+
+## Prompt 13: one run while building; v1.7 closed; v1.9 Remastered
+
+### The measurement of v1.7 was stopped, and the rule changed
+`npm run measure v1.7` (5 + 5) was stopped by hand (SIGINT to the process, then the rig's Chromium) after 1 h 9 min:
+all five headless runs had ended, the visible frame-rate runs were under way. The five headless runs all reached the
+first apple on tick 7595, between 1104687.2000000179 and 1105003.699999988 ms. What it printed is kept in
+measurements/v1.7-stopped-output.txt. It had written no files: `npm run measure` wrote the raw runs only at the end.
+It now writes each raw run as soon as the run ends.
+
+**New rule (prompt 13):** during the build `npm run measure <version>` does one headless run and one visible run;
+summary.csv marks the row "single run" (a new `kind` column; v1.0 to v1.6 are "median of 5 runs"), and the chart puts
+a * after the version. The 5 + 5 medians for every version come from `npm run measure:final <version>`, run once,
+overnight, before release (not run yet). README.md, "Methods", has it.
+
+**v1.7's numbers:** prompt 13 asks for headless run 1 of the stopped measurement, but its raw data was never written
+(only its printed line, in the stopped output), so v1.7 is measured again under the new rule, one headless and one
+visible run. The game and the bot are deterministic, so I expect the same tick (7595) and, but for timer noise, the
+same times.

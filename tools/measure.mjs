@@ -1,7 +1,9 @@
 // `npm run measure <version>`: measure one build in dist/<version>/.
 //
-// 5 headless runs (every metric but frame rate), then 5 runs in a visible window
-// (frame rate). Writes, under measurements/:
+// Since prompt 13, during the build: ONE headless run (every metric but frame rate) and ONE
+// run in a visible window (frame rate); summary.csv marks the row "single run". The bot is
+// deterministic, so repeats measure only timer noise. `npm run measure:final <version>` does
+// 5 + 5 and medians, once before release. Writes, under measurements/:
 //   <version>.json           machine, browser, method, every run's numbers, the medians
 //   <version>/run-<n>.json   raw data of each headless run (game log, keys, frames, requests)
 //   <version>/fps-run-<n>.json  raw frame times of each visible run
@@ -24,10 +26,10 @@ const PLAYWRIGHT_VERSION = JSON.parse(fs.readFileSync(path.join(ROOT, 'node_modu
 
 export const DEFAULTS = {
   seed: 1,
-  runs: 5,
+  runs: 1,                 // since prompt 13; npm run measure:final uses 5
   sessionMs: 180000,       // control share window: 3 minutes from navigation start
   playMsForMemory: 60000,  // heap is read after 60 s of control
-  fpsRuns: 5,
+  fpsRuns: 1,              // since prompt 13; npm run measure:final uses 5
   fpsPlayMs: 60000,        // frame rate: over the first 60 s of control (the heap's window)
   fpsMode: 'visible',
 };
@@ -91,11 +93,16 @@ export async function measure(opts) {
   const rawRuns = [];
   const fpsRuns = [];
   const fpsRaw = [];
+  // Each raw run is written as soon as it ends, so a measurement stopped half way keeps what it has.
+  const runDir = path.join(o.outDir, o.version);
+  fs.rmSync(runDir, { recursive: true, force: true });
+  fs.mkdirSync(runDir, { recursive: true });
   try {
     for (let i = 1; i <= o.runs; i++) {
       const { summary, raw } = await runOnce({ url, mode: 'headless', sessionMs: o.sessionMs, playMsForMemory: o.playMsForMemory });
       runs.push({ run: i, ...summary });
       rawRuns.push(raw);
+      fs.writeFileSync(path.join(runDir, `run-${i}.json`), JSON.stringify(raw));
       const s = summary;
       say(`run ${i}/${o.runs} headless: first apple ${s.timeToFirstAppleMs} ms (tick ${s.firstAppleTick}), load ${s.loadMs} ms, control ${s.controlMs} / ${s.sessionMs} ms = ${s.controlShare}, control in play ${s.controlInPlay?.controlMs} / ${s.controlInPlay ? s.controlInPlay.toMs - s.controlInPlay.fromMs : null} ms = ${s.controlInPlay?.share}, heap ${s.memory?.usedSizeAfterGc} bytes after GC (${s.memory?.usedSizeBeforeGc} before) at ${s.memory?.controlMsAtRead} ms of control, download ${s.requests.bytes} bytes in ${s.requests.count} requests, headless fps median ${s.fps.median} p5 ${s.fps.p5}, steering ${s.steering.accepted}/${s.steering.sent} (${s.steering.unchecked} unchecked), deaths ${s.deathsInSession}, errors ${s.errors.length}${s.search ? `, apple first seen after ${s.search.cellsSeen} cells seen (tick ${s.search.tick}, ${s.search.t} ms)` : ''}${s.incomplete ? ', INCOMPLETE' : ''}`);
       say(`  screens before the first apple: ${(s.screensBeforeFirstApple || []).map(x => `${x.screen} ${x.ms} ms`).join(' -> ')}`);
@@ -164,7 +171,7 @@ export async function measure(opts) {
 
   const m = result.median;
   say('');
-  say(`median of ${o.runs} runs (${o.version}):`);
+  say(o.runs === 1 ? `single run (${o.version}):` : `median of ${o.runs} runs (${o.version}):`);
   say(`  time to first apple   ${m.timeToFirstAppleMs} ms (run ${result.medianRun})`);
   const medianScreens = runs.find(r => r.run === result.medianRun)?.screensBeforeFirstApple || [];
   for (const s of medianScreens) say(`    ${s.screen.padEnd(16)} ${s.ms} ms`);
@@ -184,12 +191,8 @@ export async function measure(opts) {
   say(`performance budget (median >= 50 fps, p5 >= 30 fps): ${budget ? 'PASS' : 'FAIL'}`);
   result.budget = { fpsMedianMin: 50, fpsP5Min: 30, pass: budget };
 
-  // Write everything.
+  // Write everything (the raw headless runs are already there).
   const outDir = o.outDir;
-  const runDir = path.join(outDir, o.version);
-  fs.rmSync(runDir, { recursive: true, force: true });
-  fs.mkdirSync(runDir, { recursive: true });
-  rawRuns.forEach((raw, i) => fs.writeFileSync(path.join(runDir, `run-${i + 1}.json`), JSON.stringify(raw)));
   fpsRaw.forEach((raw, i) => fs.writeFileSync(path.join(runDir, `fps-run-${i + 1}.json`), JSON.stringify(raw)));
   fs.writeFileSync(path.join(outDir, `${o.version}.json`), JSON.stringify(result, null, 2) + '\n');
   upsertSummary(path.join(outDir, 'summary.csv'), result, o.fpsMode);
@@ -221,7 +224,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     version,
     dir: path.join(ROOT, 'dist', version),
     outDir: path.join(ROOT, 'measurements'),
-    command: `npm run measure ${version}${extra ? ' -- ' + extra : ''}`,
+    command: args.runs === '5' && args['fps-runs'] === '5' ? `npm run measure:final ${version}` : `npm run measure ${version}${extra ? ' -- ' + extra : ''}`,
     ...(args.runs && { runs: Number(args.runs) }),
     ...(args['fps-runs'] && { fpsRuns: Number(args['fps-runs']) }),
     ...(args.session && { sessionMs: Number(args.session) }),

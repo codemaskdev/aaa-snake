@@ -46,7 +46,7 @@ export function renderSvg(rows) {
   let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">`;
   out += `<rect width="${W}" height="${H}" fill="${C.bg}"/>`;
   out += `<text x="${pad.outer}" y="74" font-size="44" font-weight="700" fill="${C.text}">The bloat chart</text>`;
-  out += `<text x="${pad.outer}" y="108" font-size="22" fill="${C.muted}">AAA Snake, every metric by version. Medians of measured runs (measurements/summary.csv).</text>`;
+  out += `<text x="${pad.outer}" y="108" font-size="22" fill="${C.muted}">AAA Snake, every metric by version: medians of 5 runs; * a single run (measurements/summary.csv).</text>`;
 
   PANELS.forEach((p, i) => {
     const x0 = pad.outer + (i % cols) * (pw + gap);
@@ -72,7 +72,7 @@ export function renderSvg(rows) {
       out += `<text x="${plot.x + plot.w}" y="${y - 8}" font-size="15" fill="${C.muted}" text-anchor="end">budget ${p.ref}</text>`;
     }
     versions.forEach((v, j) => {
-      out += `<text x="${xOf(j)}" y="${plot.y + plot.h + 26}" font-size="16" fill="${C.muted}" text-anchor="middle">${esc(v)}</text>`;
+      out += `<text x="${xOf(j)}" y="${plot.y + plot.h + 26}" font-size="16" fill="${C.muted}" text-anchor="middle">${esc(v)}${rows[j].kind === 'single run' ? '*' : ''}</text>`;
     });
     const pts = values.map((v, j) => (v === null ? null : [xOf(j), yOf(v)]));
     const path = pts.filter(Boolean).map((pt, j) => `${j ? 'L' : 'M'}${pt[0]},${pt[1]}`).join(' ');

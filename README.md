@@ -14,7 +14,8 @@ npm install                 # playwright 1.63.0, the only dependency (dev)
 npx playwright install chromium
 npm test                    # game rules, determinism, the rig, the chart, the recorder
 npm run build <version>     # copy src/ to dist/<version>/ (never overwrites)
-npm run measure <version>   # 5 measured runs -> measurements/<version>.json, summary.csv
+npm run measure <version>   # one headless and one visible run -> measurements/<version>.json, summary.csv ("single run")
+npm run measure:final <version>  # 5 + 5 runs and their medians; once, overnight, before release
 npm run fps-check           # headless vs visible window frame rate, on test loads
 npm run chart               # measurements/summary.csv -> out/bloat.png
 npm run short <version>     # 30-second vertical short -> out/shorts/<version>/
@@ -25,6 +26,16 @@ npm run play-share          # control share in play, from the saved runs of ever
 ```
 
 `npm run measure` opens visible Chromium windows for its frame-rate runs.
+
+## Methods
+
+- **During the build** (since prompt 13), `npm run measure <version>` does one headless run (every metric but frame
+  rate) and one run in a visible window (frame rate); measurements/summary.csv marks such a row "single run" and the
+  chart puts a * after its version. The game and the bot are deterministic (v1.7's headless runs 1 and 2 both reached
+  the first apple on tick 7595), so more runs would only measure timer noise.
+- **Before release**, `npm run measure:final <version>` measures every version again with 5 headless and 5 visible
+  runs and takes medians ("median of 5 runs"). v1.0 to v1.6 were measured that way during the build already.
+- Numbers are written as measured, never rounded; every run's raw data is kept under measurements/<version>/.
 
 ## Shorts
 

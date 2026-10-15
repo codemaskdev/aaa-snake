@@ -19,7 +19,10 @@ export const COLUMNS = [
   'fps_window',
   'runs',
   'measured_at',
+  'kind', // since prompt 13: "single run" (during the build) or "median of 5 runs" (npm run measure:final, and v1.0 to v1.6)
 ];
+
+export const kindOf = runs => (Number(runs) === 1 ? 'single run' : `median of ${runs} runs`);
 
 export function rowFor(result, fpsWindow) {
   const m = result.median;
@@ -40,6 +43,7 @@ export function rowFor(result, fpsWindow) {
     fps_window: fpsWindow,
     runs: result.settings.runs,
     measured_at: result.measuredAt,
+    kind: kindOf(result.settings.runs),
   };
 }
 
@@ -60,7 +64,7 @@ function versionKey(v) {
 export function upsertSummary(file, result, fpsWindow) {
   const rows = fs.existsSync(file) ? parseCsv(fs.readFileSync(file, 'utf8')) : [];
   const row = rowFor(result, fpsWindow);
-  const kept = rows.filter(r => r.version !== row.version);
+  const kept = rows.filter(r => r.version !== row.version).map(r => ({ ...r, kind: r.kind || kindOf(r.runs) }));
   kept.push(Object.fromEntries(COLUMNS.map(c => [c, row[c] === null || row[c] === undefined ? '' : String(row[c])])));
   kept.sort((a, b) => versionKey(a.version) - versionKey(b.version) || a.version.localeCompare(b.version));
   const text = [COLUMNS.join(','), ...kept.map(r => COLUMNS.map(c => r[c] ?? '').join(','))].join('\n') + '\n';

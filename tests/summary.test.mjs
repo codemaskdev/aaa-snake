@@ -26,4 +26,12 @@ test('one row per version, in version order, replaced when measured again, never
   assert.equal(rows[1].time_to_first_apple_ms, '3');
   assert.equal(rows[0].time_to_first_apple_ms, '0.30000000000000004');
   assert.equal(rows[0].fps_median, '59.88023952095874');
+  assert.deepEqual(rows.map(r => r.kind), ['median of 5 runs', 'median of 5 runs', 'median of 5 runs']);
+});
+
+test('a single run is marked as one in summary.csv (since prompt 13)', () => {
+  const file = path.join(tempDir('csv'), 'summary.csv');
+  upsertSummary(file, result('v1.0', 1), 'visible');
+  upsertSummary(file, { ...result('v1.7', 2), settings: { runs: 1 } }, 'visible');
+  assert.deepEqual(parseCsv(fs.readFileSync(file, 'utf8')).map(r => [r.version, r.runs, r.kind]), [['v1.0', '5', 'median of 5 runs'], ['v1.7', '1', 'single run']]);
 });
