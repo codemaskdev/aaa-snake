@@ -1166,3 +1166,35 @@ summary.csv row and the chart mark such a version "game ended at N s" (N: the ti
 measured). Time to first apple is unaffected. Two consequences the rule leaves to the rig, written here before
 measuring: the JS heap is read when the game has ended (there is no 60 s of control to read it after), and the frame
 rate is taken over the control frames the run had. The chart and the row say which.
+
+### v2.0, what was built
+As planned above (239ebb0), nothing else: src/cabinet.js (the cabinet, its door, the inside, THE END and the
+credits), the cabinet drawn in the world at (134, 128) with v1.0's screen on it, and `npm run build` taking dist/v1.0's
+three files from the v1.0 tag into dist/v2.0/cabinet/ (tools/build.mjs, `exportCabinet`). The rest of the game is
+v1.9's: rules.js, world.js, season.js, skins.js, progress.js, online.js, story.js, launch.js, hair.js and remaster.js
+are byte for byte v1.9's (tests/v2.0.test.mjs). The rig: `cabinet` is a control screen; a run ends when the game has
+ended; when it ends before 60 s of control, both control shares are taken up to THE END (prompt 15), and the heap is
+read at the end. The short's plan for v2.0 ends segment D 3000 ms into the credits (the inner apple and the ending).
+Another place for the cabinet was worked out but not built (see the plan).
+
+### What broke while building
+- My own v2.0 test, once: it expected the bot to go to the cabinet for an apple at (128, 133), but with right turns
+  only that apple is 5 moves away (down is a right turn from facing right), fewer than the cabinet's 6 + 3; the bot
+  was right.
+- The short's plan code read `cur.plan.until` on test versions that have no plan.
+
+### v2.0, expected direction of every metric (written before `npm run measure v2.0`, against v1.9)
+| Metric | Expected | Why |
+|---|---|---|
+| First apple's tick | 3 (7595 in v1.9) | the first apple is the cabinet's: v1.0's, on its tick 3 |
+| Time to first apple | **down, sharply** (with the cabinet at the start); it would go down less with the far cabinet | at the start: the launch as in v1.9 (REMASTERED included), then 6 moves to the cabinet, its door, and 3 moves inside, instead of 7595 moves of search. Far (not built): the search would reach it around move 1780, a few minutes in, still well below v1.9 |
+| Load time | unchanged | nothing before the warning changed |
+| Control share (first 180 s) | down, sharply | the window ends at THE END, a few seconds after play begins, and holds about a second of control |
+| Control share in play | down, sharply | from the first control frame to THE END: about a second of control against the reflection's 6000 ms and more |
+| Download | up | cabinet.js and the cabinet's three v1.0 files |
+| JS lines / bytes | up | the same; v1.0's code is part of the build now |
+| Assets | unchanged | no files besides code |
+| JS heap after GC | up | read at the end now, with v1.0 running in its frame; not comparable with a heap read after 60 s of control |
+| Frame rate median / 5th percentile | not comparable | taken over about a second of control (6 moves and v1.0's 3), not 60 s; the budget still applies |
+| Requests to another origin | zero | the cabinet loads from the game's own origin |
+- The full `npm test` before tagging: 112 of 112, exit 0.
