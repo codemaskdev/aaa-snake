@@ -386,7 +386,7 @@ export function counterFor(seg, { cur, prev, runT, eaten }) {
   return {
     compare: false,
     label: 'Time to first apple',
-    sub: prev ? `${cur.version}, median of ${cur.runs} measured runs` : `median of ${cur.runs} measured runs`,
+    sub: `${prev ? `${cur.version}, ` : ''}${cur.runs === 1 ? 'a single measured run' : `median of ${cur.runs} measured runs`}`,
     value: formatTime(eaten ? cur.median : Math.min(runT, cur.median)),
     frozen: eaten,
   };

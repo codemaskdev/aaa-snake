@@ -975,3 +975,32 @@ scales up), in steps, until it fits, and DEVLOG says by how much.
 
 **Test for the tick:** tests/v1.9.test.mjs runs the bot's search offline on v1.9's own rules.js and world size and
 checks the first apple on tick 7595, and checks that rules.js, world.js and season.js are byte for byte v1.7's.
+
+### v1.7, measured (`npm run measure v1.7`, a single run) against the expectations written before measuring
+| Metric | Expected | v1.6 (median of 5) | v1.7 (single run) | Direction |
+|---|---|---|---|---|
+| First apple's tick | 7595 | 163 | 7595 | as expected |
+| Time to first apple | up, sharply | 128380.70000000298 ms | 1104846.900000006 ms | up sharply, as expected (976466.200000003 ms more) |
+| Load time | unchanged | 30141.60000000894 ms | 30163 ms | unchanged, as expected |
+| Control share (first 180 s) | up, a little (UPDATES.md: down) | 0.2537455555555721 | 0.29396666666633553 | up, as I expected |
+| Control share in play | up (UPDATES.md: down) | 0.5746840195698081 | 0.6723608157078272 | up, as I expected |
+| Download | up; corrected to down before any result | 738812 bytes | 663192 bytes | down (75620 bytes less), as corrected: the recordings are smaller than the placeholders |
+| JS lines / bytes | up | 2445 / 101353 | 3016 / 124762 | up, as expected |
+| Assets | unchanged; corrected to down | 629368 bytes | 529875 bytes | down, as corrected |
+| JS heap after GC | up, a little | 1811332 bytes | 1854092 bytes | up a little (42760 bytes), as expected |
+| Frame rate median | unchanged | 60 fps | 60 fps | unchanged, as expected |
+| Frame rate 5th percentile | unchanged or slightly down | 56.818181818163026 fps | 57.47126436783532 fps | up a little: one visible run against a median of five |
+| Requests to another origin | zero | 0 | 0 | zero, as expected |
+| Deaths | none | | 0 | none, as expected |
+
+Checks: tick 7595; 66 of 66 turns accepted; 0 requests outside the origin; 0 failed requests; 0 page errors. Budget:
+pass. **Cells the bot had seen when the apple first came into view: 52228** (at tick 7589), in this run and in all
+five headless runs of the stopped measurement (measurements/v1.7-stopped-output.txt), as in the offline search. The
+search took 66 turns; on the way: 16 level-ups, 15 battle-pass tiers, 36 reconnects (the screens before the first
+apple are in measurements/v1.7/output.txt). The stopped measurement's run 1 took 1104807.599999994 ms to the apple,
+this one 1104846.900000006 ms.
+- The short (`npm run short v1.7`): the launch and the search at 63.2x, 29866.666666666668 ms; line 10 from
+  26.01934841771573 s to 29.85934841771573 s, in full. Its counter said "median of 1 measured runs": it now says "a
+  single measured run".
+- The full `npm test` before tagging and again here: 96 of 96, then 97 of 97 (the summary test for "single run"), exit 0.
+- v1.7 was tagged before this measurement (ad4cb9a); nothing in the game changed since.
