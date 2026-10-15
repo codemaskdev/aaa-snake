@@ -223,6 +223,13 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
     }
     for (const pane of Object.values(panes).filter(Boolean)) {
       pane.log = await page.evaluate(id => document.getElementById(id).contentWindow.snakeGame.log, pane.id);
+      // Which voice line each sound the game started was (a version without voice lines has none).
+      pane.plays = await page.evaluate(id => {
+        const w = document.getElementById(id).contentWindow;
+        const urls = w.eval('typeof voice === "undefined" ? {} : voice.urls');
+        const lineOf = Object.fromEntries(Object.entries(urls).map(([line, url]) => [url, Number(line)]));
+        return w.__vclock.plays().map(p => ({ ...p, line: lineOf[p.src] ?? null }));
+      }, pane.id);
     }
   } finally {
     await browser.close();
@@ -260,11 +267,9 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
   pickFrame(Math.floor((names.length - 1) / 2), 'middle.png');
   pickFrame(names.length - 1, 'last.png');
 
+  const voice = voiceTrack(timeline, panes, distDirs, (frames * 1000) / FPS);
   const mp4 = path.join(outDir, `short-${cur.version}.mp4`);
-  if (encode) {
-    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(framesDir, '%05d.png'),
-      '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-movflags', '+faststart', mp4]);
-  }
+  if (encode) encodeShort(framesDir, voice, (frames * 1000) / FPS, mp4);
   const clip = {
     version: cur.version,
     comparedWith: prev ? prev.version : null,
@@ -276,6 +281,7 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
     timeline: timeline.map(({ name, kind, who, runFrom, runTo, clipFrom, clipMs, speed }) => ({ name, kind, who: who ? panes[who].v.version : null, runFrom, runTo, clipFrom, clipMs, speed })),
     counter: 'run clock (virtual time of the replay) until the first apple, then the measured median; in A, the new version\'s median appears once the previous one freezes',
     checks,
+    voice: voice.map(({ file, ...v }) => ({ ...v, file: path.relative(ROOT, file) })),
     safeArea: { ...SAFE, elements: safeArea },
     browser: browser.version(),
     encoder: encode ? ffmpegVersion() : null,
@@ -283,6 +289,43 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
   };
   fs.writeFileSync(path.join(outDir, 'clip.json'), JSON.stringify(clip, null, 2) + '\n');
   return clip;
+}
+
+// The short's sound: silence, except Warden Snek's lines in the segments played at 1x, each from the
+// moment the replay started it, at its recorded length. A line stops where a segment faster than
+// 1x begins, or where the short ends. Versions without voice lines get silence only.
+export function voiceTrack(timeline, panes, distDirs, clipMs) {
+  const out = [];
+  for (const seg of timeline.filter(s => s.kind === 'game' && s.speed === 1)) {
+    const pane = panes[seg.who];
+    const runTo = seg.runFrom + seg.clipMs;
+    for (const p of (pane.plays || []).filter(x => x.line !== null && x.t >= seg.runFrom && x.t < runTo)) {
+      const file = path.join(distDirs[seg.who], 'voice', `${String(p.line).padStart(2, '0')}.mp3`);
+      const clipAtMs = seg.clipFrom + (p.t - seg.runFrom);
+      const fast = timeline.find(s => s.clipFrom > clipAtMs && s.kind === 'game' && s.speed > 1);
+      const stopAtMs = Math.min(fast ? fast.clipFrom : clipMs, clipMs);
+      const lengthMs = audioMs(file);
+      out.push({ version: pane.v.version, segment: seg.name, line: p.line, file, runAtMs: p.t, clipAtMs, lengthMs, heardMs: Math.min(lengthMs, stopAtMs - clipAtMs) });
+    }
+  }
+  return out;
+}
+
+function audioMs(file) {
+  return Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file], { encoding: 'utf8' }).trim()) * 1000;
+}
+
+// Frames and sound into the mp4: H.264 video and an AAC track (mono, 44.1 kHz) in every short.
+function encodeShort(framesDir, voice, clipMs, mp4) {
+  const args = ['-y', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(framesDir, '%05d.png'),
+    '-f', 'lavfi', '-t', String(clipMs / 1000), '-i', 'anullsrc=r=44100:cl=mono'];
+  voice.forEach(v => args.push('-i', v.file));
+  const parts = voice.map((v, i) => `[${i + 2}:a]atrim=end=${v.heardMs / 1000},adelay=${Math.round(v.clipAtMs)}:all=1[v${i}]`);
+  const mix = `[1:a]${voice.map((_, i) => `[v${i}]`).join('')}amix=inputs=${voice.length + 1}:duration=first:normalize=0[aout]`;
+  args.push('-filter_complex', [...parts, mix].join(';'), '-map', '0:v', '-map', '[aout]',
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS),
+    '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-ac', '1', '-t', String(clipMs / 1000), '-movflags', '+faststart', mp4);
+  execFileSync('ffmpeg', args);
 }
 
 // What the counter at the bottom shows for this frame.
@@ -354,6 +397,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const c of Object.values(clip.checks)) {
     console.log(`${c.version}: first apple replayed at ${c.replayFirstAppleMs} ms, recorded ${c.recordedFirstAppleMs} ms, median ${c.medianFirstAppleMs} ms (counter freezes on the median); ${c.applesReplayed.length} apples shown, same as the recorded run: ${c.sameApplesAsRecordedRun}`);
   }
-  if (clip.clipMs < 25000 && clip.comparedWith) console.log(`note: the clip is shorter than 25 s because ${version}'s launch is shorter than ${PLAN.launchMs} ms at 1x`);
+  if (!clip.voice.length) console.log('sound: silence (no Warden Snek line starts in a 1x segment)');
+  for (const v of clip.voice) {
+    console.log(`sound: ${v.version} line ${v.line} (${v.segment}) at ${v.clipAtMs / 1000} s of the short, ${v.heardMs} ms heard of ${v.lengthMs} ms`);
+  }
+    if (clip.clipMs < 25000 && clip.comparedWith) console.log(`note: the clip is shorter than 25 s because ${version}'s launch is shorter than ${PLAN.launchMs} ms at 1x`);
   console.log(`wrote out/shorts/${version}/short-${version}.mp4, frames/, first.png, middle.png, last.png, clip.json`);
 }

@@ -34,6 +34,14 @@
   window.setInterval = (cb, ms, ...args) => addTimer(cb, ms, args, Math.max(1, Number(ms) || 0));
   window.clearTimeout = window.clearInterval = id => { timers = timers.filter(t => t.id !== id); };
 
+  // Sound: when the game starts a sound (Warden Snek's lines, since v1.3), the recorder notes what and
+  // when, in virtual time, and puts it on the short's audio track itself. Nothing plays in the page.
+  const plays = [];
+  HTMLMediaElement.prototype.play = function play() {
+    plays.push({ src: this.src, t: now });
+    return Promise.resolve();
+  };
+
   function runTimersUntil(t) {
     for (;;) {
       const due = timers.filter(x => x.at <= t).sort((a, b) => a.at - b.at || a.id - b.id)[0];
@@ -65,6 +73,7 @@
 
   window.__vclock = {
     now: () => now,
+    plays: () => plays.slice(),
     replay(list) {
       keys = list.slice().sort((a, b) => a.t - b.t);
       keyIndex = 0;

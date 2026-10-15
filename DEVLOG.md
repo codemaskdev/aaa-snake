@@ -807,3 +807,27 @@ first that fits is kept, the others deleted; every take's length is in voice/REC
   lead, not checked: the loading screen's "Voice lines: N of 17" depends on when the real downloads of the voice files
   finish during the replay (the first loading frame of v1.3's short shows "0 of 17", the next "17 of 17"), and those
   files changed.
+
+### Voice in the shorts
+`npm run short` now gives every short a sound track (AAC, mono, 44.1 kHz): silence, except Warden Snek's lines in the
+segments played at 1x. The recorder's virtual clock (tools/short/vclock.js) notes each sound the game starts, and when,
+instead of playing it; the recorder puts the line's file there on the track, at its recorded length. A line stops
+where a segment faster than 1x begins or where the short ends; no line is sped up. tests/short.test.mjs checks the
+placing and that the fixture's short has a silent AAC track; the text-not-box checks are unchanged. All seven shorts
+were rendered again (each exit 0); every file now has one H.264 and one AAC stream.
+
+| Short | Lines heard (second of the short, from the replay) | Heard of the take |
+|---|---|---|
+| v1.0 | none (silent track) | |
+| v1.1 | none (silent track) | |
+| v1.2 | none (silent track) | |
+| v1.3 | line 10, "One apple. Not the orchard. But it is a start.", v1.3 in D, at 29.3838186991915 s | 416.1813008084973 of 3840 ms (the short ends) |
+| v1.4 | line 10, v1.3 in A, at 2.5829000000059605 s; line 10, v1.4 in D, at 29.387344329899282 s | 3417.0999999940395 of 3840 ms (C starts at 6 s); 412.65567010071754 of 3840 ms (the short ends) |
+| v1.5 | line 10, v1.4 in A, at 2.574533333336323 s; line 10, v1.5 in D, at 29.4496217391329 s | 3425.4666666636767 of 3840 ms; 417.0449275337669 of 3840 ms |
+| v1.6 | line 10, v1.5 in A, at 2.5793666666696518 s; line 10, v1.6 in D, at 29.453162258950695 s | 3420.6333333303483 of 3840 ms; 446.8377410493049 of 3840 ms |
+
+- Line 10 is the first reflection: it starts 600 ms after the apple (the letterbox), and segment D ends 1000 ms after
+  the apple, so in D only its first 0.4 s or so is heard. In A it runs over the patch-note card until C begins.
+- Where a line is cut at the start of C, the AAC encoding leaves a trace in the first 50 ms after it (max -33.6 dB in
+  v1.4's short between 6.00 and 6.05 s; -91.0 dB, silence, from 6.05 s on).
+- The full `npm test` after this prompt: 85 of 85, exit 0.

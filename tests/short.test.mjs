@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, checkSafeArea, PLAN, WIDTH, HEIGHT } from '../tools/short.mjs';
+import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, checkSafeArea, voiceTrack, PLAN, WIDTH, HEIGHT } from '../tools/short.mjs';
 import { chromium } from 'playwright';
 import { measure } from '../tools/measure.mjs';
 import { ROOT, tempDir, pngSize } from './helpers.mjs';
@@ -53,6 +53,24 @@ test('every patch note so far fits the card whole (v1.4\'s lost its last word)',
   } finally {
     await browser.close();
   }
+});
+
+test('the voice track: lines only in 1x segments, from when the replay starts them, cut where a faster segment begins', () => {
+  const timeline = [
+    { name: 'A previous version', kind: 'game', who: 'prev', runFrom: 1000, clipFrom: 0, clipMs: 3000, speed: 1 },
+    { name: 'B patch note', kind: 'note', clipFrom: 3000, clipMs: 3000 },
+    { name: 'C launch', kind: 'game', who: 'cur', runFrom: 0, clipFrom: 6000, clipMs: 20000, speed: 5 },
+    { name: 'D first apple', kind: 'game', who: 'cur', runFrom: 100000, clipFrom: 26000, clipMs: 3000, speed: 1 },
+  ];
+  const dir = path.join(ROOT, 'dist/v1.3');
+  const panes = {
+    prev: { v: { version: 'prev' }, plays: [{ t: 2500, line: 10 }, { t: 900, line: 11 }] },
+    cur: { v: { version: 'cur' }, plays: [{ t: 50000, line: 1 }, { t: 101000, line: 12 }, { t: 101500, line: null }] },
+  };
+  const track = voiceTrack(timeline, panes, { prev: dir, cur: dir }, 29000);
+  assert.deepEqual(track.map(v => [v.version, v.line, v.clipAtMs]), [['prev', 10, 1500], ['cur', 12, 27000]], 'not before A, not in the 5x part, not a sound that is no line');
+  assert.equal(track[0].heardMs, Math.min(track[0].lengthMs, 6000 - 1500), 'A\'s line may run over the patch note, never into C');
+  assert.equal(track[1].heardMs, Math.min(track[1].lengthMs, 2000), 'D\'s line stops where the short ends');
 });
 
 test('counter text', () => {
@@ -128,7 +146,10 @@ test('records the fixture: replays its measured run in the fixed layout', async 
   for (const name of ['first.png', 'middle.png', 'last.png', 'frames/00001.png']) {
     assert.deepEqual(pngSize(path.join(shortDir, name)), { width: 1080, height: 1920 });
   }
-  const probe = execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,width,height,r_frame_rate,nb_frames', '-of', 'json', path.join(shortDir, 'short-fixture.mp4')], { encoding: 'utf8' });
-  const stream = JSON.parse(probe).streams[0];
-  assert.deepEqual([stream.codec_name, stream.width, stream.height, stream.r_frame_rate, stream.nb_frames], ['h264', 1080, 1920, '30/1', '20']);
+  const probe = execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,width,height,r_frame_rate,nb_frames,sample_rate,channels', '-of', 'json', path.join(shortDir, 'short-fixture.mp4')], { encoding: 'utf8' });
+  const [video, audio] = JSON.parse(probe).streams;
+  assert.deepEqual([video.codec_name, video.width, video.height, video.r_frame_rate, video.nb_frames], ['h264', 1080, 1920, '30/1', '20']);
+  // Every short has a sound track; a version without voice lines gets silence.
+  assert.deepEqual([audio.codec_type, audio.codec_name, audio.sample_rate, audio.channels], ['audio', 'aac', '44100', 1]);
+  assert.deepEqual(clip.voice, []);
 });
