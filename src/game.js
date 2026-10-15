@@ -1,10 +1,11 @@
-// AAA Snake v1.9: the screen, the keys and the game loop.
+// AAA Snake v2.0: the screen, the keys and the game loop.
 // The rules live in rules.js, the day-one update in update.js, the story in story.js,
 // SnakeNet in online.js, the open world in world.js, XP and skills in progress.js,
 // Season 1 in season.js and skins.js, the hair in hair.js, the remaster's WebGL pass in
-// remaster.js, the launch experience in launch.js. The shadows arrive in the day-one patch.
+// remaster.js, the arcade cabinet and the end in cabinet.js, the launch experience in launch.js.
+// The shadows arrive in the day-one patch.
 
-const VERSION = 'v1.9';
+const VERSION = 'v2.0';
 const CELL = 24;        // each cell is 24 x 24 pixels
 const HUD = 32;         // a strip at the top for the score
 const BOARD = GRID * CELL;
@@ -52,6 +53,15 @@ window.addEventListener('keydown', event => {
   if (screen === 'terms' && TERMS_KEYS[event.code]) {
     event.preventDefault();
     scrollTerms(TERMS_KEYS[event.code]);
+  } else if (screen === 'cabinet-door') {
+    if (event.code === 'Enter') setScreen('cabinet'); // in you go
+  } else if (screen === 'cabinet') {
+    if (direction || event.code === 'Enter' || event.code === 'Space') {
+      event.preventDefault();
+      cabinetKey(event.code); // v1.0 gets the key
+    }
+  } else if (screen === 'the-end' || screen === 'credits') {
+    // the game has ended: no key does anything any more
   } else if (['battle-pass', 'parody-shop', 'loot-box', 'wardrobe'].includes(screen)) {
     const to = seasonKey(screen, event.code, screenTime);
     if (to === 'carry-on') carryOn();
@@ -112,6 +122,17 @@ function frame(now) {
   if (next) setScreen(next);
   if (screen === 'finisher-bite' && screenTime >= FINISHER.biteMs) bite();
   if (screen === 'reflection' && screenTime >= cutsceneMs([reflection])) carryOn();
+  if (screen === 'cabinet' && !cabinet.ended) { // the apple eaten inside is Snek's apple, and the end
+    const inner = cabinetApple();
+    if (inner) {
+      cabinet.ended = true;
+      game.score++;
+      report('apple', { score: game.score, tick: inner.tick, where: 'cabinet' });
+      reflection = REFLECTIONS[0];
+      setScreen('reflection');
+    }
+  }
+  if (screen === 'the-end' && screenTime >= CABINET.endMs) setScreen('credits');
   if (screen === 'reconnecting' && screenTime >= online.dropMs) {
     reconnected();
     carryOn();
@@ -143,6 +164,8 @@ function tick() {
   if (!game.alive) {
     best = Math.max(best, game.score);
     setScreen('gameover');
+  } else if (atCabinet(game.snake[0])) {
+    setScreen('cabinet-door'); // since v2.0: at the arcade cabinet
   } else {
     const found = visitCell(game.snake[0]); // a map marker on this cell
     if (found) toast(found);
@@ -156,7 +179,9 @@ function tick() {
 // After anything that stops play: a level-up waiting comes first (LEVEL UP!, then the skill tree),
 // then a battle-pass tier, then a connection drop waiting, then play.
 function carryOn() {
-  if (progression.pending > 0) {
+  if (cabinet.ended) {
+    setScreen('the-end'); // after the cabinet's apple, nothing but the end
+  } else if (progression.pending > 0) {
     setScreen('level-up');
   } else if (season.pending > 0) {
     setScreen('battle-pass');
@@ -205,7 +230,10 @@ function draw() {
     reportFirstFrame();
     return;
   }
-  const seasonScreens = { 'battle-pass': drawBattlePass, 'parody-shop': drawParodyShop, 'loot-box': drawLootBox, wardrobe: drawWardrobe };
+  const seasonScreens = {
+    'battle-pass': drawBattlePass, 'parody-shop': drawParodyShop, 'loot-box': drawLootBox, wardrobe: drawWardrobe,
+    cabinet: (c, t, w, h) => drawInsideCabinet(c, w, h), 'the-end': drawTheEnd, credits: drawCredits, // since v2.0
+  };
   if (seasonScreens[screen]) {
     seasonScreens[screen](ctx, screenTime, canvas.width, canvas.height);
     drawToasts(ctx, canvas.width);
@@ -250,6 +278,7 @@ function draw() {
   ctx.scale(cam.zoom, cam.zoom);
   ctx.translate(-cam.x, -cam.y);
   drawWorld(ctx, cam.view); // only the cells the camera sees
+  drawCabinet(ctx); // since v2.0, six cells ahead of the start
   if (progression.skills.shadow) withShadow(ctx, () => drawSnake(path, headAt)); // soft shadows, from the day-one patch
   else drawSnake(path, headAt); // the shadow is a skill now
   const seen = appleVisible(game.snake[0], game.apple); // only within VISION cells, until Apple Vision
@@ -281,6 +310,7 @@ function draw() {
   if (screen === 'ready') drawMessage('Press an arrow key or WASD', HUD + BOARD / 2 + 70); // below the head, which the camera keeps in the middle
   if (screen === 'gameover') drawMessage('Game over. Press Enter to play again');
   if (screen === 'reconnecting') drawReconnecting(ctx, screenTime, canvas.width, canvas.height);
+  if (screen === 'cabinet-door') drawCabinetDoor(ctx, canvas.width, canvas.height);
   if (screen === 'level-up') drawLevelUp(ctx, screenTime, canvas.width, canvas.height);
   drawToasts(ctx, canvas.width);
   reportFirstFrame();
@@ -444,6 +474,11 @@ function report(type, data) {
 }
 // The key that moves this screen on right now (leaves it, or on the terms scrolls them first), or null.
 function nextKey() {
+  if (screen === 'cabinet-door') return 'Enter';
+  if (screen === 'cabinet') {
+    const w = cabinetWindow();
+    return w ? w.snakeGame.probe().next : null; // v1.0's own (Enter after a game over)
+  }
   if (screen === 'terms' && !termsRead()) return 'PageDown'; // the terms must be scrolled to the bottom first
   if (launchListens(screen, screenTime)) return LAUNCH[screen].key || 'Enter';
   if (screen === 'gameover') return 'Enter';
@@ -466,7 +501,7 @@ function reportFirstFrame() {
 window.snakeGame = {
   version: VERSION,
   log,
-  probe: () => ({
+  probe: () => (screen === 'cabinet' ? cabinetProbe() : {
     screen,
     shown: screen === lastDrawnScreen, // false until the screen is on the display
     next: nextKey(),                   // the key that moves this screen on, once it listens
@@ -482,8 +517,29 @@ window.snakeGame = {
     xp: progression.xp,
     skills: screen === 'skill-tree' ? skillsForProbe() : null, // the skill tree's list, and where its cursor is
     cursor: screen === 'skill-tree' ? progression.cursor : null,
+    cabinet: cabinetOnScreen(game.snake[0]) ? { x: CABINET.x, y: CABINET.y } : null, // since v2.0, while on screen
+    ended: screen === 'credits', // since v2.0: the game is over for good
   }),
 };
+
+// Inside the cabinet the probe is v1.0's own: its snake, its apple, its grid, every turn allowed.
+function cabinetProbe() {
+  const w = cabinetWindow();
+  const inner = w ? w.snakeGame.probe() : null;
+  return {
+    screen: 'cabinet',
+    shown: screen === lastDrawnScreen && Boolean(inner && inner.shown),
+    next: inner ? inner.next : null,
+    tick: inner ? inner.tick : 0,
+    heading: inner ? inner.heading : 'right',
+    snake: inner ? inner.snake : [],
+    apple: inner ? inner.apple : null,
+    score: inner ? inner.score : 0,
+    grid: inner ? inner.grid : 20,
+    cabinetReady: Boolean(inner && inner.screen === 'ready'), // v1.0 waits for an arrow key
+    ended: false,
+  };
+}
 
 report('screen', { name: screen });
 requestAnimationFrame(frame);

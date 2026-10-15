@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AAA Snake v2.0</title>
+  <link rel="icon" href="data:,"> <!-- no icon file, so the browser doesn't ask for one -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; }
+    body { display: flex; align-items: center; justify-content: center; }
+    /* Fill the window, keep the shape (480 x 512), keep the pixels sharp. */
+    canvas { width: min(100vw, calc(100vh * 480 / 512)); aspect-ratio: 480 / 512; image-rendering: pixelated; }
+    /* Since v1.9 the game draws into #game, hidden, and #screen shows it through the remaster's WebGL pass. */
+    #game { display: none; }
+    /* Since v2.0 the arcade cabinet runs v1.0 here: drawn, so it keeps running, but not seen; the game draws it. */
+    #cabinet { position: fixed; left: 0; top: 0; width: 480px; height: 512px; border: 0; opacity: 0; pointer-events: none; z-index: -1; }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <canvas id="screen"></canvas>
+  <iframe id="cabinet" src="cabinet/index.html?seed=1" tabindex="-1" title="Arcade cabinet: Snake v1.0"></iframe>
+  <script src="rules.js"></script>
+  <script src="update.js"></script>
+  <script src="story.js"></script>
+  <script src="online.js"></script>
+  <script src="world.js"></script>
+  <script src="progress.js"></script>
+  <script src="skins.js"></script>
+  <script src="season.js"></script>
+  <script src="hair.js"></script>
+  <script src="requirements.js"></script>
+  <script src="remaster.js"></script>
+  <script src="cabinet.js"></script>
+  <script src="launch.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

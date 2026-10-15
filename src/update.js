@@ -20,6 +20,7 @@ const PATCH_NOTES = [
   ['v1.6', 'Turning left is now a skill. Progression is now a feature.'],
   ['v1.7', 'Season 1 is here! Unlock exclusive rewards, including the ability to see the apple.'],
   ['v1.9', 'Remastered from the ground up with cinematic visuals. Gameplay faithfully preserved.'],
+  ['v2.0', 'Game of the Year Edition: includes all content, plus the original game, which some players prefer.'],
 ];
 
 const patch = { total: null, pieces: [], received: 0, requested: 0, installed: false, failed: null };

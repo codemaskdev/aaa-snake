@@ -33,5 +33,12 @@
   },
   "v1.9": {
     "start": "screen:update-required"
+  },
+  "v2.0": {
+    "start": "screen:update-required",
+    "until": {
+      "screen": "credits",
+      "afterMs": 3000
+    }
   }
 }
