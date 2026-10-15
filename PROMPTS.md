@@ -810,3 +810,23 @@ The answer to the number check:
 4. Keep: it is the publishing schedule, not a game fact.
 Record the host voice and re-record the shorts and the trailer.
 ````
+
+## 18. One retake, a pause before line 4, a backup of the voice files
+
+````text
+Accepted: C as long as line 3 needs (keep the rule), v2.0 at 46.9 s
+(it is the finale), the trailer as it is.
+
+Three things:
+1. v1.3 line 2: record up to two more takes, run whisper on each, keep
+   the first one that transcribes "Warden Snek" and "He had an orchard"
+   correctly; if none does, keep the current take and tell me. Log the
+   takes in RECORDING.json. This is the only re-record.
+2. Line 4 starts 300 ms after D ends, in every short (v1.6 has 0.4 ms
+   now). Re-render the shorts; no new voice requests.
+3. Back up voice/host/ and src/voice/ together with RECORDING.json to a
+   folder outside the repository (for example ~/codemask-voice-backup/
+   aaa-snake/) and tell me the path. They are not in git by design and
+   cost money to redo.
+Then STOP.
+````

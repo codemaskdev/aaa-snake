@@ -68,7 +68,7 @@ note. All three shrink to fit their box, and the recorder fails if any text spil
 The sound track is silence except that line in D, from the moment the replay starts it, at its recorded length.
 
 **The host** (since prompt 17; voice/HOST.md): four lines per short. Line 1 starts at 0 s over A; line 2 over the
-patch card; line 3 over C; nothing from the host during D, where Warden Snek's line plays alone; line 4 right after D,
+patch card; line 3 over C; nothing from the host during D, where Warden Snek's line plays alone; line 4 0.3 s after D ends,
 over a freeze of D's last frame, and the short ends when line 4 ends. A, B and C each last at least their line plus
 0.3 s (A starts earlier in the previous run, so its apple stays 1 s before A ends). C lasts as long as line 3 needs:
 its factor is the largest step of 0.05x that keeps C at least that long, never slower than real time. Host and Snek

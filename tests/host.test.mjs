@@ -32,7 +32,8 @@ test('a short with the host: A, B and C as long as lines 1 to 3 need, C at the l
   let at = 0;
   for (const seg of [a, b, c, d]) { seg.clipFrom = at; at += seg.clipMs; }
   const track = hostTrack([a, b, c, d], cur.host, at);
-  assert.deepEqual(track.map(h => h.clipAtMs), [0, a.clipMs, a.clipMs + b.clipMs, at]);
+  assert.deepEqual(track.map(h => h.clipAtMs), [0, a.clipMs, a.clipMs + b.clipMs, at + HOST_GAP_MS], 'line 4 starts 300 ms after D ends (prompt 18)');
+  assert.equal(HOST_GAP_MS, 300);
   assert.ok(track.every(h => h.heardMs === h.lengthMs), 'never cut');
   // The previous apple keeps its place 1 s before A ends when A is longer than 3 s.
   const [a2] = compareTimeline({ version: 'v1.6', start: 100, apple: 120000 }, { ...cur, apple: 130000 });

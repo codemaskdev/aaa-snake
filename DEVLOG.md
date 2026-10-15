@@ -1357,3 +1357,39 @@ to 43.924969387757535 s.
 Nothing failed. The first plan, which kept C at its 16 to 21 s rule, came out at 46 to 57 s for v1.3 to v2.0 with long
 silences in C; that is why C follows line 3 now (above). whisper.cpp on v1.1's mp4 heard the four host lines in
 order with gaps where the plan puts them, and its loudest moment is -0.8 dB (no clipping).
+
+## Prompt 18: one retake, a pause before line 4, a backup of the voice files
+
+### v1.3's line 2, two more takes
+`npm run voice -- --retake-host v1.3-2 "Warden Snek | He had an orchard"` (new): up to two more takes, whisper.cpp
+(ggml-base.en) on each, the first that holds both phrases kept. None did, so take 1 stays, as the prompt says.
+Every take is in voice/host/takes/ and in voice/RECORDING.json (`history`, with what whisper heard):
+
+| take | requested | length | whisper heard |
+|---|---|---|---|
+| 1 (kept) | 2026-10-15T19:05:10.033Z | 7840 ms | "… Meet Warden Snack. He had norchard. They took it." |
+| 2 | 2026-10-15T20:09:56.209Z | 9600 ms | "… Meet Warden Snack. He had an orchard. They took it." |
+| 3 | 2026-10-15T20:09:59.523Z | 8560 ms | "… Meet Warden Snack. He had an orchard. They took it." |
+
+All three are "Snack". whisper's base English model may not have "Snek" as a word at all, so the test may be one
+no take can pass. Takes 2 and 3 have "He had an orchard" right.
+
+### Line 4, 300 ms after D
+Line 4 now starts HOST_GAP_MS (300 ms) after D ends, in every short; the freeze is 300 ms longer to match. No new voice
+requests. The shorts re-rendered; each is 300 ms longer, and nothing else moved:
+
+| short | length | host 4 |
+|---|---|---|
+| v1.1 | 29633.333333333332 ms | 21.3 to 29.62 s |
+| v1.2 | 28933.333333333332 ms | 20.76666666666667 to 28.92666666666667 s |
+| v1.3 | 34733.333333333336 ms | 25.53333333333333 to 34.73333333333333 s |
+| v1.4 | 32233.333333333332 ms | 24.066666666666666 to 32.22666666666667 s |
+| v1.5 | 36233.333333333336 ms | 28.7 to 36.22 s |
+| v1.6 | 31166.666666666668 ms | 22.03333333333333 to 31.153333333333332 s |
+| v1.7 | 39733.333333333336 ms | 29.8 to 39.72 s |
+| v1.9 | 37833.333333333336 ms | 26.633333333333333 to 37.83333333333333 s |
+| v2.0 | 47200 ms | 36.8 to 47.2 s |
+
+### Backup
+voice/host/ (the takes included), src/voice/, voice/RECORDING.json, voice/HOST.md and voice/LINES.md were copied to a
+folder outside the repository, with a SHA256SUMS file: 64 files and the sums, all of them verified against the copy.

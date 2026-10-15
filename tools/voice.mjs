@@ -14,6 +14,10 @@
 //                            line, and logs every request under "host" in voice/RECORDING.json. A line
 //                            already recorded with the same text is not asked for again. The mp3s are
 //                            not committed (generated media for the shorts); RECORDING.json is.
+//   npm run voice -- --retake-host v1.3-2 [words...]  up to two more takes of one host line (prompt 18):
+//                            whisper.cpp transcribes each; the first whose transcript holds every given
+//                            phrase (separated by |) replaces the line; the current take is kept if none
+//                            does. Every take stays in voice/host/takes/ and is logged in RECORDING.json.
 //   npm run voice -- --retake 14,16  up to three new takes of each listed line, same settings; the first
 //                            take that fits its slot is kept, the others are deleted; every take's length
 //                            goes into voice/RECORDING.json. Slots never change; audio is never sped up or cut.
@@ -22,6 +26,7 @@
 // Placeholders are silence, MP3 44.1 kHz mono at 64 kbps constant bitrate, the format the
 // recordings will be delivered in, so the bytes the game downloads stay about the same.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import { execFileSync } from 'node:child_process';
@@ -303,10 +308,74 @@ async function recordHost(host = loadHost()) {
   console.log(`host: ${log.lines.length} line(s) in voice/RECORDING.json`);
 }
 
+// What whisper.cpp hears in an mp3 (model: WHISPER_CPP_MODEL, or ggml-base.en.bin in ~/.cache/whisper-cpp).
+export function transcribe(mp3) {
+  const model = process.env.WHISPER_CPP_MODEL || path.join(os.homedir(), '.cache/whisper-cpp/ggml-base.en.bin');
+  const wav = `${mp3}.16k.wav`;
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', mp3, '-ar', '16000', '-ac', '1', wav]);
+  try {
+    return execFileSync('whisper-cli', ['-m', model, '-f', wav, '-nt', '-np'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).replace(/\s+/g, ' ').trim();
+  } finally {
+    fs.unlinkSync(wav);
+  }
+}
+
+// Words a transcript must hold, ignoring case and punctuation.
+export const hears = (transcript, phrase) => {
+  const norm = t => t.toLowerCase().replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  return ` ${norm(transcript)} `.includes(` ${norm(phrase)} `);
+};
+
+// More takes of one host line, same text and settings; the first that whisper hears right is kept.
+async function retakeHost(id, phrases, most = 2) {
+  const recording = readRecording();
+  const entry = recording?.host?.lines.find(t => t.id === id);
+  if (!entry) throw new Error(`host line ${id} is not recorded yet`);
+  const takesDir = path.join(HOST_DIR, 'takes');
+  fs.mkdirSync(takesDir, { recursive: true });
+  const current = path.join(HOST_DIR, hostFile(id));
+  if (!entry.history) {
+    const first = path.join(takesDir, `${id}.take1.mp3`);
+    fs.copyFileSync(current, first);
+    const heard = transcribe(first);
+    entry.history = [{ take: 1, requestedAt: entry.requestedAt, bytes: entry.bytes, durationMs: entry.durationMs, file: `voice/host/takes/${id}.take1.mp3`, heard, kept: true }];
+  }
+  const voiceSettings = { stability: HOST_RECORDING.stability, similarity_boost: HOST_RECORDING.similarity, style: HOST_RECORDING.style, speed: HOST_RECORDING.speed };
+  let kept = null;
+  for (let n = 1; n <= most && !kept; n++) {
+    const take = entry.history.length + 1;
+    const requestedAt = new Date().toISOString();
+    const bytes = await speakLine(entry.text, HOST_RECORDING, voiceSettings);
+    const file = path.join(takesDir, `${id}.take${take}.mp3`);
+    fs.writeFileSync(file, bytes);
+    const heard = transcribe(file);
+    const right = phrases.every(p => hears(heard, p));
+    const t = { take, requestedAt, bytes: bytes.length, durationMs: durationMs(file), file: `voice/host/takes/${id}.take${take}.mp3`, heard, kept: right };
+    entry.history.push(t);
+    fs.writeFileSync(RECORDING_FILE, JSON.stringify(recording, null, 2) + '\n'); // after every request
+    console.log(`${id} take ${take}: ${t.durationMs} ms, whisper heard "${heard}"  ${right ? 'kept' : 'not kept'}`);
+    if (right) kept = t;
+  }
+  if (kept) {
+    entry.history.forEach(t => { t.kept = t === kept; });
+    fs.copyFileSync(path.join(ROOT, kept.file), current);
+    Object.assign(entry, { requestedAt: kept.requestedAt, bytes: kept.bytes, durationMs: kept.durationMs, keptTake: kept.take });
+  } else {
+    entry.keptTake = 1;
+    console.log(`${id}: no take was heard right; the first take stays`);
+  }
+  entry.takes = entry.history.length;
+  entry.check = `whisper.cpp must hear: ${phrases.map(p => `"${p}"`).join(' and ')}`;
+  fs.writeFileSync(RECORDING_FILE, JSON.stringify(recording, null, 2) + '\n');
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const story = loadStory();
   const retakeAt = process.argv.indexOf('--retake');
-  if (retakeAt !== -1) {
+  const retakeHostAt = process.argv.indexOf('--retake-host');
+  if (retakeHostAt !== -1) {
+    await retakeHost(process.argv[retakeHostAt + 1], process.argv.slice(retakeHostAt + 2).join(' ').split('|').map(p => p.trim()).filter(Boolean));
+  } else if (retakeAt !== -1) {
     await retake(story, process.argv[retakeAt + 1].split(',').map(Number));
   } else if (process.argv.includes('--record') && process.argv.includes('host')) {
     await recordHost();

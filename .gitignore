@@ -3,4 +3,4 @@ out/
 .DS_Store
 *.log
 test-results/
-voice/host/*.mp3
+voice/host/

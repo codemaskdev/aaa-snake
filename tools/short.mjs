@@ -20,10 +20,10 @@
 //               than 30 s, C goes faster in steps of 0.05 until it fits.
 // Sound: silence, except that line in D (since prompt 12, A carries no voice).
 // The host (prompt 17, voice/HOST.md, one take a line in voice/host/): line 1 from 0 s over A, line 2
-// over B, line 3 over C, nothing during D (Snek's line plays alone), line 4 right after D over a
-// freeze of D's last frame; the short ends when line 4 ends. A, B and C last at least as long as
-// their line plus HOST_GAP_MS (A starts earlier in the previous run, so its apple keeps its place
-// 1 s before A ends); C lasts as long as its line needs, at the largest step of 0.05x that keeps it
+// over B, line 3 over C, nothing during D (Snek's line plays alone), line 4 HOST_GAP_MS after D ends
+// (prompt 18) over a freeze of D's last frame; the short ends when line 4 ends. A, B and C last at
+// least as long as their line plus HOST_GAP_MS (A starts earlier in the previous run, so its apple
+// keeps its place 1 s before A ends); C lasts as long as its line needs, at the largest step of 0.05x that keeps it
 // at least that long. With the host, the 30 s limit no longer applies (prompt 17).
 //
 // Output in out/shorts/<version>/: frames/00001.png..., short-<version>.mp4
@@ -353,7 +353,7 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
   let host = [];
   if (cur.host && prev) {
     // Line 4 right after D, over a freeze of D's last frame, until it ends.
-    const freeze = frameLimit === Infinity ? Math.ceil((cur.host[3].ms * FPS) / 1000) : 0;
+    const freeze = frameLimit === Infinity ? Math.ceil(((HOST_GAP_MS + cur.host[3].ms) * FPS) / 1000) : 0;
     const last = path.join(framesDir, `${String(frames).padStart(5, '0')}.png`);
     for (let f = frames + 1; f <= frames + freeze; f++) fs.copyFileSync(last, path.join(framesDir, `${String(f).padStart(5, '0')}.png`));
     frames += freeze;
@@ -412,7 +412,8 @@ export function voiceTrack(timeline, panes, distDirs, clipMs) {
   return out;
 }
 
-// The host's four lines in a short: 1, 2 and 3 where A, B and C start, 4 where D ends (gameMs).
+// The host's four lines in a short: 1, 2 and 3 where A, B and C start, 4 HOST_GAP_MS after D ends
+// (gameMs; prompt 18).
 // Each is heard in full; a line that would run into the next segment is an error.
 export function hostTrack(timeline, lines, gameMs) {
   const out = timeline.filter(seg => seg.host !== null && seg.host !== undefined).map(seg => {
@@ -421,7 +422,7 @@ export function hostTrack(timeline, lines, gameMs) {
     return { who: 'host', segment: seg.name, line: line.id, file: line.file, clipAtMs: seg.clipFrom, lengthMs: line.ms, heardMs: line.ms };
   });
   const last = lines[3];
-  out.push({ who: 'host', segment: 'freeze after D', line: last.id, file: last.file, clipAtMs: gameMs, lengthMs: last.ms, heardMs: last.ms });
+  out.push({ who: 'host', segment: 'freeze after D', line: last.id, file: last.file, clipAtMs: gameMs + HOST_GAP_MS, lengthMs: last.ms, heardMs: last.ms });
   return out;
 }
 
