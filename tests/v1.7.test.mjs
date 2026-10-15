@@ -9,7 +9,8 @@ import { chromium } from 'playwright';
 import { startServer } from '../tools/serve.mjs';
 import { patchNote } from '../tools/short.mjs';
 import { offOrigin } from '../tools/rig/stats.mjs';
-import { ROOT, tempDir } from './helpers.mjs';
+import { decide, makeMemory, remember } from '../tools/rig/bot.mjs';
+import { ROOT, tempDir, loadRules } from './helpers.mjs';
 
 const dir = fs.existsSync(path.join(ROOT, 'dist/v1.7')) ? path.join(ROOT, 'dist/v1.7') : path.join(ROOT, 'src');
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -28,6 +29,28 @@ test('the apple shows only within 6 cells of the head, as the crow flies', () =>
   assert.equal(S.appleVisible(head, { x: 105, y: 104 }), false, '6.4 cells');
   assert.equal(S.appleVisible(head, { x: 107, y: 100 }), false);
   assert.equal(S.appleVisible(head, null), false);
+});
+
+test('the first apple is on tick 7595: the bot\'s search, offline, on v1.7\'s own rules and world', () => {
+  const R = loadRules(dir);
+  const read = name => fs.readFileSync(path.join(dir, name), 'utf8');
+  const { size, far, vision } = vm.runInContext(`${read('rules.js')}\n${read('world.js')}\n${read('season.js')}\n;({ size: WORLD.size, far: WORLD.appleFar, vision: VISION })`, vm.createContext({}));
+  const random = R.makeRandom(1);
+  const g = R.newGame(random, size, far);
+  const memory = makeMemory();
+  let tick = null;
+  for (let n = 0; n < 20000 && tick === null; n++) {
+    const head = g.snake[0];
+    const visible = (g.apple.x - head.x) ** 2 + (g.apple.y - head.y) ** 2 <= vision * vision;
+    const probe = { snake: g.snake, apple: visible ? g.apple : null, grid: size, heading: g.turns.at(-1) || g.direction,
+      allowedTurns: g.tick >= 500 ? ['right', 'left'] : ['right'], vision, score: g.score, tick: g.tick };
+    remember(memory, probe);
+    const d = decide(probe, memory);
+    if (d !== probe.heading) R.queueTurn(g, d);
+    R.step(g, random);
+    if (g.score === 1) tick = g.tick;
+  }
+  assert.equal(tick, 7595);
 });
 
 test('the battle pass: a tier every 500 XP, 100 tiers, Apple Vision at the top', () => {
@@ -131,6 +154,9 @@ test('v1.7 in the browser: the probe hides the far apple; a tier, the PARODY sho
     const probe = () => page.evaluate(() => window.snakeGame.probe());
     await page.waitForFunction(() => window.snakeGame.probe().screen === 'publisher-logo', null, { timeout: 60000, polling: 50 });
     let p = await probe();
+    // The camera sees the whole 480 x 480 board, in the middle of the world and at its edge (fixed in prompt 14).
+    const views = await page.evaluate(() => [camera({ x: 3084, y: 3084 }), camera({ x: 12, y: 12 })].map(c => [c.view.x1 - c.view.x0, c.view.y1 - c.view.y0]));
+    assert.deepEqual(views, [[480, 480], [480, 480]]);
     assert.equal(p.vision, 6);
     assert.equal(p.apple, null, 'the apple is 163 moves away');
     await page.evaluate(() => setScreen('ready'));
