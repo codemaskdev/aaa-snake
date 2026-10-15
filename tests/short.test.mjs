@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, checkSafeArea, voiceTrack, firstAppleLine, PLAN, WIDTH, HEIGHT } from '../tools/short.mjs';
+import { patchNote, formatTime, startTime, compressSpeed, compareTimeline, counterFor, loadVersion, recordShort, checkSafeArea, voiceTrack, firstAppleLine, shortName, patchLine, PREMISE, PLAN, WIDTH, HEIGHT } from '../tools/short.mjs';
 import { chromium } from 'playwright';
 import { measure } from '../tools/measure.mjs';
 import { ROOT, tempDir, pngSize } from './helpers.mjs';
@@ -25,31 +25,37 @@ test('every clip plan has a patch note in UPDATES.md; v1.0\'s own plan fits in 3
   }
 });
 
-test('every patch note so far fits the card whole (v1.4\'s lost its last word)', async () => {
+test('every patch line and patch note so far fits the card whole, under the premise (v1.4\'s once lost its last word)', async () => {
   const md = fs.readFileSync(path.join(ROOT, 'UPDATES.md'), 'utf8');
   const versions = [...md.matchAll(/^## (v\d+\.\d+)/gm)].map(m => m[1]).filter(v => patchNote(md, v));
-  assert.ok(versions.includes('v1.4'));
+  assert.ok(versions.includes('v1.4') && versions.includes('v2.0'));
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } });
     await page.goto(`file://${path.join(ROOT, 'tools/short/layout.html')}`);
+    await page.evaluate(text => window.layout.setPremise(text), PREMISE);
+    assert.equal(PREMISE, 'I turned Snake into a AAA game.');
     for (const version of versions) {
+      const name = shortName(md, version);
+      const words = name.split(/\s+/).length;
+      assert.ok(words >= 2 && words <= 4, `${version}: "${name}" is ${words} words`);
+      const line = patchLine({ version, shortName: name });
       const note = patchNote(md, version);
-      await page.evaluate(([v, n]) => { window.layout.setCard(v, n); window.layout.setBigNote(v, n); }, [version, note]);
-      await checkSafeArea(page);
-      assert.equal(await page.evaluate(() => document.getElementById('note').textContent), note, version);
+      await page.evaluate(([l, n]) => { window.layout.setCard(l, n); window.layout.setBigNote(l, n); window.layout.setSpeed('12.35x'); }, [line, note]);
+      await checkSafeArea(page); // the premise, the patch line and the note all inside their boxes
+      assert.deepEqual(await page.evaluate(() => ['premise', 'version', 'note'].map(id => document.getElementById(id).textContent)), [PREMISE, line, note], version);
     }
-    // The speed label never covers the game, its top bar included, and stays clear of the card's text.
+    assert.equal(patchLine({ version: 'v1.4', shortName: shortName(md, 'v1.4') }), 'Patch 1.4: online only.');
+    // The speed label never covers the game (its top bar included), the premise's words or the card.
     const boxes = await page.evaluate(() => {
-      window.layout.setSpeed('12.35x');
       const r = id => document.getElementById(id).getBoundingClientRect().toJSON();
-      return { speed: r('speed'), game: r('game'), card: r('card'), words: (() => { const range = document.createRange(); range.selectNodeContents(document.querySelector('#card .label')); return range.getBoundingClientRect().toJSON(); })() };
+      const words = id => { const range = document.createRange(); range.selectNodeContents(document.getElementById(id)); return range.getBoundingClientRect().toJSON(); };
+      return { speed: r('speed'), game: r('game'), card: r('card'), premise: words('premise') };
     });
     const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
     assert.ok(apart(boxes.speed, boxes.game), 'the speed label is off the game');
-    assert.ok(apart(boxes.speed, boxes.words), 'the speed label is off the card\'s "Patch notes"');
-    assert.ok(boxes.speed.top >= boxes.card.top && boxes.speed.right <= boxes.card.right, 'inside the card');
-    await checkSafeArea(page);
+    assert.ok(apart(boxes.speed, boxes.premise), 'the speed label is off the premise');
+    assert.ok(apart(boxes.speed, boxes.card), 'the speed label is off the card');
   } finally {
     await browser.close();
   }

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trailer layout</title>
+<style>
+  /* The trailer (prompt 16): 1080 x 1920, v1.0 and v2.0 side by side on one virtual clock.
+     Safe area as in every short: nothing important below y = 1440 or right of x = 918. */
+  :root { --bg: #0b0d13; --panel: #141824; --line: #262c3d; --cyan: #00f0ff; --yellow: #ffd23f; --text: #e8ecf5; --muted: #8a93a8; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+  body { position: relative; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--text); }
+  #premise { position: absolute; left: 54px; top: 120px; width: 864px; height: 64px; box-sizing: border-box; padding-right: 150px;
+    font: 700 44px/64px "Helvetica Neue", Helvetica, Arial, sans-serif; white-space: nowrap; overflow: hidden; }
+  #speed { position: absolute; top: 134px; right: 162px; padding: 4px 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.7);
+    font: 700 24px Menlo, monospace; color: var(--yellow); }
+  .hidden { visibility: hidden; }
+  .name { position: absolute; top: 230px; width: 424px; height: 40px; font: 700 28px/40px Menlo, monospace; color: var(--cyan);
+    white-space: nowrap; overflow: hidden; }
+  .game { position: absolute; top: 280px; width: 424px; height: 452px; border: 0; border-radius: 6px; background: #000; }
+  #leftname, #left { left: 54px; }
+  #rightname, #right { left: 494px; }
+  .counter { position: absolute; left: 54px; width: 864px; height: 110px; box-sizing: border-box; padding: 0 30px;
+    display: flex; align-items: center; justify-content: space-between; background: var(--panel); border: 2px solid var(--line); border-radius: 18px; }
+  #leftcounter { top: 780px; }
+  #rightcounter { top: 910px; }
+  .counter .label { font-size: 30px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+  .counter .value { font: 700 60px Menlo, monospace; color: var(--yellow); white-space: nowrap; }
+  .counter.frozen { border-color: var(--yellow); }
+</style>
+</head>
+<body>
+  <div id="premise"></div>
+  <div id="speed" class="hidden"></div>
+  <div class="name" id="leftname"></div>
+  <div class="name" id="rightname"></div>
+  <iframe class="game" id="left" scrolling="no"></iframe>
+  <iframe class="game" id="right" scrolling="no"></iframe>
+  <div class="counter" id="leftcounter"><div class="label" id="leftlabel"></div><div class="value" id="leftvalue"></div></div>
+  <div class="counter" id="rightcounter"><div class="label" id="rightlabel"></div><div class="value" id="rightvalue"></div></div>
+<script>
+  // The recorder fills these in. Nothing here keeps time by itself.
+  const $ = id => document.getElementById(id);
+  function fit(el, start, least) {
+    let size = start;
+    el.style.fontSize = `${size}px`;
+    while ((el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) && size > least) el.style.fontSize = `${--size}px`;
+  }
+  window.trailer = {
+    load(id, src) { $(id).src = src; },
+    setText(premise, left, right) {
+      $('premise').textContent = premise;
+      fit($('premise'), 44, 24);
+      $('leftname').textContent = left;
+      $('rightname').textContent = right;
+    },
+    // which: 'left' or 'right'; { label, value, frozen }
+    setCounter(which, c) {
+      $(`${which}label`).textContent = c.label;
+      $(`${which}value`).textContent = c.value;
+      $(`${which}counter`).classList.toggle('frozen', Boolean(c.frozen));
+      fit($(`${which}label`), 30, 18);
+    },
+    setSpeed(text) {
+      $('speed').textContent = text;
+      $('speed').classList.toggle('hidden', !text);
+    },
+  };
+</script>
+</body>
+</html>

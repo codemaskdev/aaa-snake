@@ -24,7 +24,7 @@
 // (1080x1920, 30 fps, H.264), first/middle/last.png and clip.json.
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { chromium } from 'playwright';
@@ -38,7 +38,7 @@ export const FPS = 30;
 export const MAX_CLIP_MS = 30000;
 // Safe area: nothing important in the bottom 25 % or the right 15 % of the frame.
 export const SAFE = { right: WIDTH * 0.85, bottom: HEIGHT * 0.75 };
-const MAX_APPLE_DRIFT_MS = 50;
+export const MAX_APPLE_DRIFT_MS = 50;
 // The fixed plan for every version after v1.0 (ms of clip time).
 export const PLAN = { prevMs: 3000, noteMs: 3000, launchMs: 16000, launchMaxMs: 21000, appleMs: 3000, beforeAppleMs: 2000 };
 // Room kept for the line starting a little later in the replay than in the recorded run (the
@@ -54,6 +54,17 @@ export function patchNote(markdown, version) {
   const match = section.match(/\*\*Patch note:\*\*\s*(.+)/);
   return match ? match[1].trim().replace(/^"(.*)"$/, '$1') : null;
 }
+
+// Since prompt 16 every short opens with the same premise line, and the card says which patch it is:
+// "Patch 1.4: online only." (the version and its short name from UPDATES.md), then the patch note.
+export const PREMISE = 'I turned Snake into a AAA game.';
+export function shortName(markdown, version) {
+  const sections = markdown.split(/^## /m);
+  const section = sections.find(s => s.startsWith(version + ' ') || s.startsWith(version + '\n'));
+  const match = section && section.match(/\*\*Short name:\*\*\s*(.+)/);
+  return match ? match[1].trim() : null;
+}
+export const patchLine = v => (v.shortName ? `Patch ${v.version.replace(/^v/, '')}: ${v.shortName}.` : v.version);
 
 // Display of a time in ms on the counter: seconds to the millisecond.
 export function formatTime(ms) {
@@ -133,7 +144,9 @@ export function compareTimeline(prev, cur) {
   // ending), that long after a screen of the run first shows (prompt 14: the inner apple and the ending).
   const until = cur.plan?.until && cur.raw.log.find(e => e.type === 'screen' && e.name === cur.plan.until.screen);
   if (cur.plan?.until && !until) throw new Error(`${cur.version}: the run never shows screen '${cur.plan.until.screen}'`);
-  const dMs = until ? until.t + cur.plan.until.afterMs - dFrom
+  // With `until`, two video frames more, so that the last frame (frames are 1000 / FPS apart and the clip is
+  // rounded to whole frames) already shows that screen (prompt 16: v2.0 runs to the credits' first frame).
+  const dMs = until ? until.t + cur.plan.until.afterMs - dFrom + (2 * 1000) / FPS
     : cur.firstLine ? PLAN.beforeAppleMs + cur.firstLine.afterAppleMs + cur.firstLine.ms : PLAN.appleMs;
   const room = MAX_CLIP_MS - PLAN.prevMs - PLAN.noteMs - dMs - (cur.firstLine && !until ? LINE_SLACK_MS : 0);
   let speed = compressSpeed(dFrom - cur.start);
@@ -146,7 +159,7 @@ export function compareTimeline(prev, cur) {
   ];
 }
 
-function ffmpegVersion() {
+export function ffmpegVersion() {
   try {
     return execFileSync('ffmpeg', ['-version'], { encoding: 'utf8' }).split('\n')[0];
   } catch {
@@ -154,7 +167,7 @@ function ffmpegVersion() {
   }
 }
 
-const speedText = s => `${Number(s.toFixed(2))}x`;
+export const speedText = s => `${Number(s.toFixed(2))}x`;
 
 export async function recordShort({ cur, prev = null, distDirs, outDir, frameLimit = Infinity, encode = true, log = console.log }) {
   const timeline = prev ? compareTimeline(prev, cur) : singleTimeline(cur);
@@ -244,9 +257,10 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
         }
       }
       const counter = counterFor(seg, { cur, prev, runT, eaten });
-      const card = seg.card === 'prev' ? [prev.version, prev.note] : seg.card === 'cur-version' ? [cur.version, ''] : [cur.version, cur.note];
-      await page.evaluate(({ which, card, counter, speed, big }) => {
+      const card = seg.card === 'prev' ? [patchLine(prev), prev.note] : seg.card === 'cur-version' ? [patchLine(cur), ''] : [patchLine(cur), cur.note];
+      await page.evaluate(({ which, card, counter, speed, big, premise }) => {
         window.layout.show(which);
+        window.layout.setPremise(premise);
         window.layout.setCard(card[0], card[1]);
         window.layout.setBigNote(big[0], big[1]);
         window.layout.setCounter(counter);
@@ -256,7 +270,8 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
         card,
         counter,
         speed: seg.kind === 'game' && prev && seg.name.startsWith('C') ? speedText(seg.speed) : '',
-        big: [cur.version, cur.note],
+        big: [patchLine(cur), cur.note],
+        premise: PREMISE,
       });
       const rects = await checkSafeArea(page); // every frame: text changes from frame to frame
       if (f === 0) safeArea = rects;
@@ -264,6 +279,10 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
       if ((f + 1) % 90 === 0 || f === frames - 1) log(`  frame ${f + 1}/${frames}`);
     }
     if (dSeg && frameLimit === Infinity && dSeg.lineEndClipMs === undefined) throw new Error(`${cur.version}: line ${dSeg.untilLine.id} did not start in segment D`);
+    if (cur.plan?.until && frameLimit === Infinity) {
+      const shown = await page.evaluate(({ id, screen }) => document.getElementById(id).contentWindow.snakeGame.log.find(e => e.type === 'screen' && e.name === screen), { id: panes.cur.id, screen: cur.plan.until.screen });
+      if (!shown || shown.t > panes.cur.shownUntil) throw new Error(`${cur.version}: the last frame does not show screen '${cur.plan.until.screen}' yet`);
+    }
     if (dSeg) {
       dSeg.clipMs = (frames * 1000) / FPS - dSeg.clipFrom;
       dSeg.runTo = dSeg.runFrom + dSeg.clipMs;
@@ -358,12 +377,12 @@ export function voiceTrack(timeline, panes, distDirs, clipMs) {
   return out;
 }
 
-function audioMs(file) {
+export function audioMs(file) {
   return Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file], { encoding: 'utf8' }).trim()) * 1000;
 }
 
 // Frames and sound into the mp4: H.264 video and an AAC track (mono, 44.1 kHz) in every short.
-function encodeShort(framesDir, voice, clipMs, mp4) {
+export function encodeShort(framesDir, voice, clipMs, mp4) {
   const args = ['-y', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(framesDir, '%05d.png'),
     '-f', 'lavfi', '-t', String(clipMs / 1000), '-i', 'anullsrc=r=44100:cl=mono'];
   voice.forEach(v => args.push('-i', v.file));
@@ -399,7 +418,7 @@ export function counterFor(seg, { cur, prev, runT, eaten }) {
 
 export async function checkSafeArea(page) {
   // Every box must sit inside the safe area, and no text may spill out of its box.
-  const rects = await page.evaluate(({ right, bottom }) => ['card', 'note', 'game', 'prev', 'bignote', 'bignotetext', 'counter', 'speed'].map(id => {
+  const rects = await page.evaluate(({ right, bottom }) => ['premise', 'card', 'version', 'note', 'game', 'prev', 'bignote', 'bignotetext', 'counter', 'speed'].map(id => {
     const el = document.getElementById(id);
     const r = el.getBoundingClientRect();
     const spills = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
@@ -410,21 +429,31 @@ export async function checkSafeArea(page) {
   return rects;
 }
 
+// A version as the CLIs load it: its median run, plan, patch note and short name.
+export function loadForShort(v) {
+  const plans = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/short/plans.json'), 'utf8'));
+  const updates = fs.readFileSync(path.join(ROOT, 'UPDATES.md'), 'utf8');
+  if (!plans[v]) throw new Error(`no clip plan for ${v} in tools/short/plans.json`);
+  const note = patchNote(updates, v);
+  if (!note) throw new Error(`no "**Patch note:**" line for ${v} in UPDATES.md`);
+  const name = shortName(updates, v);
+  if (!name) throw new Error(`no "**Short name:**" line for ${v} in UPDATES.md`);
+  return { ...loadVersion(path.join(ROOT, 'measurements'), v, plans[v], note, firstAppleLine(path.join(ROOT, 'dist', v))), shortName: name };
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url) && process.argv[2] === 'trailer') {
+  // `npm run short -- trailer v1.0 v2.0`: tools/trailer.mjs, in its own process (it imports this file).
+  const { status } = spawnSync(process.execPath, [path.join(ROOT, 'tools/trailer.mjs'), ...process.argv.slice(3)], { stdio: 'inherit' });
+  process.exit(status ?? 1);
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const version = process.argv[2];
   if (!/^v\d+\.\d+$/.test(version || '')) {
-    console.error('usage: npm run short <version>   (like v1.0)');
+    console.error('usage: npm run short <version>   (like v1.0), or npm run short -- trailer v1.0 v2.0');
     process.exit(1);
   }
-  const plans = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/short/plans.json'), 'utf8'));
-  const updates = fs.readFileSync(path.join(ROOT, 'UPDATES.md'), 'utf8');
-  const measurements = path.join(ROOT, 'measurements');
-  const load = v => {
-    if (!plans[v]) throw new Error(`no clip plan for ${v} in tools/short/plans.json`);
-    const note = patchNote(updates, v);
-    if (!note) throw new Error(`no "**Patch note:**" line for ${v} in UPDATES.md`);
-    return loadVersion(measurements, v, plans[v], note, firstAppleLine(path.join(ROOT, 'dist', v)));
-  };
+  const load = loadForShort;
   const versions = listVersions();
   const prevVersion = versions[versions.indexOf(version) - 1] || null;
   const cur = load(version);

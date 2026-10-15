@@ -20,6 +20,7 @@ npm run reevaluate <version>  # the frame rate again from the saved runs, with t
 npm run fps-check           # headless vs visible window frame rate, on test loads
 npm run chart               # measurements/summary.csv -> out/bloat.png
 npm run short <version>     # 30-second vertical short -> out/shorts/<version>/
+npm run short -- trailer v1.0 v2.0  # the trailer: both side by side on one clock -> out/shorts/trailer/
 npm run voice               # voice/LINES.md, placeholders, and src/voice/ copied into every build
 npm run voice -- --check    # every voice line against its slot, and every build against src/voice/
 npm run voice -- --record   # record the 17 lines with the ElevenLabs API (needs ELEVENLABS_API_KEY in the environment)
@@ -49,17 +50,32 @@ npm run play-share          # control share in play, from the saved runs of ever
 ## Shorts
 
 `npm run short <version>` replays the version's median measured run on a virtual clock into a 1080 x 1920 video,
-25 to 30 s. v1.0 has its own plan; every later version follows one fixed plan:
+25 to 30 s. v1.0 has its own plan (its file is kept; it is not published on its own); every later version follows one
+fixed plan. From frame 0 every short shows the same premise line at the top, "I turned Snake into a AAA game.", and
+under it the patch line, "Patch 1.4: online only." (the version and its short name from UPDATES.md), then the patch
+note. All three shrink to fit their box, and the recorder fails if any text spills out of it.
 
 - **A** (3 s): the previous version reaches its first apple at real speed. No voice.
 - **B** (3 s): the new version's patch note.
 - **C**: the new version from launch to 2 s before its first apple, sped up: 16 s of clip at the largest step of
   0.05x that does not make it shorter, 4x while that fits in 21 s, faster only beyond; and faster again, in steps of
-  0.05x, if the whole short would otherwise pass 30 s. The speed shows in the patch-note card.
+  0.05x, if the whole short would otherwise pass 30 s. The speed shows next to the premise line.
 - **D**: the first apple at real speed, from 2 s before it until Warden Snek's line after it has been said in full
-  (it starts 600 ms after the apple); for a version without voice lines, until 1 s after the apple.
+  (apple + 600 ms + the line's recorded length); for a version without voice lines, until 1 s after the apple. v2.0's
+  D runs to the first frame of the credits (tools/short/plans.json), so it may end under 25 s.
 
 The sound track is silence except that line in D, from the moment the replay starts it, at its recorded length.
+
+### The trailer
+
+`npm run short -- trailer v1.0 v2.0` puts both versions side by side, each replaying its median measured run from
+the same seed, on one shared virtual clock, 1080 x 1920. Top: the premise line. Bottom: two counters, "Snake: first
+apple in", which stops on v1.0's measured median once v1.0 eats, and "AAA Snake: first apple in", which runs until
+v2.0's own first apple. Timing (tools/trailer.mjs, `TRAILER`): the first 15 s at real time; the last 10 s at real
+time, ending 1 s after THE END, so they hold the inner apple, the line, THE END and the counter's real value; the
+middle sped up at the smallest step of 0.05x that keeps the whole within 30 s, the factor on screen. Prompt 16 asked
+for 20 s at the start; 20 + 10 s at real time leave no room for the middle within 30 s, so the start is 15 s. The sound
+is Warden Snek's lines that start in a real-time part.
 
 ## Files
 

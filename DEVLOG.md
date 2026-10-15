@@ -1240,3 +1240,49 @@ re-evaluated from its saved runs with `npm run reevaluate v2.0` (new: tools/reev
   measurements/v2.0.json says when and why (`reevaluated`). Every other version had whole seconds, so nothing else moves.
 - The chart: every other version label sits one line lower, so the ten labels and their * and † no longer run into
   each other.
+
+### The short template and the trailer, the plan (written before re-recording)
+- **Premise and patch line.** Every short opens, from frame 0 of A, with "I turned Snake into a AAA game." at the top
+  and under it the patch line "Patch <version>: <short name>." The short names are new lines in UPDATES.md
+  (`**Short name:**`, two to four words per version, logged there). The card's old "Patch notes" label goes; the
+  premise, the patch line and the note each shrink to fit their box, and the recorder fails on any text that spills
+  out (tests/short.test.mjs checks every version's patch line and note on the real layout). The speed badge moves up
+  next to the premise.
+- **D.** Ends when the first apple's Warden Snek line has been said (apple + 600 ms + its recorded length), as
+  before; v2.0's D now runs to the first frame of the credits (plans.json `until`, afterMs 0, was 3000). A carries no
+  voice. C's factor rises in steps of 0.05 until the whole fits 30 s.
+- **Trailer** (`npm run short -- trailer v1.0 v2.0`, tools/trailer.mjs, tools/short/trailer.html): both median runs
+  from seed 1 side by side on one virtual clock; the premise on top; two counters below, v1.0's held on its measured
+  median (0.320 s, shown with three decimals like every counter in the shorts, not "0.3 s") once v1.0 eats, v2.0's
+  running until its own apple. **Deviation from the prompt:** the prompt asks for 20 s at real time, a compressed
+  middle and the last 10 s at real time within 25 to 30 s. 20 + 10 s already make 30 s, which leaves the middle
+  (84307 ms of run) no time at all. The trailer uses 15 s, then the middle, then the last 10 s (ending 1 s after THE END,
+  so the inner apple at 107.290 s of the run, line 10 and THE END are in it). With v2.0's run that makes the middle
+  89307 ms of run in 5000 ms of clip: 17.9x, the smallest step of 0.05x that fits.
+
+### The shorts, re-recorded (`npm run short v1.1` … `v2.0`), and the trailer
+v1.0's short keeps its file. Every other short was recorded again with the premise and patch line. Line 10 ("One
+apple. Not the orchard. But it is a start.", 3840 ms) is heard in full in every short with a voice.
+
+| short | length | C | line 10 in the short |
+|---|---|---|---|
+| v1.1 | 25400 ms (762 frames) | 1x | none (no voice yet) |
+| v1.2 | 25233.333333333332 ms (757 frames) | 2.4x | none |
+| v1.3 | 29866.666666666668 ms (896 frames) | 4.9x | 26.019850340140806 s to 29.859850340140806 s |
+| v1.4 | 29866.666666666668 ms (896 frames) | 5.8x | 26.002116091956495 s to 29.842116091956495 s |
+| v1.5 | 29833.333333333332 ms (895 frames) | 6.9x | 25.981279227055687 s to 29.821279227055687 s |
+| v1.6 | 29866.666666666668 ms (896 frames) | 7.25x | 26.014822988503184 s to 29.854822988503184 s |
+| v1.7 | 29900 ms (897 frames) | 63.2x | 26.036454430382634 s to 29.876454430382633 s |
+| v1.9 | 29933.333333333332 ms (898 frames) | 63.35x | 26.060544909254805 s to 29.900544909254805 s |
+| v2.0 | 29933.333333333332 ms (898 frames) | 8.2x | 21.42756097558883 s to 25.26756097558883 s |
+| trailer v1.0 v2.0 | 30000 ms (900 frames) | middle 17.9x | 23.571723463664647 s to 27.411723463664647 s |
+
+v1.1 and v1.2 stay under 25 s, as before: their launches are shorter than 16 s at the fixed plan's speeds.
+
+### What broke
+- **v2.0's short stopped one video frame before the credits.** D ended exactly at the credits' first game frame
+  (116323.80000001192 ms of the run), and the short's last video frame fell at 116283.3392638246 ms, still THE END. D now runs two video
+  frames past that screen, and the recorder fails if the last frame does not show it yet. C went from 8.15x to 8.2x
+  to make room.
+- The trailer's v1.0 pane keeps playing v1.0's measured run next to v2.0's whole launch, still
+  eating apples beside THE END. That is the recorded run, not a choice.

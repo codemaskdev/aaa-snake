@@ -7,7 +7,8 @@ share may go up. Any later change to this file is a new, logged decision.
 Logged changes since the freeze: a bot rule for v1.4's terms of service (2026-10-14, PROMPTS.md #5); the keys of
 v1.6's skill-tree rule (2026-10-15, PROMPTS.md #7); what "seen" and "nearest" mean in v1.7's search rule (2026-10-15,
 PROMPTS.md #8); v1.7's skins and their drop odds (2026-10-15, PROMPTS.md #9); v2.0's cabinet, its bot rule and the
-ending (2026-10-15, PROMPTS.md #14 and #15).
+ending (2026-10-15, PROMPTS.md #14 and #15); a short name for every version, for the shorts' patch line
+(2026-10-15, PROMPTS.md #16).
 
 Every update keeps everything before it (v1.4 still has the logos of v1.1), so the costs pile up the way they do in
 real games. Each one becomes a 30-second short; the long video comes last.
@@ -67,12 +68,15 @@ real games. Each one becomes a 30-second short; the long video comes last.
 
 ## v1.0 — Snake
 
+- **Short name:** the honest original
+
 The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game over, score, restart. Plain squares.
 
 - **Patch note:** "Snake. Eat apples, grow, don't hit anything."
 
 ## v1.1 — Launch experience
 
+- **Short name:** launch experience
 - **Cliché:** studio logos you cannot skip, a health and safety warning, "Press any key", an autosave notice.
 - **What changes:** before the board, three invented studio logos, each animated and unskippable; a photosensitivity
   warning that can be dismissed only after a few seconds; a title screen that says "Press any key" but only starts
@@ -88,6 +92,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.2 — Day-one patch
 
+- **Short name:** day-one patch
 - **Cliché:** the patch you must download before you can play the thing you just got, then a loading screen with tips.
 - **What changes:** on start, "A required update is available". The game downloads its patch from its own origin, the
   same host that served the game, and from nowhere else (a real file: the code of this update's new features), with a
@@ -105,6 +110,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.3 — Story mode: Warden Snek
 
+- **Short name:** story mode
 - **Cliché:** the gritty hero with a tragic backstory, voiced cutscenes, and the cinematic quick-time event.
 - **What changes:** the snake becomes Warden Snek, a retired orchard warden: the apples were taken,
   the orchard is gone, and only Snek remembers. An opening cutscene, voiced, skippable only "after your first
@@ -125,6 +131,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.4 — Always online
 
+- **Short name:** online only
 - **Cliché:** a single-player game that needs a connection, an account and a fresh terms-of-service agreement.
 - **What changes:** "Connecting to SnakeNet..." (a local stub: no network request is made, and the rig checks it); a
   sign-in screen with a pre-filled guest account; a server queue that counts down your position (the count is the
@@ -144,6 +151,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.5 — Open world
 
+- **Short name:** open world
 - **Cliché:** the huge map covered in icons, with nothing in it that matters.
 - **What changes:** the board becomes a large world (the camera follows Snek), with hundreds of map markers: question
   marks, viewpoints, camps, chests that contain nothing, collectibles that count up to a total. A minimap and a full
@@ -160,6 +168,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.6 — Progression
 
+- **Short name:** XP and level-ups
 - **Cliché:** XP, level-ups, and a skill tree that sells you back things the game used to do.
 - **What changes:** Snek earns XP for moving and eating. "Turn left" (turning counter-clockwise) is a skill unlocked at
   level 5; until then only right turns work, so going left means three rights, and a locked turn shows "Skill locked:
@@ -180,6 +189,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.7 — Season 1 (parody battle pass and loot boxes)
 
+- **Short name:** Season 1 battle pass
 - **Cliché:** the battle pass, the premium currency, the loot box, the "free" tier.
 - **What changes:** the apple is visible only within a small vision radius around Snek. The top reward of the Season 1
   battle pass is "Apple Vision: the ability to see the apple". Tiers fill from XP, or "can be bought" with a premium
@@ -219,6 +229,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v1.9 — Remastered
 
+- **Short name:** remastered edition
 - **Cliché:** the remaster: the same game, with cinematic effects, sold again.
 - **What changes:** an "Upgrade to Remastered" screen (PARODY, nothing to pay), then the same game through the one
   allowed WebGL post-processing pass: bloom, vignette, film grain, chromatic aberration at the edges, a color grade, and
@@ -235,6 +246,7 @@ The honest original: a 20 × 20 grid, arrow keys or WASD, apples, growing, game 
 
 ## v2.0 — Game of the Year Edition
 
+- **Short name:** Game of the Year
 - **Cliché:** the complete edition: everything bundled, plus a museum piece.
 - **What changes:** all previous content, plus an arcade cabinet in the world near the start. Its screen runs dist/v1.0
   unmodified. Walking up to it and pressing a key enters it; inside, the arrow keys steer v1.0's snake (a control

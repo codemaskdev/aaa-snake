@@ -38,7 +38,7 @@
     "start": "screen:update-required",
     "until": {
       "screen": "credits",
-      "afterMs": 3000
+      "afterMs": 0
     }
   }
 }
