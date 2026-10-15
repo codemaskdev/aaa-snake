@@ -2,7 +2,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { compareTimeline, hostTrack, checkNoOverlap, HOST_GAP_MS, PLAN } from '../tools/short.mjs';
-import { trailerTimeline, TRAILER } from '../tools/trailer.mjs';
 import { loadHost, HOST_RECORDING } from '../tools/voice.mjs';
 
 const line = (id, ms) => ({ id, file: `${id}.mp3`, ms });
@@ -10,7 +9,8 @@ const line = (id, ms) => ({ id, file: `${id}.mp3`, ms });
 test('voice/HOST.md: four lines for every short from v1.1 to v2.0 and five for the trailer, with the author\'s changes', () => {
   const host = loadHost();
   assert.deepEqual(Object.keys(host), ['v1.1', 'v1.2', 'v1.3', 'v1.4', 'v1.5', 'v1.6', 'v1.7', 'v1.9', 'v2.0', 'trailer']);
-  for (const [short, lines] of Object.entries(host)) assert.equal(lines.length, short === 'trailer' ? 5 : 4, short);
+  for (const [short, lines] of Object.entries(host)) if (short !== 'trailer') assert.equal(lines.length, 4, short);
+  assert.deepEqual(host.trailer.map(l => l.id), ['trailer-1a', 'trailer-1b', 'trailer-2', 'trailer-3', 'trailer-4', 'trailer-5'], 'line 1 split in two (prompt 21)');
   assert.match(host['v1.1'][2].text, /^Three logos and a warning you can't skip\./);
   assert.match(host['v1.7'][1].text, /Ten skins\./);
   assert.match(host['v1.7'][3].text, /The game is two days old\./);
@@ -43,19 +43,4 @@ test('a short with the host: A, B and C as long as lines 1 to 3 need, C at the l
 test('host and Snek never speak at once', () => {
   assert.doesNotThrow(() => checkNoOverlap([{ line: 'x', clipAtMs: 0, heardMs: 1000 }], [{ line: 10, clipAtMs: 1000, heardMs: 3840 }]));
   assert.throws(() => checkNoOverlap([{ line: 'x', clipAtMs: 0, heardMs: 1001 }], [{ line: 10, clipAtMs: 1000, heardMs: 3840 }]), /overlaps/);
-});
-
-test('the trailer with the host: line 3 fits the middle, line 4 ends before Snek, line 5 from THE END over a freeze', () => {
-  const right = { version: 'v2.0', apple: 107290, firstLine: { afterAppleMs: 600 }, raw: { log: [{ t: 113307, type: 'screen', name: 'the-end' }] } };
-  const host = [line('t1', 3600), line('t2', 560), line('t3', 8720), line('t4', 3920), line('t5', 10240)];
-  const segs = trailerTimeline(right, TRAILER, host);
-  const [first, middle, last] = segs;
-  assert.equal(first.clipMs, 3600 + HOST_GAP_MS + 560 + TRAILER.afterDoneMs, 'the first part ends 1 s after "Done." (prompt 20)');
-  assert.equal(middle.runFrom, first.clipMs);
-  assert.ok(middle.clipMs >= 8720 + HOST_GAP_MS);
-  assert.equal(last.runFrom + 3920 + HOST_GAP_MS, 107290 + 600, 'line 4 ends HOST_GAP_MS before Snek starts');
-  const [h1, h2, h3, h4, h5] = segs.host;
-  assert.deepEqual([h1.clipAtMs, h2.clipAtMs, h3.clipAtMs, h4.clipAtMs], [0, 3600 + HOST_GAP_MS, middle.clipFrom, last.clipFrom]);
-  assert.equal(h5.clipAtMs, last.clipFrom + (113307 - last.runFrom));
-  assert.equal(segs.freezeMs, h5.clipAtMs + 10240 - (last.clipFrom + last.clipMs));
 });

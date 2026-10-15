@@ -1430,3 +1430,46 @@ unchanged.
 Host 1 from 0 to 3.6 s, host 2 3.9 to 4.46 s, host 3 5.46 to 14.18 s, host 4 14.511622119817867 to 18.431622119817867 s.
 Snek's line 10 from 18.731122119794033 to 22.571122119794033 s. Host 5 from 24.14862211981787 to 34.38862211981787 s.
 Frame 1 is black: neither game has drawn at 0 ms of its run.
+
+## Prompt 21: the trailer, design "A"
+
+### Voice
+The trailer's line 1 was recorded again as two lines, with the same settings and one take each. These were the only
+two requests: "This is Snake." (trailer-1a, 1360 ms) and "This is Snake after I made it AAA." (trailer-1b, 2000 ms).
+whisper.cpp heard both as written. voice/HOST.md has 1a and 1b in place of 1 (the parser now takes "1a."). The old
+take of line 1 stays in voice/RECORDING.json as trailer-1. The backup outside the repository was brought up to date and
+checked against its SHA256SUMS.
+
+### Design A
+One full-width panel (tools/short/trailer.html): the premise in a 90 px band, the game at 1080 x 1152 (2.25x), the
+counter in a band from y = 1242 to 1440. tools/trailer.mjs was rewritten for the five parts; the side-by-side and
+stacked versions are in git history. The sting is ours: 500 ms, made by ffmpeg from
+`0.6*sin(2*PI*t*(55+165*exp(-6*t)))*exp(-5*t)+0.25*sin(2*PI*880*t)*exp(-25*t)` (a falling thump and a short ping).
+The card holds 0.3 s past the end of 1b, the same gap as everywhere else, so line 3 does not start on 1b's last word.
+"The cabinet is reached" is taken as the cabinet-door screen (106956.80000001192 ms), so part 4 starts at
+102956.80000001192 ms.
+
+### The trailer, re-rendered
+35766.666666666664 ms (1073 frames).
+
+| part | starts at (s of the file) | run |
+|---|---|---|
+| 1 v1.0 | 0 | from 28 ms (its first drawn frame); holds from 328 ms, the first video frame after the apple (319.6 ms replayed) |
+| 2a black and sting | 2.62 | |
+| 2b card "Patch 2.0" | 3.12 | |
+| 3 v2.0 sped up, 11.75x | 5.42 | 101.60000002384186 to 102956.80000001192 ms |
+| 4 v2.0 real time | 14.173634042552178 | 102956.80000001192 to 114307.10000002384 ms |
+| 5 freeze on THE END | 25.523934042564097 | |
+
+Host 1a from 0 to 1.36 s, 2 1.66 to 2.22 s, 1b 3.12 to 5.12 s, 3 5.42 to 14.14 s, 4 14.173634042552177 to 18.09363404255218
+s, 5 25.523934042564097 to 35.763934042564095 s; Snek's line 10 19.10643404254026 to 22.94643404254026 s; nothing
+overlaps. The first frame is v1.0's ready screen ("Press an arrow key or WASD"), with the counter at 0.028 s (the run's
+clock at its first drawn frame), not black.
+
+### What broke
+The full `npm test` gave 117 of 118. The test "v1.4: SnakeNet makes no request; sign in, the queue, and terms you must
+scroll" counted 34 requests where it expects 17, between connecting and the end of the terms. The 17 extra are as many
+as v1.4's voice lines, which its loading screen fetches. Nothing in src/ or dist/ changed in this prompt. The same
+test file then passed twice on its own (6 of 6, twice), so it looks like a timing race in the test: on a busy machine,
+the voice files can still be loading when the test starts counting. It is not fixed here; the prompt did not ask for
+it.

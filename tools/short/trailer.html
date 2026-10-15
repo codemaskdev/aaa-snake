@@ -4,47 +4,42 @@
 <meta charset="utf-8">
 <title>Trailer layout</title>
 <style>
-  /* The trailer (prompt 20): 1080 x 1920, v1.0 on top and v2.0 below, each panel the full 1080 width, each
-     with its counter under it, the premise in the divider between them. The games may run under the right-hand
-     buttons; every piece of text stays in the safe area, as in every short: nothing below y = 1440 or right of
-     x = 918. The game pages keep their own shape (480 x 512) and letterbox in black, so a 1080 x 600 panel shows
-     a 562.5 x 600 game in the middle of a full-width black strip. */
+  /* The trailer, design "A" (prompt 21): one full-width panel. The premise in a 90 px band at the top; the game at
+     1080 x 1152 (its 480 x 512 canvas at 2.25x); the time-to-first-apple counter in a band under it; nothing below
+     y = 1440. Text stays in the safe area, as in every short (nothing right of x = 918). */
   :root { --bg: #0b0d13; --panel: #141824; --line: #262c3d; --cyan: #00f0ff; --yellow: #ffd23f; --text: #e8ecf5; --muted: #8a93a8; }
   html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
   body { position: relative; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--text); }
-  .game { position: absolute; left: 0; width: 1080px; height: 600px; border: 0; background: #000; }
-  #left { top: 0; }
-  #right { top: 760px; }
-  .name { position: absolute; left: 24px; height: 40px; max-width: 400px; padding: 0 12px; border-radius: 6px; background: rgba(0, 0, 0, 0.7);
-    font: 700 26px/40px Menlo, monospace; color: var(--cyan); white-space: nowrap; overflow: hidden; }
-  #leftname { top: 16px; }
-  #rightname { top: 776px; }
-  .counter { position: absolute; left: 54px; width: 864px; height: 80px; box-sizing: border-box; padding: 0 26px;
-    display: flex; align-items: center; justify-content: space-between; background: var(--panel); border: 2px solid var(--line); border-radius: 14px; }
-  #leftcounter { top: 604px; }
-  #rightcounter { top: 1360px; }
-  .counter .label { font-size: 28px; color: var(--muted); white-space: nowrap; overflow: hidden; }
-  .counter .value { font: 700 52px Menlo, monospace; color: var(--yellow); white-space: nowrap; }
-  .counter.frozen { border-color: var(--yellow); }
-  /* The divider: thin lines above and below, the premise between them. */
-  #divider { position: absolute; left: 0; top: 688px; width: 1080px; height: 68px; border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); box-sizing: border-box; }
-  #premise { position: absolute; left: 54px; top: 690px; width: 864px; height: 64px; box-sizing: border-box; padding-right: 150px;
-    font: 700 44px/64px "Helvetica Neue", Helvetica, Arial, sans-serif; white-space: nowrap; overflow: hidden; }
-  #speed { position: absolute; top: 704px; right: 162px; padding: 4px 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.7);
-    font: 700 24px Menlo, monospace; color: var(--yellow); }
-  .hidden { visibility: hidden; }
+  #band { position: absolute; left: 0; top: 0; width: 1080px; height: 90px; background: var(--panel); border-bottom: 2px solid var(--line); box-sizing: border-box; }
+  #premise { position: absolute; left: 54px; top: 0; width: 864px; height: 90px; box-sizing: border-box;
+    font: 700 44px/90px "Helvetica Neue", Helvetica, Arial, sans-serif; white-space: nowrap; overflow: hidden; }
+  .game { position: absolute; left: 0; top: 90px; width: 1080px; height: 1152px; border: 0; background: #000; }
+  .off { visibility: hidden; }
+  #speed { position: absolute; top: 108px; right: 162px; z-index: 3; padding: 4px 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.75);
+    font: 700 30px Menlo, monospace; color: var(--yellow); }
+  #card { position: absolute; left: 0; top: 90px; width: 1080px; height: 1152px; z-index: 2; background: #000;
+    display: flex; align-items: center; justify-content: center; }
+  #cardtext { width: 864px; margin-right: 162px; margin-left: 54px; text-align: center; white-space: nowrap; overflow: hidden;
+    font: 700 120px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--cyan); }
+  #black { position: absolute; inset: 0; z-index: 5; background: #000; }
+  #counterband { position: absolute; left: 0; top: 1242px; width: 1080px; height: 198px; border-top: 2px solid var(--line); box-sizing: border-box; }
+  #counter { position: absolute; left: 54px; top: 1280px; width: 864px; height: 120px; box-sizing: border-box; padding: 0 30px;
+    display: flex; align-items: center; justify-content: space-between; background: var(--panel); border: 2px solid var(--line); border-radius: 18px; }
+  #label { font-size: 32px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+  #value { font: 700 64px Menlo, monospace; color: var(--yellow); white-space: nowrap; }
+  #counter.frozen { border-color: var(--yellow); }
 </style>
 </head>
 <body>
-  <iframe class="game" id="left" scrolling="no"></iframe>
-  <iframe class="game" id="right" scrolling="no"></iframe>
-  <div class="name" id="leftname"></div>
-  <div class="name" id="rightname"></div>
-  <div class="counter" id="leftcounter"><div class="label" id="leftlabel"></div><div class="value" id="leftvalue"></div></div>
-  <div id="divider"></div>
+  <div id="band"></div>
   <div id="premise"></div>
-  <div id="speed" class="hidden"></div>
-  <div class="counter" id="rightcounter"><div class="label" id="rightlabel"></div><div class="value" id="rightvalue"></div></div>
+  <iframe class="game" id="left" scrolling="no"></iframe>
+  <iframe class="game off" id="right" scrolling="no"></iframe>
+  <div id="speed" class="off"></div>
+  <div id="card" class="off"><div id="cardtext"></div></div>
+  <div id="counterband"></div>
+  <div id="counter"><div id="label"></div><div id="value"></div></div>
+  <div id="black" class="off"></div>
 <script>
   // The recorder fills these in. Nothing here keeps time by itself.
   const $ = id => document.getElementById(id);
@@ -55,24 +50,27 @@
   }
   window.trailer = {
     load(id, src) { $(id).src = src; },
-    setText(premise, left, right) {
-      $('premise').textContent = premise;
-      fit($('premise'), 44, 24);
-      $('leftname').textContent = left;
-      fit($('leftname'), 26, 16);
-      $('rightname').textContent = right;
-      fit($('rightname'), 26, 16);
+    setPremise(text) { $('premise').textContent = text; fit($('premise'), 44, 24); },
+    setCard(text) { $('cardtext').textContent = text; fit($('cardtext'), 120, 40); },
+    // what: 'left' (v1.0), 'right' (v2.0), 'card' or 'black'
+    show(what) {
+      $('left').classList.toggle('off', what !== 'left');
+      $('right').classList.toggle('off', what !== 'right');
+      $('card').classList.toggle('off', what !== 'card');
+      $('black').classList.toggle('off', what !== 'black');
     },
-    // which: 'left' or 'right'; { label, value, frozen }
-    setCounter(which, c) {
-      $(`${which}label`).textContent = c.label;
-      $(`${which}value`).textContent = c.value;
-      $(`${which}counter`).classList.toggle('frozen', Boolean(c.frozen));
-      fit($(`${which}label`), 28, 18);
+    // { label, value, frozen }, or null for an empty band
+    setCounter(c) {
+      $('counter').classList.toggle('off', !c);
+      if (!c) return;
+      $('label').textContent = c.label;
+      $('value').textContent = c.value;
+      $('counter').classList.toggle('frozen', Boolean(c.frozen));
+      fit($('label'), 32, 18);
     },
     setSpeed(text) {
       $('speed').textContent = text;
-      $('speed').classList.toggle('hidden', !text);
+      $('speed').classList.toggle('off', !text);
     },
   };
 </script>

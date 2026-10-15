@@ -651,6 +651,24 @@
         "takes": 1,
         "bytes": 82380,
         "durationMs": 10240
+      },
+      {
+        "id": "trailer-1a",
+        "file": "voice/host/trailer-1a.mp3",
+        "text": "This is Snake.",
+        "requestedAt": "2026-10-15T21:01:25.807Z",
+        "takes": 1,
+        "bytes": 11536,
+        "durationMs": 1360
+      },
+      {
+        "id": "trailer-1b",
+        "file": "voice/host/trailer-1b.mp3",
+        "text": "This is Snake after I made it AAA.",
+        "requestedAt": "2026-10-15T21:01:27.280Z",
+        "takes": 1,
+        "bytes": 16552,
+        "durationMs": 2000
       }
     ]
   }

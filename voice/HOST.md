@@ -5,7 +5,9 @@ said. One change, by the author's rule in prompt 17: v1.1 has three logos and a 
 then the photosensitivity warning: dist/v1.1/launch.js and every v1.1 run), so its line 3 is the author's
 replacement, not "Four logos you can't skip. …". Two more by the author after the number check (prompt 17): v1.7's
 line 2 says "Ten skins" (the loot boxes hold 10; it said "Twelve skins") and its line 4 "The game is two days old"
-(v1.0 was committed on 2026-10-14; it said "a week old").
+(v1.0 was committed on 2026-10-14; it said "a week old"). The trailer's line 1 is two lines since prompt 21, 1a and
+1b, recorded separately (the take of the old line 1, "This is Snake. This is Snake after I made it AAA.", stays in
+voice/RECORDING.json as trailer-1).
 
 ### v1.1
 1. I'm turning Snake into a AAA game. Patch 1.1.
@@ -62,7 +64,8 @@ line 2 says "Ten skins" (the loot boxes hold 10; it said "Twelve skins") and its
 4. That's the whole game. Play any version: the link is in the description. Subscribe for the full video, like it if you'd play the cabinet, and comment the one patch you want: I'll build it.
 
 ### trailer
-1. This is Snake. This is Snake after I made it AAA.
+1a. This is Snake.
+1b. This is Snake after I made it AAA.
 2. Done.
 3. Logos, a day-one patch, a story, a login, an open world, a skill tree, a season, a remaster.
 4. The only way to eat the apple is the arcade cabinet with the old game inside.

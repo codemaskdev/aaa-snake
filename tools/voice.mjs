@@ -269,18 +269,24 @@ export const HOST_RECORDING = {
 export const HOST_DIR = path.join(ROOT, 'voice/host');
 export const hostFile = id => `${id}.mp3`;
 
-// voice/HOST.md: "### v1.1" (or "### trailer"), then numbered lines. Returns { short: [{ id, n, text }] }.
+// voice/HOST.md: "### v1.1" (or "### trailer"), then numbered lines ("1." or "1a."). Returns
+// { short: [{ id, n, part, text }] }.
 export function loadHost(file = path.join(ROOT, 'voice/HOST.md')) {
   const out = {};
   let short = null;
   for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
     const head = line.match(/^### (\S+)\s*$/);
     if (head) { short = head[1]; out[short] = []; continue; }
-    const said = short && line.match(/^(\d+)\. (.+)$/);
-    if (said) out[short].push({ id: `${short}-${said[1]}`, n: Number(said[1]), text: said[2].trim() });
+    const said = short && line.match(/^(\d+)([a-z]?)\. (.+)$/);
+    if (said) out[short].push({ id: `${short}-${said[1]}${said[2]}`, n: Number(said[1]), part: said[2], text: said[3].trim() });
   }
   for (const [short, lines] of Object.entries(out)) {
-    lines.forEach((l, i) => { if (l.n !== i + 1) throw new Error(`voice/HOST.md: ${short} line ${l.n} is out of order`); });
+    // Numbered 1, 2, 3 ...; a line may be split into 1a, 1b (prompt 21).
+    lines.forEach((l, i) => {
+      const prev = lines[i - 1];
+      const next = prev ? (l.n === prev.n ? l.part > prev.part : l.n === prev.n + 1) : l.n === 1;
+      if (!next) throw new Error(`voice/HOST.md: ${short} line ${l.n}${l.part} is out of order`);
+    });
   }
   return out;
 }

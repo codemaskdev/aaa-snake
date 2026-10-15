@@ -859,3 +859,33 @@ Re-render the trailer, no new voice requests, and report: length, the
 second each part starts, the middle's factor, and the first still of
 the stacked layout. STOP.
 ````
+
+## 21. The trailer, design "A": one full-width panel
+
+````text
+Trailer, new design "A": one full-width panel, no split screen.
+Layout: premise line in a 90 px band at the top; the game at 1080x1152
+(480x512 scaled 2.25x, full width); the "time to first apple" counter
+in a band under it; nothing below y=1440. Text-not-box checks apply.
+
+Voice: re-record trailer line 1 as two separate lines, same settings,
+one take each, logged in RECORDING.json and the backup:
+  1a. This is Snake.
+  1b. This is Snake after I made it AAA.
+Lines 2 to 5 are reused as recorded. Two requests, no more.
+
+Sequence:
+1. v1.0 full screen from its first drawn frame; line 1a at 0 s. The
+   apple is eaten at 0.32 s; freeze the frame with the counter stopped
+   at 0.320 s and hold it until line 2 ("Done.") ends, plus 400 ms.
+2. Hard cut to black, a 500 ms sting of our own, then the card
+   "Patch 2.0" with line 1b over it; the card stays until 1b ends.
+3. v2.0 from its first drawn frame, time-compressed for exactly the
+   length of line 3 (factor in 0.05 steps, shown in the corner, about
+   12x); the counter runs the whole time.
+4. Real time from 4 s before the cabinet is reached: line 4, Enter,
+   the inner apple, Snek's line, THE END. Line 4 ends before Snek.
+5. Freeze on THE END with line 5; the file ends when line 5 ends.
+The first frame of the file is never black. Report length, the start
+second of each part, the factor, and the first still. STOP.
+````

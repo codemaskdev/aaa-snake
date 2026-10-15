@@ -1,18 +1,21 @@
-// `npm run short -- trailer v1.0 v2.0`: the trailer (prompt 16). v1.0 and v2.0 side by side from the
-// same seed, each replaying its measured run (as the shorts do) on one shared virtual clock, in
-// tools/short/trailer.html (1080 x 1920; since prompt 20 stacked, v1.0 on top, each full width). Real time for the first TRAILER.firstMs and the last
-// TRAILER.lastMs, which hold v2.0's inner apple, its line and THE END; the middle sped up by the
-// smallest step of 0.05x that keeps the whole within TRAILER.totalMs, the factor on screen. Prompt 16
-// asked for the first 20 s at real time; with the last 10 s at real time that leaves no middle within
-// 30 s, so the first part is 15 s (DEVLOG.md, prompt 16).
-// With the host (prompt 17, voice/HOST.md "trailer"): line 1 at 0 s, line 2 right after it (v1.0 has
-// eaten by then); the first part ends 1 s after line 2 (prompt 20); line 3 over the middle, which lasts at least line 3 (its factor the largest step of
-// 0.05x that allows it); line 4 starts the last real-time part, timed to end HOST_GAP_MS before Warden
-// Snek's line (so it plays over the walk to the cabinet); line 5 when THE END shows, over a freeze of
-// the last frame until it ends. The 30 s limit does not apply.
-// Output in out/shorts/trailer/: trailer-<left>-<right>.mp4, frames/, first/middle/last.png, clip.json.
+// `npm run short -- trailer v1.0 v2.0`: the trailer, design "A" (prompt 21), in tools/short/trailer.html
+// (1080 x 1920): one full-width panel, the premise in a band at the top, the time-to-first-apple counter
+// under the game. Each version replays its median measured run (as the shorts do) on its own virtual clock,
+// from the same seed. The host's lines are voice/HOST.md's "trailer" (1a, 1b, 2 to 5).
+//   1  v1.0 from its first drawn frame, line 1a at 0 s; once its apple is eaten the frame holds, the counter
+//      stopped on v1.0's median, line 2 ("Done.") after 1a, held until 2 ends plus TRAILER.holdAfterDoneMs.
+//   2  a hard cut to black with a TRAILER.stingMs sting of our own (made by ffmpeg from a formula, STING),
+//      then the card "Patch 2.0" with line 1b over it, until 1b ends (plus HOST_GAP_MS).
+//   3  v2.0 from its first drawn frame, sped up for the length of line 3: the largest step of 0.05x that keeps
+//      the part at least as long as the line, the factor in the corner; the counter runs.
+//   4  real time from TRAILER.beforeCabinetMs before the cabinet is reached (its door shows): line 4, Enter, the
+//      inner apple, Warden Snek's line, THE END, until TRAILER.afterEndMs after THE END. Line 4 must end
+//      HOST_GAP_MS before Snek starts.
+//   5  a freeze on THE END with line 5; the file ends when line 5 ends.
+// Output in out/shorts/trailer/: trailer-<left>-<right>.mp4, frames/, first/middle/last.png, sting.wav, clip.json.
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { startServer } from './serve.mjs';
@@ -22,71 +25,68 @@ import {
 } from './short.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-export const TRAILER = { firstMs: 15000, lastMs: 10000, totalMs: 30000, afterEndMs: 1000, afterDoneMs: 1000 };
+export const TRAILER = { holdAfterDoneMs: 400, stingMs: 500, beforeCabinetMs: 4000, afterEndMs: 1000 };
+// The sting: a low thump falling in pitch, with a short high ping on top; 44.1 kHz mono, made by ffmpeg.
+export const STING = '0.6*sin(2*PI*t*(55+165*exp(-6*t)))*exp(-5*t)+0.25*sin(2*PI*880*t)*exp(-25*t)';
 
-// The three parts, in run time and clip time. The last part ends TRAILER.afterEndMs after THE END.
-export function trailerTimeline(right, t = TRAILER, host = null) {
-  const theEnd = right.raw.log.find(e => e.type === 'screen' && e.name === 'the-end');
-  if (!theEnd) throw new Error(`${right.version}: the run never shows THE END`);
-  if (host) return hostTimeline(right, theEnd, t, host);
-  const lastFrom = theEnd.t + t.afterEndMs - t.lastMs;
-  const span = lastFrom - t.firstMs;
-  const room = t.totalMs - t.firstMs - t.lastMs;
-  const speed = Math.max(1, Math.ceil((span / room) * 20 - 1e-9) / 20);
-  const segs = [
-    { name: 'first', runFrom: 0, clipMs: t.firstMs, speed: 1 },
-    { name: 'middle', runFrom: t.firstMs, clipMs: span / speed, speed },
-    { name: 'last', runFrom: lastFrom, clipMs: t.lastMs, speed: 1 },
-  ];
-  let at = 0;
-  for (const seg of segs) {
-    seg.clipFrom = at;
-    at += seg.clipMs;
-    seg.runTo = seg.runFrom + seg.clipMs * seg.speed;
-  }
-  return segs;
-}
+const firstFrame = v => {
+  const f = v.raw.log.find(e => e.type === 'frame');
+  if (!f) throw new Error(`${v.version}: the run has no drawn frame`);
+  return f.t;
+};
+const screenAt = (v, name) => {
+  const e = v.raw.log.find(x => x.type === 'screen' && x.name === name);
+  if (!e) throw new Error(`${v.version}: the run never shows ${name}`);
+  return e.t;
+};
 
-// The trailer with the host's five lines: the parts, and where each line starts (clip ms).
-function hostTimeline(right, theEnd, t, host) {
+// The five parts in clip time, and where each host line (and the sting) starts.
+// host: { '1a': { ms, file, id }, '1b': ..., '2': ..., '3': ..., '4': ..., '5': ... }
+export function trailerTimeline(left, right, host, t = TRAILER) {
   if (!right.firstLine) throw new Error(`${right.version}: no Warden Snek line after the apple`);
+  const f1 = firstFrame(left);
+  const f2 = firstFrame(right);
+  const oneMs = host['1a'].ms + HOST_GAP_MS + host['2'].ms + t.holdAfterDoneMs;
+  if (left.apple - f1 >= oneMs) throw new Error(`${left.version}: the apple comes after the hold would end`);
+  const fourFrom = screenAt(right, 'cabinet-door') - t.beforeCabinetMs;
   const snekAt = right.apple + right.firstLine.afterAppleMs;
-  const lastFrom = snekAt - HOST_GAP_MS - host[3].ms;
-  // The first part ends t.afterDoneMs after line 2 ("Done.") ends (prompt 20: no dead air).
-  const firstMs = host[0].ms + HOST_GAP_MS + host[1].ms + t.afterDoneMs;
-  const span = lastFrom - firstMs;
-  const need = host[2].ms + HOST_GAP_MS;
-  const speed = Math.max(1, Math.floor((span / need) * 20 + 1e-9) / 20);
-  const segs = [
-    { name: 'first', runFrom: 0, clipMs: firstMs, speed: 1 },
-    { name: 'middle', runFrom: firstMs, clipMs: span / speed, speed },
-    { name: 'last', runFrom: lastFrom, clipMs: theEnd.t + t.afterEndMs - lastFrom, speed: 1 },
+  if (fourFrom + host['4'].ms + HOST_GAP_MS > snekAt) throw new Error(`host line 4 (${host['4'].ms} ms) would not end before Warden Snek's line`);
+  const theEnd = screenAt(right, 'the-end');
+  const span = fourFrom - f2;
+  const speed = Math.max(1, Math.floor((span / host['3'].ms) * 20 + 1e-9) / 20);
+  const parts = [
+    { name: '1 v1.0', kind: 'game', who: 'left', runFrom: f1, clipMs: oneMs, speed: 1, holdOnApple: true },
+    { name: '2a black', kind: 'black', clipMs: t.stingMs },
+    { name: '2b card', kind: 'card', clipMs: host['1b'].ms + HOST_GAP_MS },
+    { name: '3 v2.0 sped up', kind: 'game', who: 'right', runFrom: f2, clipMs: span / speed, speed },
+    { name: '4 v2.0 real time', kind: 'game', who: 'right', runFrom: fourFrom, clipMs: theEnd + t.afterEndMs - fourFrom, speed: 1 },
+    { name: '5 freeze', kind: 'freeze', who: 'right', clipMs: host['5'].ms },
   ];
   let at = 0;
-  for (const seg of segs) {
-    seg.clipFrom = at;
-    at += seg.clipMs;
-    seg.runTo = seg.runFrom + seg.clipMs * seg.speed;
+  for (const p of parts) {
+    p.clipFrom = at;
+    at += p.clipMs;
+    if (p.kind === 'game') p.runTo = p.runFrom + p.clipMs * p.speed;
   }
-  const [first, middle, last] = segs;
-  const theEndAt = last.clipFrom + (theEnd.t - last.runFrom);
-  const starts = [0, host[0].ms + HOST_GAP_MS, middle.clipFrom, last.clipFrom, theEndAt];
-  segs.host = host.map((line, i) => ({ who: 'host', line: line.id, file: line.file, clipAtMs: starts[i], lengthMs: line.ms, heardMs: line.ms,
-    segment: ['first', 'first', 'middle', 'last', 'THE END and the freeze'][i] }));
-  segs.freezeMs = Math.max(0, theEndAt + host[4].ms - at);
-  return segs;
+  const [one, black, card, three, four, five] = parts;
+  const said = (key, clipAtMs, part) => ({ who: 'host', line: host[key].id, file: host[key].file, clipAtMs, lengthMs: host[key].ms, heardMs: host[key].ms, segment: part.name });
+  parts.host = [
+    said('1a', 0, one), said('2', host['1a'].ms + HOST_GAP_MS, one), said('1b', card.clipFrom, card),
+    said('3', three.clipFrom, three), said('4', four.clipFrom, four), said('5', five.clipFrom, five),
+  ];
+  parts.sting = { who: 'sting', line: 'sting', clipAtMs: black.clipFrom, lengthMs: t.stingMs, heardMs: t.stingMs, segment: black.name };
+  return parts;
 }
 
-// What a counter says at run time t: the run clock until the version's first apple, then its measured value.
+// What the counter says at run time t: the run clock until the version's first apple, then its measured median.
 export function trailerCounter(v, appleAt, t, name) {
   const eaten = appleAt !== null && appleAt <= t;
   return { label: `${name}: first apple in`, value: formatTime(eaten ? v.median : Math.min(t, v.median)), frozen: eaten };
 }
 
-// Text: inside the safe area and not spilling out of its box. The game panels (prompt 20, full width):
-// inside the frame.
-export const TRAILER_TEXT = ['premise', 'speed', 'leftname', 'rightname', 'leftcounter', 'rightcounter', 'leftlabel', 'rightlabel', 'leftvalue', 'rightvalue'];
-export const TRAILER_PANELS = ['left', 'right'];
+// Text: inside the safe area and not spilling out of its box. The game panels: inside the frame.
+export const TRAILER_TEXT = ['premise', 'speed', 'cardtext', 'counter', 'label', 'value'];
+export const TRAILER_PANELS = ['left', 'right', 'card'];
 export async function checkSafeAreaOf(page, ids = TRAILER_TEXT, panels = TRAILER_PANELS) {
   const rects = await page.evaluate(({ ids, panels, right, bottom, width, height }) => [
     ...ids.map(id => {
@@ -104,22 +104,30 @@ export async function checkSafeAreaOf(page, ids = TRAILER_TEXT, panels = TRAILER
   if (outside.length) throw new Error(`trailer layout outside the safe area or text spilling out: ${outside.map(r => r.id).join(', ')}`);
 }
 
-export async function recordTrailer({ left, right, host = null, distDirs, outDir, frameLimit = Infinity, encode = true, log = console.log }) {
-  const timeline = trailerTimeline(right, TRAILER, host);
-  const clipMs = timeline.reduce((sum, seg) => sum + seg.clipMs, 0);
-  const frames = Math.min(Math.round((clipMs * FPS) / 1000), frameLimit);
+export function makeSting(file, ms = TRAILER.stingMs) {
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `aevalsrc=${STING}:s=44100:d=${ms / 1000}`, '-ac', '1', file]);
+  return file;
+}
+
+export async function recordTrailer({ left, right, host, distDirs, outDir, frameLimit = Infinity, encode = true, log = console.log }) {
+  const parts = trailerTimeline(left, right, host);
+  const clipMs = parts.reduce((sum, p) => sum + p.clipMs, 0);
+  const frames = Math.min(Math.ceil((clipMs * FPS) / 1000), frameLimit);
   const framesDir = path.join(outDir, 'frames');
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(framesDir, { recursive: true });
   const server = await startServer({ '/left': distDirs.left, '/right': distDirs.right, '/_short': path.join(ROOT, 'tools/short') });
   const browser = await chromium.launch({ headless: true, channel: 'chromium' });
-  const panes = { left: { id: 'left', v: left, apple: null, now: 0, plays: [] }, right: { id: 'right', v: right, apple: null, now: 0, plays: [] } };
+  const panes = { left: { id: 'left', v: left, apple: null, now: 0, plays: [], hold: null }, right: { id: 'right', v: right, apple: null, now: 0, plays: [] } };
+  const frameFile = f => path.join(framesDir, `${String(f + 1).padStart(5, '0')}.png`);
+  let browserVersion = null;
   try {
+    browserVersion = browser.version();
     const context = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
     await context.addInitScript({ path: path.join(ROOT, 'tools/short/vclock.js') });
     const page = await context.newPage();
     await page.goto(`${server.url}/_short/trailer.html`);
-    await page.evaluate(([premise, l, r]) => window.trailer.setText(premise, l, r), [PREMISE, `Snake (${left.version})`, `AAA Snake (${right.version})`]);
+    await page.evaluate(([premise, card]) => { window.trailer.setPremise(premise); window.trailer.setCard(card); }, [PREMISE, `Patch ${right.version.replace(/^v/, '')}`]);
     for (const pane of Object.values(panes)) {
       await page.evaluate(({ id, src }) => window.trailer.load(id, src), { id: pane.id, src: `/${pane.id}/index.html?seed=${pane.v.seed}` });
       await page.waitForFunction(id => { const w = document.getElementById(id).contentWindow; return w && w.__vclock && w.snakeGame; }, pane.id);
@@ -141,21 +149,30 @@ export async function recordTrailer({ left, right, host = null, distDirs, outDir
     };
     for (let f = 0; f < frames; f++) {
       const t = (f * 1000) / FPS;
-      const seg = timeline.find(s => t >= s.clipFrom && t < s.clipFrom + s.clipMs) || timeline[timeline.length - 1];
-      const runT = seg.runFrom + (t - seg.clipFrom) * seg.speed;
-      await advance(panes.left, runT);
-      await advance(panes.right, runT);
-      await page.evaluate(({ l, r, speed }) => {
-        window.trailer.setCounter('left', l);
-        window.trailer.setCounter('right', r);
+      const part = parts.find(p => t >= p.clipFrom && t < p.clipFrom + p.clipMs) || parts[parts.length - 1];
+      if (part.kind === 'freeze' && f > 0) { // the frame before, held
+        fs.copyFileSync(frameFile(f - 1), frameFile(f));
+        continue;
+      }
+      let show = part.kind === 'game' ? part.who : part.kind;
+      let counter = null;
+      let speed = '';
+      if (part.kind === 'game') {
+        const pane = panes[part.who];
+        let runT = part.runFrom + (t - part.clipFrom) * part.speed;
+        if (part.holdOnApple && pane.hold !== null) runT = pane.hold; // part 1: the frame holds once the apple is eaten
+        await advance(pane, runT);
+        if (part.holdOnApple && pane.hold === null && pane.apple !== null && pane.apple <= runT) pane.hold = runT;
+        counter = trailerCounter(pane.v, pane.apple, runT, part.who === 'left' ? `Snake (${left.version})` : `AAA Snake (${right.version})`);
+        if (part.speed > 1) speed = speedText(part.speed);
+      }
+      await page.evaluate(({ show, counter, speed }) => {
+        window.trailer.show(show);
+        window.trailer.setCounter(counter);
         window.trailer.setSpeed(speed);
-      }, {
-        l: trailerCounter(left, panes.left.apple, runT, 'Snake'),
-        r: trailerCounter(right, panes.right.apple, runT, 'AAA Snake'),
-        speed: seg.speed > 1 ? speedText(seg.speed) : '',
-      });
+      }, { show, counter, speed });
       await checkSafeAreaOf(page);
-      await page.screenshot({ path: path.join(framesDir, `${String(f + 1).padStart(5, '0')}.png`) });
+      await page.screenshot({ path: frameFile(f) });
       if ((f + 1) % 90 === 0 || f === frames - 1) log(`  frame ${f + 1}/${frames}`);
     }
     for (const pane of Object.values(panes)) {
@@ -177,43 +194,35 @@ export async function recordTrailer({ left, right, host = null, distDirs, outDir
       }
     }
   }
-  // Sound: Warden Snek's lines that start in a real-time part, at their recorded length; nothing in the fast middle.
+  // Sound: Warden Snek's lines that start in a real-time part of v2.0, at their recorded length.
   const voice = [];
-  for (const seg of timeline.filter(s => s.speed === 1)) {
-    for (const p of panes.right.plays.filter(x => x.line !== null && x.t >= seg.runFrom && x.t < seg.runTo)) {
+  for (const part of parts.filter(p => p.kind === 'game' && p.who === 'right' && p.speed === 1)) {
+    for (const p of panes.right.plays.filter(x => x.line !== null && x.t >= part.runFrom && x.t < part.runTo)) {
       const file = path.join(distDirs.right, 'voice', `${String(p.line).padStart(2, '0')}.mp3`);
-      const clipAtMs = seg.clipFrom + (p.t - seg.runFrom);
-      const fast = timeline.find(s => s.clipFrom > clipAtMs && s.speed > 1);
-      const stopAtMs = Math.min(fast ? fast.clipFrom : clipMs, clipMs);
       const lengthMs = audioMs(file);
-      voice.push({ version: right.version, segment: seg.name, line: p.line, file, runAtMs: p.t, clipAtMs, lengthMs, heardMs: Math.min(lengthMs, stopAtMs - clipAtMs) });
+      const clipAtMs = part.clipFrom + (p.t - part.runFrom);
+      voice.push({ version: right.version, segment: part.name, line: p.line, file, runAtMs: p.t, clipAtMs, lengthMs, heardMs: Math.min(lengthMs, part.clipFrom + part.clipMs - clipAtMs) });
     }
   }
-  // The host: line 5 over a freeze of the last frame until it ends.
-  let total = frames;
-  const hostVoice = timeline.host || [];
-  if (hostVoice.length && frameLimit === Infinity) {
-    const freeze = Math.ceil((timeline.freezeMs * FPS) / 1000);
-    const last = path.join(framesDir, `${String(frames).padStart(5, '0')}.png`);
-    for (let f = frames + 1; f <= frames + freeze; f++) fs.copyFileSync(last, path.join(framesDir, `${String(f).padStart(5, '0')}.png`));
-    total += freeze;
-    checkNoOverlap(hostVoice, voice);
-  }
+  const sting = { ...parts.sting, file: makeSting(path.join(outDir, 'sting.wav')) };
+  const said = frameLimit === Infinity ? parts.host : [];
+  checkNoOverlap([...said, sting], voice);
   const names = fs.readdirSync(framesDir).sort();
   const pickFrame = (i, name) => fs.copyFileSync(path.join(framesDir, names[i]), path.join(outDir, name));
   pickFrame(0, 'first.png');
   pickFrame(Math.floor((names.length - 1) / 2), 'middle.png');
   pickFrame(names.length - 1, 'last.png');
   const mp4 = path.join(outDir, `trailer-${left.version}-${right.version}.mp4`);
-  const heard = frameLimit === Infinity ? hostVoice : [];
-  if (encode) encodeShort(framesDir, [...voice, ...heard], (total * 1000) / FPS, mp4);
+  if (encode) encodeShort(framesDir, [...voice, ...said, sting], (frames * 1000) / FPS, mp4);
   const clip = {
-    trailer: [left.version, right.version], size: [WIDTH, HEIGHT], fps: FPS, frames: total, clipMs: (total * 1000) / FPS,
-    freezeFromMs: hostVoice.length ? (frames * 1000) / FPS : null,
-    timeline: timeline.map(({ name, runFrom, runTo, clipFrom, clipMs: ms, speed }) => ({ name, runFrom, runTo, clipFrom, clipMs: ms, speed })),
+    trailer: [left.version, right.version], design: 'A (prompt 21)', size: [WIDTH, HEIGHT], fps: FPS, frames, clipMs: (frames * 1000) / FPS,
+    parts: parts.map(({ name, kind, who, runFrom, runTo, clipFrom, clipMs: ms, speed }) => ({ name, kind, who: who ? panes[who].v.version : null, runFrom, runTo, clipFrom, clipMs: ms, speed })),
+    holdFromRunMs: panes.left.hold,
     apples: Object.fromEntries(Object.values(panes).map(p => [p.v.version, { replayed: p.apple, recorded: p.v.apple, median: p.v.median }])),
     voice: voice.map(({ file, ...v }) => ({ ...v, file: path.relative(ROOT, file) })),
-    host: heard.map(({ file, ...h }) => ({ ...h, file: path.relative(ROOT, file) })),
+    host: said.map(({ file, ...h }) => ({ ...h, file: path.relative(ROOT, file) })),
+    sting: { clipAtMs: sting.clipAtMs, ms: TRAILER.stingMs, made: `ffmpeg -f lavfi -i aevalsrc=${STING}:s=44100:d=${TRAILER.stingMs / 1000}` },
+    browser: browserVersion,
     encoder: encode ? ffmpegVersion() : null,
   };
   fs.writeFileSync(path.join(outDir, 'clip.json'), JSON.stringify(clip, null, 2) + '\n');
@@ -229,19 +238,21 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const left = loadForShort(l);
   const right = loadForShort(r);
   if (left.seed !== right.seed) throw new Error(`${l} was measured with seed ${left.seed}, ${r} with seed ${right.seed}: not the same seed`);
+  const host = Object.fromEntries(hostLines('trailer').map(h => [h.id.replace(/^trailer-/, ''), h]));
   console.log(`$ npm run short -- trailer ${l} ${r}   (seed ${left.seed})`);
   const clip = await recordTrailer({
-    left, right, host: hostLines('trailer'),
+    left, right, host,
     distDirs: { left: path.join(ROOT, 'dist', l), right: path.join(ROOT, 'dist', r) },
     outDir: path.join(ROOT, 'out/shorts/trailer'),
   });
   console.log(`clip: ${clip.frames} frames, ${clip.clipMs} ms`);
-  for (const s of clip.timeline) console.log(`  ${s.name.padEnd(8)} clip ${s.clipFrom} ms + ${s.clipMs} ms: run ${s.runFrom} -> ${s.runTo} ms at ${s.speed}x`);
+  for (const p of clip.parts) console.log(`  ${p.name.padEnd(17)} clip ${p.clipFrom} ms + ${p.clipMs} ms${p.kind === 'game' ? `: ${p.who} run ${p.runFrom} -> ${p.runTo} ms at ${p.speed}x` : ''}`);
+  console.log(`part 1 holds from ${clip.holdFromRunMs} ms of v1.0's run`);
   for (const [v, a] of Object.entries(clip.apples)) console.log(`${v}: first apple replayed at ${a.replayed} ms, recorded ${a.recorded} ms, median ${a.median} ms (counter freezes on the median)`);
   for (const h of clip.host) console.log(`host: line ${h.line} (${h.segment}) from ${h.clipAtMs / 1000} s to ${(h.clipAtMs + h.heardMs) / 1000} s of the trailer`);
-  if (!clip.voice.length) console.log('sound: silence');
+  console.log(`sting: from ${clip.sting.clipAtMs / 1000} s, ${clip.sting.ms} ms`);
   for (const v of clip.voice) {
     console.log(`sound: ${v.version} line ${v.line} (${v.segment}) from ${v.clipAtMs / 1000} s to ${(v.clipAtMs + v.heardMs) / 1000} s of the trailer, ${v.heardMs} ms heard of ${v.lengthMs} ms${v.heardMs === v.lengthMs ? ' (in full)' : ' (CUT)'}`);
   }
-  console.log(`wrote out/shorts/trailer/trailer-${l}-${r}.mp4, frames/, first.png, middle.png, last.png, clip.json`);
+  console.log(`wrote out/shorts/trailer/trailer-${l}-${r}.mp4, frames/, first.png, middle.png, last.png, sting.wav, clip.json`);
 }

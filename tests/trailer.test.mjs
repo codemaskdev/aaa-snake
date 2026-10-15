@@ -1,51 +1,69 @@
-// The trailer (prompt 16): v1.0 and v2.0 side by side on one clock, real time at both ends.
+// The trailer, design "A" (prompt 21): one full-width panel; v1.0, a sting and a card, v2.0 sped up, then real time.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { trailerTimeline, trailerCounter, TRAILER } from '../tools/trailer.mjs';
+import path from 'node:path';
+import { chromium } from 'playwright';
+import { trailerTimeline, trailerCounter, checkSafeAreaOf, TRAILER } from '../tools/trailer.mjs';
+import { HOST_GAP_MS, PREMISE, WIDTH, HEIGHT } from '../tools/short.mjs';
+import { ROOT } from './helpers.mjs';
 
-test('the trailer: real time first and last, the middle sped up in steps of 0.05x, 30 s at most, ending 1 s after THE END', () => {
-  const right = { version: 'v2.0', raw: { log: [{ t: 107290, type: 'apple' }, { t: 113307, type: 'screen', name: 'the-end' }] } };
-  const [first, middle, last] = trailerTimeline(right);
-  assert.deepEqual([first.runFrom, first.runTo, first.speed], [0, TRAILER.firstMs, 1]);
-  assert.equal(middle.runFrom, TRAILER.firstMs);
-  assert.equal(middle.speed, 17.9, '89307 ms of run in at most 5000 ms of clip: 17.8614x, up to the next 0.05');
-  assert.ok(Math.abs(middle.runTo - last.runFrom) < 1e-6, 'the middle ends where the last part starts');
-  assert.deepEqual([last.runFrom, last.runTo, last.speed], [104307, 114307, 1]);
-  assert.ok(last.runFrom < 107290, 'the inner apple is in the real-time end');
-  const total = first.clipMs + middle.clipMs + last.clipMs;
-  assert.ok(total <= TRAILER.totalMs && total >= 25000, `${total} ms`);
-  assert.throws(() => trailerTimeline({ version: 'v1.0', raw: { log: [] } }), /never shows THE END/);
+const host = Object.fromEntries([['1a', 1360], ['1b', 2000], ['2', 560], ['3', 8720], ['4', 3920], ['5', 10240]].map(([k, ms]) => [k, { id: `trailer-${k}`, file: `${k}.mp3`, ms }]));
+const left = { version: 'v1.0', apple: 320.1, raw: { log: [{ t: 28, type: 'frame', name: 'ready' }] } };
+const right = {
+  version: 'v2.0', apple: 107290.1, firstLine: { afterAppleMs: 600 },
+  raw: { log: [{ t: 101.6, type: 'frame', name: 'update-required' }, { t: 106956.8, type: 'screen', name: 'cabinet-door' }, { t: 113307.1, type: 'screen', name: 'the-end' }] },
+};
+
+test('the trailer\'s five parts: v1.0 held until "Done." + 400 ms, black with the sting, the card, v2.0 for line 3, real time, the freeze', () => {
+  const parts = trailerTimeline(left, right, host);
+  const [one, black, card, three, four, five] = parts;
+  assert.deepEqual([one.runFrom, one.clipMs], [28, 1360 + HOST_GAP_MS + 560 + TRAILER.holdAfterDoneMs], 'from v1.0\'s first drawn frame');
+  assert.equal(black.clipMs, TRAILER.stingMs);
+  assert.equal(card.clipMs, 2000 + HOST_GAP_MS);
+  assert.equal(three.runFrom, 101.6, 'from v2.0\'s first drawn frame');
+  assert.equal(three.speed, 11.75, 'the largest step of 0.05x that keeps the part at least as long as line 3');
+  assert.ok(three.clipMs >= 8720 && (three.runTo - three.runFrom) / (three.speed + 0.05) < 8720);
+  assert.ok(Math.abs(three.runTo - four.runFrom) < 1e-6, 'part 4 starts where part 3 ends');
+  assert.equal(four.runFrom, 106956.8 - 4000, '4 s before the cabinet is reached');
+  assert.ok(Math.abs(four.runTo - (113307.1 + TRAILER.afterEndMs)) < 1e-6);
+  assert.equal(five.clipMs, 10240, 'the file ends when line 5 ends');
+  const at = Object.fromEntries(parts.host.map(h => [h.line, h.clipAtMs]));
+  assert.deepEqual([at['trailer-1a'], at['trailer-2'], at['trailer-1b'], at['trailer-3'], at['trailer-4'], at['trailer-5']],
+    [0, 1360 + HOST_GAP_MS, card.clipFrom, three.clipFrom, four.clipFrom, five.clipFrom]);
+  assert.ok(four.runFrom + 3920 + HOST_GAP_MS <= 107290.1 + 600, 'line 4 ends before Snek');
+  assert.equal(parts.sting.clipAtMs, black.clipFrom);
+  assert.throws(() => trailerTimeline(left, { ...right, raw: { log: right.raw.log.filter(e => e.name !== 'cabinet-door') } }, host), /never shows cabinet-door/);
 });
 
-test('the trailer counters run on the shared clock until each version\'s own first apple, then hold its measured median', () => {
+test('the trailer counter runs on the run clock until the version\'s own first apple, then holds its measured median', () => {
   const v10 = { median: 320.09999999403954 };
-  assert.deepEqual(trailerCounter(v10, null, 200, 'Snake'), { label: 'Snake: first apple in', value: '0.200 s', frozen: false });
-  assert.deepEqual(trailerCounter(v10, 320, 90000, 'Snake'), { label: 'Snake: first apple in', value: '0.320 s', frozen: true });
+  assert.deepEqual(trailerCounter(v10, null, 200, 'Snake (v1.0)'), { label: 'Snake (v1.0): first apple in', value: '0.200 s', frozen: false });
+  assert.deepEqual(trailerCounter(v10, 319.6, 333, 'Snake (v1.0)'), { label: 'Snake (v1.0): first apple in', value: '0.320 s', frozen: true });
   const v20 = { median: 107290.10000002384 };
-  assert.equal(trailerCounter(v20, null, 60000, 'AAA Snake').value, '1:00.000');
-  assert.equal(trailerCounter(v20, 107290, 110000, 'AAA Snake').value, '1:47.290');
+  assert.equal(trailerCounter(v20, null, 60000, 'AAA Snake (v2.0)').value, '1:00.000');
+  assert.equal(trailerCounter(v20, 107290, 110000, 'AAA Snake (v2.0)').value, '1:47.290');
 });
 
-test('the stacked trailer layout: both panels full width inside the frame, every text inside the safe area and its box (prompt 20)', async () => {
-  const { chromium } = await import('playwright');
-  const path = await import('node:path');
-  const { ROOT } = await import('./helpers.mjs');
-  const { checkSafeAreaOf } = await import('../tools/trailer.mjs');
-  const { PREMISE, WIDTH, HEIGHT } = await import('../tools/short.mjs');
+test('design A\'s layout: the premise band, the game at 1080 x 1152, the counter under it, nothing below y = 1440, text inside its box', async () => {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } });
     await page.goto(`file://${path.join(ROOT, 'tools/short/trailer.html')}`);
     await page.evaluate(p => {
-      window.trailer.setText(p, 'Snake (v1.0)', 'AAA Snake (v2.0)');
-      window.trailer.setCounter('left', { label: 'Snake: first apple in', value: '0.320 s', frozen: true });
-      window.trailer.setCounter('right', { label: 'AAA Snake: first apple in', value: '1:47.290', frozen: true });
-      window.trailer.setSpeed('12.35x');
+      window.trailer.setPremise(p);
+      window.trailer.setCard('Patch 2.0');
+      window.trailer.setCounter({ label: 'AAA Snake (v2.0): first apple in', value: '1:47.290', frozen: true });
+      window.trailer.setSpeed('11.8x');
     }, PREMISE);
-    await checkSafeAreaOf(page);
-    const r = await page.evaluate(() => ['left', 'right'].map(id => document.getElementById(id).getBoundingClientRect().toJSON()));
-    assert.deepEqual(r.map(x => [x.width, x.left]), [[1080, 0], [1080, 0]], 'each panel the full width');
-    assert.ok(r[0].bottom <= r[1].top, 'v1.0 on top, v2.0 below');
+    for (const what of ['left', 'card', 'right']) {
+      await page.evaluate(w => window.trailer.show(w), what);
+      await checkSafeAreaOf(page);
+    }
+    const r = await page.evaluate(() => Object.fromEntries(['band', 'left', 'right', 'counterband'].map(id => [id, document.getElementById(id).getBoundingClientRect().toJSON()])));
+    assert.deepEqual([r.band.top, r.band.height], [0, 90]);
+    assert.deepEqual([r.left.left, r.left.top, r.left.width, r.left.height], [0, 90, 1080, 1152], '480 x 512 at 2.25x');
+    assert.deepEqual([r.right.top, r.right.width, r.right.height], [90, 1080, 1152]);
+    assert.ok(r.counterband.top >= 1242 && r.counterband.bottom <= 1440);
   } finally {
     await browser.close();
   }
