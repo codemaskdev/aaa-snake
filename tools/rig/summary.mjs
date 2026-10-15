@@ -40,7 +40,7 @@ export function rowFor(result, fpsWindow) {
     heap_used_after_gc_bytes: m.heapUsedAfterGcBytes,
     fps_median: m.fpsMedian,
     fps_p5: m.fpsP5,
-    fps_window: fpsWindow,
+    fps_window: result.median.fpsMedianOverFrames ? `${fpsWindow}; median over ${result.median.fpsMedianOverFrames} frames` : fpsWindow,
     runs: result.settings.runs,
     measured_at: result.measuredAt,
     kind: kindOf(result.settings.runs) + (result.median.endedAtMs ? ` / game ended at ${result.median.endedAtMs / 1000} s` : ''),

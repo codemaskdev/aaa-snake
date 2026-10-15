@@ -74,7 +74,8 @@ export function renderSvg(rows) {
       out += `<text x="${plot.x + plot.w}" y="${y - 8}" font-size="15" fill="${C.muted}" text-anchor="end">budget ${p.ref}</text>`;
     }
     versions.forEach((v, j) => {
-      out += `<text x="${xOf(j)}" y="${plot.y + plot.h + 26}" font-size="16" fill="${C.muted}" text-anchor="middle">${esc(v)}${(rows[j].kind || '').startsWith('single run') ? '*' : ''}${(rows[j].kind || '').includes('game ended') ? '†' : ''}</text>`;
+      // Every other label one line lower, so ten versions' labels (and their marks) do not run into each other.
+      out += `<text x="${xOf(j)}" y="${plot.y + plot.h + 24 + (j % 2) * 18}" font-size="15" fill="${C.muted}" text-anchor="middle">${esc(v)}${(rows[j].kind || '').startsWith('single run') ? '*' : ''}${(rows[j].kind || '').includes('game ended') ? '†' : ''}</text>`;
     });
     const pts = values.map((v, j) => (v === null ? null : [xOf(j), yOf(v)]));
     const path = pts.filter(Boolean).map((pt, j) => `${j ? 'L' : 'M'}${pt[0]},${pt[1]}`).join(' ');

@@ -633,3 +633,45 @@ ended at N s". Time to first apple is unaffected. Write the rule in
 README (methods) and DEVLOG before measuring, then continue prompt 12
 as written.
 ````
+
+## 16. Frame rate under 1 s of control; the short template; the trailer
+
+````text
+v1.7 fix and v2.0 accepted. The line-10 cutscene before THE END stays.
+Do not run measure:final yet.
+
+## FPS rule for games with less than 1 s of control (v2.0)
+The median is taken over individual frames (1000 / frame ms), the
+summary.csv cell says "median over N frames", and the budget check uses
+it. Write the rule in README (methods) and DEVLOG, re-evaluate v2.0 from
+the saved run (no re-measure), update the chart, and fix the overlapping
+version labels at the end of the chart axis.
+
+## Short template, three changes, then re-record everything
+1. Premise line. Every short gets the same first line at the top, above
+   the patch-note card: "I turned Snake into a AAA game." Under it the
+   patch line: "Patch 1.4: online only." (version and a 2-4 word name
+   taken from UPDATES.md). The patch-note text follows below; the
+   font-shrink and text-not-box checks apply to all three. The premise
+   line is visible from frame 0 of segment A.
+2. Segment D ends when the first apple's Warden Snek line finishes
+   (apple + 600 ms + the line's recorded length); for v2.0 it runs to
+   the first frame of the credits. Segment A carries no voice. Total
+   still 25 to 30 s by the existing rule (raise the C factor in steps
+   of 0.05 as far as needed; v2.0 may be shorter if D ends earlier).
+3. New mode `npm run short -- trailer v1.0 v2.0`: 1080x1920, both
+   versions side by side from the same seed on a shared virtual clock,
+   real time. Top line: "I turned Snake into a AAA game." Bottom: two
+   counters, "Snake: first apple in 0.3 s" fixed once v1.0 eats, and
+   the v2.0 counter running until its own first apple. v2.0 takes
+   107 s, so: first 20 s real time, a time-compressed middle with the
+   factor shown (same rule as segment C), the last 10 s real time with
+   the inner apple, the line and THE END, so the real counter value is
+   on screen at the end. Total 25 to 30 s.
+
+Update the plan in README and DEVLOG. Re-record shorts v1.1 to v2.0
+with the current recorder rules (v1.0 keeps its file, it is not
+published on its own), record the trailer, and report per file: length,
+C factor, the second at which the voice line starts and ends, and the
+frame you consider the best still for each. STOP.
+````

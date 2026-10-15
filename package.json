@@ -9,6 +9,7 @@
     "serve": "node tools/serve.mjs",
     "measure": "node tools/measure.mjs",
     "measure:final": "node tools/measure.mjs --runs 5 --fps-runs 5",
+    "reevaluate": "node tools/reevaluate.mjs",
     "fps-check": "node tools/fps-check.mjs",
     "chart": "node tools/chart.mjs",
     "short": "node tools/short.mjs",

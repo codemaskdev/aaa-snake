@@ -16,6 +16,7 @@ npm test                    # game rules, determinism, the rig, the chart, the r
 npm run build <version>     # copy src/ to dist/<version>/ (never overwrites)
 npm run measure <version>   # one headless and one visible run -> measurements/<version>.json, summary.csv ("single run")
 npm run measure:final <version>  # 5 + 5 runs and their medians; once, overnight, before release
+npm run reevaluate <version>  # the frame rate again from the saved runs, with the current rules
 npm run fps-check           # headless vs visible window frame rate, on test loads
 npm run chart               # measurements/summary.csv -> out/bloat.png
 npm run short <version>     # 30-second vertical short -> out/shorts/<version>/
@@ -39,6 +40,10 @@ npm run play-share          # control share in play, from the saved runs of ever
   actual window up to THE END (control time / time until the end screen), and the summary.csv row and the chart mark
   it "game ended at N s". Time to first apple is unaffected. The JS heap is then read when the game has ended, and the
   frame rate is taken over the control frames the run had.
+- **Frame rate with under one whole second of control** (v2.0, prompt 16): the median is taken over individual frames
+  (1000 / frame ms) instead of per-second counts, the summary.csv `fps_window` cell says "median over N frames", and
+  the budget check uses it. `npm run reevaluate <version>` applies the rules to a version's saved runs without
+  measuring again.
 - Numbers are written as measured, never rounded; every run's raw data is kept under measurements/<version>/.
 
 ## Shorts

@@ -269,11 +269,12 @@
     "controlShareInPlay": 0.13529504689188016,
     "heapUsedAfterGcBytes": 2273904,
     "downloadBytes": 695122,
-    "fpsMedian": null,
+    "fpsMedian": 59.880239520968516,
     "fpsP5": 57.47126436783532,
-    "headlessFpsMedian": null,
+    "headlessFpsMedian": 59.880239520968516,
     "headlessFpsP5": 59.523809523799216,
-    "endedAtMs": 113307.10000002384
+    "endedAtMs": 113307.10000002384,
+    "fpsMedianOverFrames": 56
   },
   "checks": {
     "firstAppleTicks": [
@@ -448,7 +449,7 @@
       "fps": {
         "frames": 56,
         "seconds": 0,
-        "median": null,
+        "median": 59.880239520968516,
         "p5": 59.523809523799216,
         "medianPerFrame": 59.880239520968516,
         "longestFrameMs": 16.80000000000291,
@@ -456,7 +457,8 @@
           "controlMs": 942.1000000238419,
           "from": 106343.80000001192,
           "to": 107290.10000002384
-        }
+        },
+        "medianOverFrames": 56
       },
       "steering": {
         "sent": 0,
@@ -495,7 +497,7 @@
       "mode": "visible",
       "frames": 56,
       "seconds": 0,
-      "median": null,
+      "median": 59.880239520968516,
       "p5": 57.47126436783532,
       "medianPerFrame": 59.880239520968516,
       "longestFrameMs": 17.59999999999127,
@@ -513,13 +515,23 @@
         "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
       },
       "endMs": 116207.80000001192,
-      "errors": []
+      "errors": [],
+      "medianOverFrames": 56
     }
   ],
   "medianRun": 1,
   "budget": {
     "fpsMedianMin": 50,
     "fpsP5Min": 30,
-    "pass": false
+    "pass": true
+  },
+  "reevaluated": {
+    "at": "2026-10-15T17:56:36.205Z",
+    "why": "prompt 16: under one whole second of control, the frame-rate median is taken over individual frames",
+    "before": {
+      "fpsMedian": null,
+      "fpsP5": 57.47126436783532,
+      "budget": false
+    }
   }
 }

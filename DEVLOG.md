@@ -1228,3 +1228,15 @@ not picked one after the measurement.
 - The chart marks v2.0 with * and †, and its subtitle says "v2.0: game ended at 113.30710000002384 s"; the frame-rate
   median panel has no point for v2.0. The version labels at the end of the x axis now run into each other.
 - The full `npm test` after measuring: 112 of 112, exit 0.
+
+## Prompt 16: frame rate under one second of control; the short template; the trailer
+
+### Frame rate with under one whole second of control (rule written before re-evaluating v2.0)
+The median is taken over individual frames (1000 / frame ms), not per-second counts; summary.csv's `fps_window` cell
+says "median over N frames"; the budget check uses it (tools/rig/stats.mjs frameRate, README.md "Methods"). v2.0 is
+re-evaluated from its saved runs with `npm run reevaluate v2.0` (new: tools/reevaluate.mjs), nothing measured again.
+- `npm run reevaluate v2.0`: before, median null, p5 57.47126436783532 fps, budget FAIL; now **median 59.880239520968516
+  fps (median over 56 frames)**, p5 57.47126436783532 fps, **budget PASS**. measurements/v2.0/output.txt has both,
+  measurements/v2.0.json says when and why (`reevaluated`). Every other version had whole seconds, so nothing else moves.
+- The chart: every other version label sits one line lower, so the ten labels and their * and † no longer run into
+  each other.

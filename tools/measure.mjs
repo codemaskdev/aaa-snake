@@ -143,6 +143,7 @@ export async function measure(opts) {
       heapUsedAfterGcBytes: pick(r => r.memory?.usedSizeAfterGc),
       downloadBytes: pick(r => r.requests.bytes),
       fpsMedian: median(fpsRuns.map(r => r.median)),
+      fpsMedianOverFrames: fpsRuns.length && fpsRuns.every(r => r.medianOverFrames) ? median(fpsRuns.map(r => r.medianOverFrames)) : null,
       fpsP5: median(fpsRuns.map(r => r.p5)),
       headlessFpsMedian: pick(r => r.fps.median),
       headlessFpsP5: pick(r => r.fps.p5),
@@ -187,7 +188,7 @@ export async function measure(opts) {
   }
   say(`  JS heap after GC      ${m.heapUsedAfterGcBytes} bytes`);
   say(`  download              ${m.downloadBytes} bytes`);
-  say(`  frame rate (${o.fpsMode})  median ${m.fpsMedian} fps, p5 ${m.fpsP5} fps`);
+  say(`  frame rate (${o.fpsMode})  median ${m.fpsMedian} fps${m.fpsMedianOverFrames ? ` (median over ${m.fpsMedianOverFrames} frames: under one whole second of control)` : ''}, p5 ${m.fpsP5} fps`);
   say(`  frame rate (headless) median ${m.headlessFpsMedian} fps, p5 ${m.headlessFpsP5} fps`);
   say(`  js ${size.jsLines} lines, ${size.jsBytes} bytes; code ${size.codeLines} lines; assets ${size.assetBytes} bytes; build ${size.buildBytes} bytes`);
   const c = result.checks;

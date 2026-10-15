@@ -44,3 +44,8 @@ checks: first apple tick 3 (same in all runs: true); external requests 0; failed
 checks: PASS
 performance budget (median >= 50 fps, p5 >= 30 fps): FAIL
 wrote measurements/v2.0.json, measurements/v2.0/ (raw runs and this output), measurements/summary.csv
+
+$ npm run reevaluate v2.0   (2026-10-15T17:56:36.205Z; the saved runs, nothing measured again)
+frame rate (visible) before: median null fps, p5 57.47126436783532 fps, budget FAIL
+frame rate (visible) now:    median 59.880239520968516 fps (median over 56 frames), p5 57.47126436783532 fps
+performance budget (median >= 50 fps, p5 >= 30 fps): PASS

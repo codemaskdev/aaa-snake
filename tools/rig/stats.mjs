@@ -154,10 +154,14 @@ export function frameRate(frameTimes, intervals, excluded = []) {
       perSecond.push(frameTimes.filter(t => t >= s && t < s + 1000).length);
     }
   }
+  // Under one whole second of control (v2.0, prompt 16) there is no per-second count: the median is
+  // then taken over the individual frames (1000 / frame ms), and says over how many.
+  const overFrames = perSecond.length === 0 && fps.length > 0;
   return {
     frames: fps.length,
     seconds: perSecond.length,
-    median: median(perSecond),
+    median: overFrames ? median(fps) : median(perSecond),
+    medianOverFrames: overFrames ? fps.length : null,
     p5: percentile(fps, 5),
     medianPerFrame: median(fps),
     longestFrameMs: gaps.length ? Math.max(...gaps) : null,
