@@ -851,3 +851,67 @@ it. README.md has the plan; tests/short.test.mjs checks D's length, the steps of
 
 `npm run short v1.3` to `v1.6`, each exit 0. C had been 4.1x, 4.85x, 5.75x and 6.05x. v1.0 to v1.2 were not rendered
 again: they have no voice, so their plan did not change.
+
+### v1.7, what was built
+The plan of prompts 8 and 9 above (ed0991d, 846fa33): radius 6, the battle pass, the PARODY shop, the loot box, the
+wardrobe, the skins, the bot's search. The work was in `git stash` during prompts 10 and 11 and came back unchanged
+(`git stash pop`); what follows was added after.
+- **The apple shows only within 6 cells** of the head (src/season.js, `appleVisible`): in the world, on the minimap,
+  on the world map and in the probe. Out of sight, the quest tracker says "Location unknown"; a dashed circle shows how
+  far Snek can see.
+- **The battle pass** (src/season.js): one tier every 500 XP (the XP of v1.6), 100 tiers; the top reward, at tier 100,
+  is "Apple Vision: the ability to see the apple" (50000 XP, out of reach in a measured run). Every new tier stops play
+  for the battle-pass screen: a track of tier cards that slides to the new tier, the free row and a locked premium
+  row, the top reward pinned below it, "Golden Scales: 0". It offers Enter (Continue) after 1500 ms. Its "B: Buy tiers
+  with Golden Scales" button opens the PARODY screen: "Nothing is for sale." Both screens carry a PARODY label. No
+  payment code, no network, no prices (tests/v1.7.test.mjs checks the code for them).
+- **After every game over:** the loot box (it shakes, bursts open with light rays and sparkles, shows the skin, its
+  rarity and the drop odds; Enter after 3200 ms), then the wardrobe (the new skin, worn, and all 11; Enter after
+  1000 ms), then the autosave notice and the world map as before.
+- **Skins** (src/skins.js), as written before building: 10 in the boxes plus Warden, the look Snek starts with; odds
+  Common 60 %, Rare 25 %, Epic 12 %, Legendary 3 %; Classic Green, the Legendary, draws the v1.0 snake (square cells,
+  #3b3 and #8f8, no eyes). Drops come from the seed. **Bytes added: src/skins.js 5197, src/season.js 15835** (season.js
+  also holds the vision, the battle pass and the screens). tests/v1.7.test.mjs plays 20 s of the same game under each
+  of the 11 skins, on the short recorder's virtual clock with the same keys, and finds the log and the final state
+  identical; and draws 20000 boxes from seed 1 to check the odds (each rarity within 1.5 points).
+- **Line 16 (prompt 12):** in v1.7's story.js its subtitle is "Another. The orchard remembers.", as it is said, and its
+  slot is pinned at 2800 ms (`slot: 2800`; slotMs uses a pinned slot before counting words), the slot the old text had.
+  v1.3 to v1.6 keep "Another one. The orchard remembers." in their own story.js. voice/LINES.md shows both.
+- **The camera may now look 3 cells past the edge of the world** (dark ground there). Without it, in the first
+  screenshots of the search, the snake ran along the bottom edge hidden under the XP bar, as the camera stopped at the
+  edge and the head sat at the bottom of the view. And the acorn count moved right in the quest tracker, where "Location
+  unknown" ran into it.
+- **The rig** (tools/rig/run.mjs) keeps the bot's memory of seen cells for the search and reports, per run, how many
+  cells the bot had seen when the apple first came into view (`search`), in the measure output too.
+
+### What broke while building
+- In prompt 9's work, before the stash: `memory` in tools/rig/run.mjs was already the heap reading, so the bot's
+  memory of seen cells needed another name (a SyntaxError, caught by `node --check`).
+- My own v1.7 tests: "stripe" (a payment company) matched "stripes" (Tiger's pattern); a cross-realm deepEqual, again.
+- tests/v1.4.test.mjs compared v1.4's story.js with src/story.js, as its way of checking that v1.4 plays the voice
+  from the same place; with line 16 changed for v1.7 they differ, so it now checks that the build plays its own
+  voice/ files (which `npm run voice` keeps the same as src/voice/).
+
+### One headless run, timed before measuring
+As promised above, before running all five: one headless run of src/ with the rig's settings (a scratch script calling
+tools/rig/run.mjs's runOnce, as `npm run measure` does; not a measurement, not kept): **1105656 ms of wall time, 18.4
+minutes**, against the estimate of 1104400 ms. Under the 20 minutes, so the measurement goes ahead. The run found the
+apple on tick 7595 after seeing 52228 cells, the numbers of the offline search; no death, no error, 66 of 66 turns
+accepted.
+
+### v1.7, expected direction of every metric (written before `npm run measure v1.7`)
+| Metric | Expected | Why |
+|---|---|---|
+| First apple's tick | 7595 (163 in v1.6) | the bot's search reaches seed 1's apple on move 7595 in the offline search and in the timed run; the game and the bot are deterministic, so I expect the same in all five runs |
+| Time to first apple | up, sharply (about 1100 s) | 7595 moves at 100 ms, plus 36 reconnects, 16 level-ups and 15 battle-pass tiers on the way |
+| Load time | unchanged | nothing before the warning changed |
+| Control share (first 180 s) | up, a little | UPDATES.md says down; I do not expect that here. In v1.6 the first 180 s held two level-ups and the first apple (finishing move, bite, reflection); in v1.7 they hold only the walk (the search), the same level-ups and one battle-pass tier at move 500. The loot box comes only after a game over, and I expect none |
+| Control share in play | up | UPDATES.md says down; I expect up for the same reason: v1.6's first 60 s of control held two apples, each about 8300 ms of finishing move, bite and reflection; v1.7's hold no apple at all, but four level-ups, one tier screen (about 1500 ms) and the reconnects, as v1.6 |
+| Download | up | season.js and skins.js |
+| JS lines / bytes | up | the same |
+| Assets | unchanged | skins are drawn in code; the voice files are new recordings since prompt 10, but download counts only what a version fetches, and assets are counted from the build: they changed in size for v1.3 to v1.6 too (not measured again) |
+| JS heap after GC | up, a little | the skins, the season's state |
+| Frame rate median | unchanged | play draws as in v1.6, plus a dashed circle |
+| Frame rate 5th percentile | unchanged or slightly down | the same |
+| Requests to another origin | zero | nothing is loaded from anywhere; the shop is a screen |
+| Deaths | none expected | the timed run had none; a death would mean a loot box, a wardrobe and a new search |
