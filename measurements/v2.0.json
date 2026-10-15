@@ -1,0 +1,525 @@
+{
+  "version": "v2.0",
+  "command": "npm run measure v2.0",
+  "measuredAt": "2026-10-15T17:19:26.028Z",
+  "git": {
+    "head": "7ae8439",
+    "tag": {
+      "name": "v2.0",
+      "commit": "8739053"
+    },
+    "buildSameAsTag": true,
+    "buildUncommitted": false
+  },
+  "machine": {
+    "model": "MacBook Air",
+    "modelIdentifier": "MacBookAir10,1",
+    "chip": "Apple M1",
+    "cores": 8,
+    "ramBytes": 17179869184,
+    "os": "macOS 26.3.1 (25D771280a)",
+    "node": "v24.15.0",
+    "ram": "16 GB"
+  },
+  "browser": {
+    "name": "Chromium",
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "headless": {
+      "mode": "new headless (Playwright channel \"chromium\")",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        800
+      ],
+      "devicePixelRatio": 2
+    },
+    "fpsWindow": {
+      "mode": "visible",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      "viewport": [
+        1280,
+        700
+      ],
+      "devicePixelRatio": 2
+    }
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1,
+    "sessionMs": 180000,
+    "playMsForMemory": 60000,
+    "fpsRuns": 1,
+    "fpsPlayMs": 60000,
+    "frameRateMethod": 2
+  },
+  "method": {
+    "timeToFirstApple": "performance.now() in the page when the game logs its first apple; 0 is navigation start.",
+    "screensBeforeFirstApple": "Segments of the game's screen log between navigation start and the first apple. \"(page load)\" is the time before the game reports its first screen.",
+    "bot": "tools/rig/bot.mjs. Seed 1. It acts only on screens already drawn, presses the key a screen offers to leave it (skip/continue/restart) at once, and on control screens takes a shortest path to the apple (breadth-first search). Keys are real key presses (Playwright keyboard). It polls the game every 4 ms.",
+    "controlShareInPlay": "Since prompt 5: from the first drawn frame of a control screen until the bot has had 60000 ms of control (the heap's and the frame rate's window), control time divided by the time that passed. The launch screens are left out; what stops play after the first control frame (finishing moves, cutscenes, deaths, reconnects) counts against it (tools/rig/stats.mjs playShare).",
+    "controlShare": "Time in control screens (ready, play, cabinet) divided by the session, over the first sessionMs from navigation start. Control screens are those where arrow keys steer the snake; the list is fixed in tools/rig/stats.mjs.",
+    "search": "Since v1.7 the apple shows only within a vision radius. The bot counts the cells it has seen (within the radius of every cell its head has been on, since the apple appeared); search.cellsSeen is that count on the bot's first look at the game that shows the apple, with the tick and the time.",
+    "steering": "In play, every turn key the bot sends is checked on the next look at the game: accepted means the game now heads that way. A turn sent just before the snake died, or on the last look at the game in a run, cannot be checked and is counted as unchecked.",
+    "load": "performance.now() of the first drawn frame of a screen that accepts any key: the first frame of a control screen, or the game's first \"accepts\" log entry (the first drawn frame where another screen starts reacting to a key), whichever comes first.",
+    "memory": "CDP Runtime.getHeapUsage().usedSize of the page, read right after CDP HeapProfiler.collectGarbage, at the moment the bot has had playMsForMemory of control. The value before garbage collection is kept too.",
+    "origin": "Every request of every run must go to the page's own origin (scheme, host and port of the game); any other request is listed in checks.externalRequests and fails the checks (tools/rig/stats.mjs offOrigin).",
+    "download": "Sum of CDP Network.loadingFinished encodedDataLength over every request of the session (headers + body; no compression, browser cache disabled).",
+    "size": "Files in dist/<version>/. js = .js and .mjs; code = js + .html + .css; assets = every other file. Lines = newline characters, like wc -l (tools/rig/size.mjs).",
+    "frameRate": "Method 2 (since 2026-10-14, prompt 4): over the first 60 s of play, the same window as the heap. Every requestAnimationFrame timestamp is recorded by a script injected before the game; only frames inside control screens count, taken in order from navigation start until 60000 ms of control (by the game's screen log), and frames within the heap read (+500 ms) are left out. Per run: median = median of per-second frame counts (1-second windows, like an FPS counter); p5 = 5th percentile (nearest rank) of per-frame values, 1000 / interval between two frames. The version's figure is the median over runs. Per-frame values are not used for the median because rAF timestamps snap to the 60 Hz display: a 25 ms frame shows up as 16.7 and 33.3 ms intervals in turn. Method 1 took the control frames of the first 60 s from navigation start; its files are in measurements/old-method/.",
+    "frameRateWindow": "Frame rate is measured in a visible Chromium window, not headless: on this Mac, headless and visible medians agreed on CPU and GPU loads, but the 5th percentile did not (see measurements/fps-check.json). The headless runs' frame rate is kept as headlessFps for comparison.",
+    "medians": "Median over runs: the middle value of 5 (mean of the two middle values for an even count)."
+  },
+  "size": {
+    "tool": "tools/rig/size.mjs: newline characters per file, like wc -l",
+    "jsLines": 3752,
+    "codeLines": 3810,
+    "jsBytes": 153897,
+    "assetBytes": 529875,
+    "buildBytes": 686201,
+    "files": [
+      {
+        "path": "cabinet/game.js",
+        "bytes": 4723,
+        "lines": 144
+      },
+      {
+        "path": "cabinet/index.html",
+        "bytes": 712,
+        "lines": 20
+      },
+      {
+        "path": "cabinet/rules.js",
+        "bytes": 3407,
+        "lines": 96
+      },
+      {
+        "path": "cabinet.js",
+        "bytes": 5238,
+        "lines": 139
+      },
+      {
+        "path": "game.js",
+        "bytes": 24239,
+        "lines": 545
+      },
+      {
+        "path": "hair.js",
+        "bytes": 3917,
+        "lines": 95
+      },
+      {
+        "path": "index.html",
+        "bytes": 1717,
+        "lines": 38
+      },
+      {
+        "path": "launch.js",
+        "bytes": 9851,
+        "lines": 211
+      },
+      {
+        "path": "online.js",
+        "bytes": 16306,
+        "lines": 380
+      },
+      {
+        "path": "patch/day-one.js",
+        "bytes": 2126,
+        "lines": 62
+      },
+      {
+        "path": "progress.js",
+        "bytes": 11985,
+        "lines": 291
+      },
+      {
+        "path": "remaster.js",
+        "bytes": 7316,
+        "lines": 171
+      },
+      {
+        "path": "requirements.js",
+        "bytes": 350,
+        "lines": 10
+      },
+      {
+        "path": "rules.js",
+        "bytes": 3888,
+        "lines": 101
+      },
+      {
+        "path": "season.js",
+        "bytes": 15835,
+        "lines": 415
+      },
+      {
+        "path": "skins.js",
+        "bytes": 5271,
+        "lines": 122
+      },
+      {
+        "path": "story.js",
+        "bytes": 5557,
+        "lines": 112
+      },
+      {
+        "path": "update.js",
+        "bytes": 8636,
+        "lines": 212
+      },
+      {
+        "path": "voice/01.mp3",
+        "bytes": 18434,
+        "lines": null
+      },
+      {
+        "path": "voice/02.mp3",
+        "bytes": 40795,
+        "lines": null
+      },
+      {
+        "path": "voice/03.mp3",
+        "bytes": 29928,
+        "lines": null
+      },
+      {
+        "path": "voice/04.mp3",
+        "bytes": 33271,
+        "lines": null
+      },
+      {
+        "path": "voice/05.mp3",
+        "bytes": 23658,
+        "lines": null
+      },
+      {
+        "path": "voice/06.mp3",
+        "bytes": 23031,
+        "lines": null
+      },
+      {
+        "path": "voice/07.mp3",
+        "bytes": 40795,
+        "lines": null
+      },
+      {
+        "path": "voice/08.mp3",
+        "bytes": 32017,
+        "lines": null
+      },
+      {
+        "path": "voice/09.mp3",
+        "bytes": 41421,
+        "lines": null
+      },
+      {
+        "path": "voice/10.mp3",
+        "bytes": 31181,
+        "lines": null
+      },
+      {
+        "path": "voice/11.mp3",
+        "bytes": 32644,
+        "lines": null
+      },
+      {
+        "path": "voice/12.mp3",
+        "bytes": 28047,
+        "lines": null
+      },
+      {
+        "path": "voice/13.mp3",
+        "bytes": 29301,
+        "lines": null
+      },
+      {
+        "path": "voice/14.mp3",
+        "bytes": 37660,
+        "lines": null
+      },
+      {
+        "path": "voice/15.mp3",
+        "bytes": 22404,
+        "lines": null
+      },
+      {
+        "path": "voice/16.mp3",
+        "bytes": 21777,
+        "lines": null
+      },
+      {
+        "path": "voice/17.mp3",
+        "bytes": 43511,
+        "lines": null
+      },
+      {
+        "path": "world.js",
+        "bytes": 25252,
+        "lines": 646
+      }
+    ]
+  },
+  "median": {
+    "timeToFirstAppleMs": 107290.10000002384,
+    "loadMs": 30143.70000001788,
+    "controlShare": 0.00831457163782008,
+    "controlShareInPlay": 0.13529504689188016,
+    "heapUsedAfterGcBytes": 2273904,
+    "downloadBytes": 695122,
+    "fpsMedian": null,
+    "fpsP5": 57.47126436783532,
+    "headlessFpsMedian": null,
+    "headlessFpsP5": 59.523809523799216,
+    "endedAtMs": 113307.10000002384
+  },
+  "checks": {
+    "firstAppleTicks": [
+      3
+    ],
+    "sameFirstAppleTickInAllRuns": true,
+    "sameApplesBeforeFirstDeathInAllRuns": true,
+    "externalRequests": [],
+    "failedRequests": [],
+    "pageErrors": [],
+    "steering": {
+      "sent": 0,
+      "accepted": 0,
+      "unchecked": 0
+    },
+    "incompleteRuns": [],
+    "pass": true
+  },
+  "runs": [
+    {
+      "run": 1,
+      "mode": "headless",
+      "browserVersion": "153.0.8010.12",
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "version": "v2.0",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 116340.80000001192,
+      "incomplete": false,
+      "timeToFirstAppleMs": 107290.10000002384,
+      "firstAppleTick": 3,
+      "screensBeforeFirstApple": [
+        {
+          "screen": "(page load)",
+          "ms": 88.10000002384186
+        },
+        {
+          "screen": "update-required",
+          "ms": 1956.5
+        },
+        {
+          "screen": "patch-download",
+          "ms": 9015.899999976158
+        },
+        {
+          "screen": "patch-install",
+          "ms": 3017.5
+        },
+        {
+          "screen": "preparing",
+          "ms": 3016.5
+        },
+        {
+          "screen": "publisher-logo",
+          "ms": 3016.5
+        },
+        {
+          "screen": "studio-logo",
+          "ms": 3016.5
+        },
+        {
+          "screen": "engine-logo",
+          "ms": 3015.800000011921
+        },
+        {
+          "screen": "warning",
+          "ms": 4012.5999999940395
+        },
+        {
+          "screen": "title",
+          "ms": 2509
+        },
+        {
+          "screen": "remastered",
+          "ms": 3015.7000000178814
+        },
+        {
+          "screen": "connecting",
+          "ms": 3012.5999999940395
+        },
+        {
+          "screen": "sign-in",
+          "ms": 1509.7999999821186
+        },
+        {
+          "screen": "signing-in",
+          "ms": 1990.4000000059605
+        },
+        {
+          "screen": "queue",
+          "ms": 7316.4000000059605
+        },
+        {
+          "screen": "terms",
+          "ms": 1782.300000011921
+        },
+        {
+          "screen": "loading",
+          "ms": 5006.399999976158
+        },
+        {
+          "screen": "opening",
+          "ms": 44009.30000001192
+        },
+        {
+          "screen": "autosave",
+          "ms": 3018.300000011921
+        },
+        {
+          "screen": "world-map",
+          "ms": 3017.699999988079
+        },
+        {
+          "screen": "ready",
+          "ms": 21.30000001192093
+        },
+        {
+          "screen": "play",
+          "ms": 591.6999999880791
+        },
+        {
+          "screen": "cabinet-door",
+          "ms": 4.199999988079071
+        },
+        {
+          "screen": "cabinet",
+          "ms": 329.10000002384186
+        }
+      ],
+      "loadMs": 30143.70000001788,
+      "sessionMs": 113307.10000002384,
+      "controlMs": 942.1000000238419,
+      "controlShare": 0.00831457163782008,
+      "controlInPlay": {
+        "controlMs": 942.1000000238419,
+        "fromMs": 106343.80000001192,
+        "toMs": 113307.10000002384,
+        "share": 0.13529504689188016,
+        "endedGame": true
+      },
+      "endedAtMs": 113307.10000002384,
+      "search": null,
+      "memory": {
+        "atMs": 116328,
+        "controlMsAtRead": 911.4000000059605,
+        "usedSizeAfterGc": 2273904,
+        "totalSizeAfterGc": 3145728,
+        "usedSizeBeforeGc": 2939732,
+        "framesExcluded": [
+          116328,
+          116839.60000002384
+        ]
+      },
+      "memoryRaw": {
+        "beforeGc": {
+          "usedSize": 2939732,
+          "totalSize": 11272192,
+          "embedderHeapUsedSize": 3299544,
+          "backingStorageSize": 427774
+        },
+        "afterGc": {
+          "usedSize": 2273904,
+          "totalSize": 3145728,
+          "embedderHeapUsedSize": 1411752,
+          "backingStorageSize": 427381
+        }
+      },
+      "fps": {
+        "frames": 56,
+        "seconds": 0,
+        "median": null,
+        "p5": 59.523809523799216,
+        "medianPerFrame": 59.880239520968516,
+        "longestFrameMs": 16.80000000000291,
+        "window": {
+          "controlMs": 942.1000000238419,
+          "from": 106343.80000001192,
+          "to": 107290.10000002384
+        }
+      },
+      "steering": {
+        "sent": 0,
+        "accepted": 0,
+        "unchecked": 0
+      },
+      "nextKeys": {
+        "warning": "Enter",
+        "title": "Enter",
+        "remastered": "Enter",
+        "sign-in": "Enter",
+        "terms": "Enter",
+        "loading": "Enter",
+        "world-map": "Enter",
+        "cabinet-door": "Enter"
+      },
+      "applesBeforeFirstDeath": [
+        {
+          "score": 1,
+          "tick": 3
+        }
+      ],
+      "deathsInSession": 0,
+      "requests": {
+        "count": 55,
+        "bytes": 695122,
+        "external": [],
+        "failed": []
+      },
+      "errors": []
+    }
+  ],
+  "fpsRuns": [
+    {
+      "run": 1,
+      "mode": "visible",
+      "frames": 56,
+      "seconds": 0,
+      "median": null,
+      "p5": 57.47126436783532,
+      "medianPerFrame": 59.880239520968516,
+      "longestFrameMs": 17.59999999999127,
+      "window": {
+        "controlMs": 944.5999999940395,
+        "from": 106253.30000001192,
+        "to": 107201
+      },
+      "page": {
+        "devicePixelRatio": 2,
+        "innerWidth": 1280,
+        "innerHeight": 700,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "version": "v2.0",
+        "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
+      },
+      "endMs": 116207.80000001192,
+      "errors": []
+    }
+  ],
+  "medianRun": 1,
+  "budget": {
+    "fpsMedianMin": 50,
+    "fpsP5Min": 30,
+    "pass": false
+  }
+}

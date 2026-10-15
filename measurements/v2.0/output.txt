@@ -1,0 +1,46 @@
+$ npm run measure v2.0
+machine: MacBook Air (MacBookAir10,1), Apple M1, 17179869184 bytes RAM, macOS 26.3.1 (25D771280a), Node v24.15.0
+size: js 3752 lines / 153897 bytes; code 3810 lines; assets 529875 bytes; build 686201 bytes (36 files)
+run 1/1 headless: first apple 107290.10000002384 ms (tick 3), load 30143.70000001788 ms, control 942.1000000238419 / 113307.10000002384 ms = 0.00831457163782008, control in play 942.1000000238419 / 6963.300000011921 ms = 0.13529504689188016, heap 2273904 bytes after GC (2939732 before) at 911.4000000059605 ms of control, download 695122 bytes in 55 requests, headless fps median null p5 59.523809523799216, steering 0/0 (0 unchecked), deaths 0, errors 0
+  screens before the first apple: (page load) 88.10000002384186 ms -> update-required 1956.5 ms -> patch-download 9015.899999976158 ms -> patch-install 3017.5 ms -> preparing 3016.5 ms -> publisher-logo 3016.5 ms -> studio-logo 3016.5 ms -> engine-logo 3015.800000011921 ms -> warning 4012.5999999940395 ms -> title 2509 ms -> remastered 3015.7000000178814 ms -> connecting 3012.5999999940395 ms -> sign-in 1509.7999999821186 ms -> signing-in 1990.4000000059605 ms -> queue 7316.4000000059605 ms -> terms 1782.300000011921 ms -> loading 5006.399999976158 ms -> opening 44009.30000001192 ms -> autosave 3018.300000011921 ms -> world-map 3017.699999988079 ms -> ready 21.30000001192093 ms -> play 591.6999999880791 ms -> cabinet-door 4.199999988079071 ms -> cabinet 329.10000002384186 ms
+fps run 1/1 visible: median null fps, p5 57.47126436783532 fps, 56 frames over 944.5999999940395 ms of play, longest frame 17.59999999999127 ms
+
+single run (v2.0):
+  time to first apple   107290.10000002384 ms (run 1)
+    (page load)      88.10000002384186 ms
+    update-required  1956.5 ms
+    patch-download   9015.899999976158 ms
+    patch-install    3017.5 ms
+    preparing        3016.5 ms
+    publisher-logo   3016.5 ms
+    studio-logo      3016.5 ms
+    engine-logo      3015.800000011921 ms
+    warning          4012.5999999940395 ms
+    title            2509 ms
+    remastered       3015.7000000178814 ms
+    connecting       3012.5999999940395 ms
+    sign-in          1509.7999999821186 ms
+    signing-in       1990.4000000059605 ms
+    queue            7316.4000000059605 ms
+    terms            1782.300000011921 ms
+    loading          5006.399999976158 ms
+    opening          44009.30000001192 ms
+    autosave         3018.300000011921 ms
+    world-map        3017.699999988079 ms
+    ready            21.30000001192093 ms
+    play             591.6999999880791 ms
+    cabinet-door     4.199999988079071 ms
+    cabinet          329.10000002384186 ms
+  load time             30143.70000001788 ms
+  game ended at 113.30710000002384 s (THE END), before 60000 ms of control: both control shares are over the time until then (prompt 15)
+  control share         0.00831457163782008 (of 113307.10000002384 ms)
+  control share in play 0.13529504689188016 (from the first control frame to THE END)
+  JS heap after GC      2273904 bytes
+  download              695122 bytes
+  frame rate (visible)  median null fps, p5 57.47126436783532 fps
+  frame rate (headless) median null fps, p5 59.523809523799216 fps
+  js 3752 lines, 153897 bytes; code 3810 lines; assets 529875 bytes; build 686201 bytes
+checks: first apple tick 3 (same in all runs: true); external requests 0; failed requests 0; page errors 0; steering 0/0 turns accepted (0 sent just before a death or the end of a run, not checkable); incomplete runs 0
+checks: PASS
+performance budget (median >= 50 fps, p5 >= 30 fps): FAIL
+wrote measurements/v2.0.json, measurements/v2.0/ (raw runs and this output), measurements/summary.csv

@@ -1198,3 +1198,33 @@ Another place for the cabinet was worked out but not built (see the plan).
 | Frame rate median / 5th percentile | not comparable | taken over about a second of control (6 moves and v1.0's 3), not 60 s; the budget still applies |
 | Requests to another origin | zero | the cabinet loads from the game's own origin |
 - The full `npm test` before tagging: 112 of 112, exit 0.
+
+### v2.0, measured (`npm run measure v2.0`, a single run) against the expectations written before measuring
+| Metric | Expected | v1.9 (single run) | v2.0 (single run, game ended at 113.30710000002384 s) | Direction |
+|---|---|---|---|---|
+| First apple's tick | 3 | 7595 | 3 (the cabinet's) | as expected |
+| Time to first apple | down, sharply | 1107972.7999999821 ms | 107290.10000002384 ms | down by 1000682.6999999583 ms, as expected: for the first time in the series |
+| Load time | unchanged | 30154.29999998212 ms | 30143.70000001788 ms | unchanged, as expected |
+| Control share (until THE END) | down, sharply | 0.278013333333532 | 0.00831457163782008 (942.1000000238419 of 113307.10000002384 ms) | down sharply, as expected |
+| Control share in play (until THE END) | down, sharply | 0.6722515834327185 | 0.13529504689188016 (942.1000000238419 of 6963.300000011921 ms) | down sharply, as expected |
+| Download | up | 677222 bytes | 695122 bytes | up (17900 bytes), as expected |
+| JS lines / bytes | up | 3316 / 137892 | 3752 / 153897 | up, as expected |
+| Assets | unchanged | 529875 bytes | 529875 bytes | unchanged, as expected |
+| JS heap after GC | up (read at the end) | 2027288 bytes | 2273904 bytes, read at 911.4000000059605 ms of control | up (246616 bytes), as expected; not comparable |
+| Frame rate (visible) | not comparable | median 60, p5 57.471264367787256 fps | median: none, p5 57.47126436783532 fps, 56 frames over 944.5999999940395 ms of control, longest frame 17.59999999999127 ms | see below |
+| Requests to another origin | zero | 0 | 0 | zero, as expected |
+
+Checks: first apple on tick 3; 0 requests outside the origin; 0 failed requests; 0 page errors; no turn needed (the
+cabinet is straight ahead). **The budget check says FAIL, and I have not changed anything about it.** The frame rate's
+median is the median of frames counted per whole second of control (Method 2); the run had 944.5999999940395 ms of
+control in all, not one whole second, so there is no median (null), and `null >= 50` fails. The frames themselves: 56
+in 944.5999999940395 ms, the 5th percentile 57.47126436783532 fps, the longest frame 17.59999999999127 ms. The rule of
+prompt 15 covered the control shares, not the frame rate's median; how to count it for a game this short is your
+call (for example: frames over the time, 56 / 0.9445999999940395 s, or the median of per-frame values), and I have
+not picked one after the measurement.
+- The short (`npm run short v2.0`): C at 10.6x, D from 2 s before the cabinet's apple to 3000 ms into the credits,
+  14033.699999988079 ms at real speed; line 10 from 18.523094339601055 s to 22.363094339601055 s, in full; 29966.666666666668
+  ms in all. The replay ate the cabinet's apple at 107289.6 ms against 107290.10000002384 recorded.
+- The chart marks v2.0 with * and †, and its subtitle says "v2.0: game ended at 113.30710000002384 s"; the frame-rate
+  median panel has no point for v2.0. The version labels at the end of the x axis now run into each other.
+- The full `npm test` after measuring: 112 of 112, exit 0.
