@@ -13,6 +13,7 @@
     "chart": "node tools/chart.mjs",
     "short": "node tools/short.mjs",
     "voice": "node tools/voice.mjs",
+    "requirements": "node tools/requirements.mjs",
     "play-share": "node tools/play-share.mjs"
   },
   "engines": {
