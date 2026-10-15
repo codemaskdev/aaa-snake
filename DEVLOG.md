@@ -1004,3 +1004,38 @@ this one 1104846.900000006 ms.
   single measured run".
 - The full `npm test` before tagging and again here: 96 of 96, then 97 of 97 (the summary test for "single run"), exit 0.
 - v1.7 was tagged before this measurement (ad4cb9a); nothing in the game changed since.
+
+### v1.9, what was built
+As planned above: src/remaster.js (the WebGL pass and the REMASTERED screen), src/hair.js (the hair), src/requirements.js
+(written by `npm run requirements v1.7`: download 663192 bytes, JS heap after GC 1854092 bytes, assets 529875 bytes,
+v1.7's single run). The 2D canvas is hidden and the WebGL canvas shows it, at the screen's resolution times
+REMASTER.scale = 1. The REMASTERED screen comes after the title; Enter after 3000 ms. Motion blur: two fading copies
+of the snake a third and two thirds of a move behind, in play, once Smooth movement is learned. rules.js, world.js,
+season.js, online.js and progress.js are v1.7's, byte for byte (tests/v1.9.test.mjs), and the offline search still
+finds the first apple on tick 7595.
+
+### What broke
+- **v1.7 drew only the middle of the board** (found in v1.9's first screenshots, after v1.7 was tagged and measured).
+  When I let the camera look 3 cells past the edge of the world (v1.7, "what was built"), I used the same number,
+  half the board minus 3 cells, for the rectangle the camera sees: so v1.7 draws a 336 x 336 px square in the middle
+  of the 480 x 480 board, and the 72 px around it keep whatever was drawn there before (the black of the launch
+  screens, or earlier frames of the world, smeared as the camera moves; the dark band on the left of v1.7's short's
+  middle frame is that). It also means v1.7 drew fewer tiles a frame than v1.5 and v1.6. v1.7 stays as built and
+  measured (its tag is not rewritten); v1.9 draws the whole board again, and tests/v1.9.test.mjs checks that the
+  camera sees 480 x 480 px in the middle of the world and at its edge.
+
+### v1.9, expected direction of every metric (written before `npm run measure v1.9`, against v1.7)
+| Metric | Expected | Why |
+|---|---|---|
+| First apple's tick | 7595, unchanged | same rules, world, bot and seed (tests/v1.9.test.mjs) |
+| Time to first apple | up, by about 3 s | the REMASTERED screen: 3000 ms before Enter works, plus the bot's key press; nothing else before the apple changes |
+| Load time | unchanged | the new screen comes after the title |
+| Control share (first 180 s) | down, a little | play starts about 3 s later inside the same 180 s |
+| Control share in play | unchanged | the same play: the same level-ups, tiers and reconnects |
+| Download | up | remaster.js, hair.js, requirements.js |
+| JS lines / bytes | up | the same |
+| Assets | unchanged | no image, no sound added |
+| JS heap after GC | up, a little | the pass's state and the hair; the WebGL texture itself is not on the JS heap |
+| Frame rate median | down, or unchanged at 60 | every frame now uploads the 2D canvas (480 x 512) and runs the shader over the whole Retina window; and v1.9 draws the whole board again, about 21 x 21 tiles where v1.7 drew about 15 x 15 |
+| Frame rate 5th percentile | down | the same; if it falls under 30 fps (or the median under 50), the pass gets a lower internal resolution, as planned |
+| Requests to another origin | zero | nothing loaded from anywhere |
