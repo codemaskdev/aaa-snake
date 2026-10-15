@@ -919,3 +919,6 @@ accepted.
   wrong. The voice files are now the recordings (since prompt 10), 529875 bytes in src/voice/ against the
   placeholders' 629368, so I expect assets **down** (99493 bytes less), and download down by about as much, offset by
   season.js and skins.js (21032 bytes): **download down** too, not up.
+- (On that correction: "before any of its output" is not exact. The measurement prints its size line first, and that
+  line, with assets 529875 bytes, had already been written when I committed the correction; I had not read it. The
+  529875 came from adding up src/voice/ myself.)
