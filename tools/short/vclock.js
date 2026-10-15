@@ -62,10 +62,16 @@
   function byTick(k) {
     return k.screen === 'play' && k.tick != null;
   }
+  // A key the bot pressed because the screen offered it (the probe's `next`) is replayed when the
+  // screen offers it (since prompt 14): the run's network loads end at other moments of the replay's
+  // virtual time, so a screen may begin to listen a few ms later than in the run, and a key pressed by
+  // the clock alone, the moment the run's screen began to listen, would fall just before and be lost.
+  const OFFERED = new Set(['Enter', 'KeyE', 'PageDown', 'Space']);
   function ready(k) {
     const game = window.snakeGame && window.snakeGame.probe();
     if (!game || k.screen == null) return true;
-    return game.screen === k.screen && (k.tick == null || game.tick >= k.tick);
+    if (game.screen !== k.screen || (k.tick != null && game.tick < k.tick)) return false;
+    return k.screen === 'play' || !OFFERED.has(k.code) || game.next === k.code;
   }
 
   function pressKeysUntil(t) {
@@ -77,17 +83,34 @@
     }
   }
 
+  // Animation frames come at the times the measured run had them (since prompt 14), so the game
+  // counts the same milliseconds, frame by frame, as it did in the run: a key that the run pressed the
+  // moment a screen began to listen lands the same way here. Past the end of the recording, and with
+  // no recording, frames come on a 60 Hz grid.
+  let recorded = [];
+  let recordedIndex = 0;
+  let lastFrame = 0;
+  function upcoming() {
+    if (recordedIndex < recorded.length) return recorded[recordedIndex];
+    return recorded.length ? lastFrame + FRAME : (frameIndex + 1) * FRAME;
+  }
+
   window.__vclock = {
     now: () => now,
     plays: () => plays.slice(),
-    replay(list) {
+    replay(list, frames = []) {
       keys = list.slice().sort((a, b) => a.t - b.t);
       keyIndex = 0;
+      recorded = frames.filter(f => f > now);
+      recordedIndex = 0;
     },
-    // Move virtual time forward to t, one 60 Hz animation frame at a time.
+    // Move virtual time forward to t, one animation frame at a time.
     advanceTo(t) {
-      while ((frameIndex + 1) * FRAME <= t) {
-        const frameTime = ++frameIndex * FRAME;
+      while (upcoming() <= t) {
+        const frameTime = upcoming();
+        if (recordedIndex < recorded.length) recordedIndex++;
+        else frameIndex++;
+        lastFrame = frameTime;
         pressKeysUntil(frameTime);
         runTimersUntil(frameTime);
         now = frameTime;

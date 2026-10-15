@@ -26,8 +26,9 @@ measurements/ are the raw material for the video.
 ## Versions
 - Every update is one git tag (v1.0, v1.1, ...) and one build in dist/<version>/ (`npm run build <version>` copies
   src/ there; it refuses to overwrite an existing build). Every version stays playable side by side (`npm run serve`).
-- Never rewrite an old tag. tests/build.test.mjs checks that each tagged build in dist/ still matches its tag, except
-  its voice lines (see Voice).
+- Never rewrite an old tag, unless I decide otherwise for a version (prompt 14 moved v1.7's tag to its camera fix,
+  7fc8bb2; it was ad4cb9a). tests/build.test.mjs checks that each tagged build in dist/ still matches its tag, except
+  its voice lines (see Voice) and requirements.js (v1.9 on: written by `npm run requirements` from a measurement).
 - The VERSION constant in src/game.js names the version being built.
 - UPDATES.md is the plan. Once approved it is frozen; changes to it after that are new, logged decisions.
 

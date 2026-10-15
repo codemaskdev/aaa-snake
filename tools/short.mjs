@@ -189,7 +189,7 @@ export async function recordShort({ cur, prev = null, distDirs, outDir, frameLim
         const w = document.getElementById(id).contentWindow;
         return w && w.__vclock && w.snakeGame;
       }, pane.id);
-      await page.evaluate(({ id, keys }) => document.getElementById(id).contentWindow.__vclock.replay(keys), { id: pane.id, keys: pane.v.raw.keys });
+      await page.evaluate(({ id, keys, frames }) => document.getElementById(id).contentWindow.__vclock.replay(keys, frames), { id: pane.id, keys: pane.v.raw.keys, frames: pane.v.raw.frames || [] });
     }
 
     // Move a pane's game to run time t, at most 100 ms of virtual time per step, so the

@@ -1,12 +1,12 @@
 {
   "version": "v1.7",
   "command": "npm run measure v1.7",
-  "measuredAt": "2026-10-15T13:15:16.485Z",
+  "measuredAt": "2026-10-15T16:17:15.357Z",
   "git": {
-    "head": "1908dfe",
+    "head": "be404fd",
     "tag": {
       "name": "v1.7",
-      "commit": "ad4cb9a"
+      "commit": "7fc8bb2"
     },
     "buildSameAsTag": true,
     "buildUncommitted": false
@@ -76,13 +76,13 @@
     "tool": "tools/rig/size.mjs: newline characters per file, like wc -l",
     "jsLines": 3016,
     "codeLines": 3044,
-    "jsBytes": 124762,
+    "jsBytes": 124852,
     "assetBytes": 529875,
-    "buildBytes": 655636,
+    "buildBytes": 655726,
     "files": [
       {
         "path": "game.js",
-        "bytes": 20608,
+        "bytes": 20698,
         "lines": 470
       },
       {
@@ -228,16 +228,16 @@
     ]
   },
   "median": {
-    "timeToFirstAppleMs": 1104846.900000006,
-    "loadMs": 30163,
-    "controlShare": 0.29396666666633553,
-    "controlShareInPlay": 0.6723608157078272,
-    "heapUsedAfterGcBytes": 1854092,
-    "downloadBytes": 663192,
+    "timeToFirstAppleMs": 1104786,
+    "loadMs": 30151.20000001788,
+    "controlShare": 0.294143333333234,
+    "controlShareInPlay": 0.6724007508475051,
+    "heapUsedAfterGcBytes": 1853948,
+    "downloadBytes": 663282,
     "fpsMedian": 60,
-    "fpsP5": 57.47126436783532,
+    "fpsP5": 56.818181818163026,
     "headlessFpsMedian": 60,
-    "headlessFpsP5": 59.52380952385077
+    "headlessFpsP5": 59.88023952091634
   },
   "checks": {
     "firstAppleTicks": [
@@ -269,106 +269,170 @@
         "version": "v1.7",
         "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
       },
-      "endMs": 1104849.900000006,
+      "endMs": 1104790.099999994,
       "incomplete": false,
-      "timeToFirstAppleMs": 1104846.900000006,
+      "timeToFirstAppleMs": 1104786,
       "firstAppleTick": 7595,
       "screensBeforeFirstApple": [
         {
           "screen": "(page load)",
-          "ms": 25.599999994039536
+          "ms": 35.599999994039536
         },
         {
           "screen": "update-required",
-          "ms": 2022.1000000238419
+          "ms": 2000.7000000178814
         },
         {
           "screen": "patch-download",
-          "ms": 9015.399999976158
+          "ms": 9016
         },
         {
           "screen": "patch-install",
-          "ms": 3017.4000000059605
+          "ms": 3016.2999999821186
         },
         {
           "screen": "preparing",
-          "ms": 3015.7000000178814
+          "ms": 3016.9000000059605
         },
         {
           "screen": "publisher-logo",
-          "ms": 3017.399999976158
+          "ms": 3016.4000000059605
         },
         {
           "screen": "studio-logo",
-          "ms": 3016.600000023842
+          "ms": 3016.699999988079
         },
         {
           "screen": "engine-logo",
-          "ms": 3015.699999988079
+          "ms": 3016.4000000059605
         },
         {
           "screen": "warning",
-          "ms": 4021.0999999940395
+          "ms": 4027.300000011921
         },
         {
           "screen": "title",
-          "ms": 2516
+          "ms": 2509.4000000059605
         },
         {
           "screen": "connecting",
-          "ms": 3012.800000011921
+          "ms": 3013.199999988079
         },
         {
           "screen": "sign-in",
-          "ms": 1506
+          "ms": 1504.699999988079
         },
         {
           "screen": "signing-in",
-          "ms": 2010.7999999821186
+          "ms": 1994.6000000238419
         },
         {
           "screen": "queue",
-          "ms": 7315.700000017881
+          "ms": 7316.799999982119
         },
         {
           "screen": "terms",
-          "ms": 1774.7999999821186
+          "ms": 1788.7000000178814
         },
         {
           "screen": "loading",
-          "ms": 5014.100000023842
+          "ms": 5020.5
         },
         {
           "screen": "opening",
-          "ms": 44010.09999999404
+          "ms": 44005.39999997616
         },
         {
           "screen": "autosave",
-          "ms": 3018.5
+          "ms": 3002.100000023842
         },
         {
           "screen": "world-map",
-          "ms": 3018.9000000059605
+          "ms": 3020.399999976158
         },
         {
           "screen": "ready",
-          "ms": 22.399999976158142
+          "ms": 21.30000001192093
         },
         {
           "screen": "play",
-          "ms": 5006.700000017881
+          "ms": 5005.5999999940395
         },
         {
           "screen": "level-up",
-          "ms": 2020.699999988079
+          "ms": 2023.5
         },
         {
           "screen": "skill-tree",
-          "ms": 1002.5
+          "ms": 997.5
         },
         {
           "screen": "play",
-          "ms": 10008.5
+          "ms": 10011.90000000596
+        },
+        {
+          "screen": "level-up",
+          "ms": 2019.9000000059605
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1282.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 4413.5999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4317.200000017881
+        },
+        {
+          "screen": "play",
+          "ms": 10599.399999976158
+        },
+        {
+          "screen": "level-up",
+          "ms": 2023.800000011921
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1531.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 7509.9000000059605
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4217.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 12499.199999988079
+        },
+        {
+          "screen": "level-up",
+          "ms": 2022.0999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1792.4000000059605
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1488.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 9213.100000023842
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5516.399999976158
+        },
+        {
+          "screen": "play",
+          "ms": 15799.90000000596
         },
         {
           "screen": "level-up",
@@ -376,171 +440,107 @@
         },
         {
           "screen": "skill-tree",
-          "ms": 1287.9000000059605
+          "ms": 2044.699999988079
         },
         {
           "screen": "play",
-          "ms": 4407.399999976158
+          "ms": 10998.800000011921
         },
         {
           "screen": "reconnecting",
-          "ms": 4316.600000023842
+          "ms": 4217.199999988079
         },
         {
           "screen": "play",
-          "ms": 10598.899999976158
-        },
-        {
-          "screen": "level-up",
-          "ms": 2023.1000000238419
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 1530.199999988079
-        },
-        {
-          "screen": "play",
-          "ms": 7513.5999999940395
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 4215.4000000059605
-        },
-        {
-          "screen": "play",
-          "ms": 12499.59999999404
-        },
-        {
-          "screen": "level-up",
-          "ms": 2008
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 1788.2000000178814
+          "ms": 13999.5
         },
         {
           "screen": "battle-pass",
-          "ms": 1506.8999999761581
+          "ms": 1522.300000011921
         },
         {
           "screen": "play",
-          "ms": 9213.90000000596
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5516.5
-        },
-        {
-          "screen": "play",
-          "ms": 15798.800000011921
+          "ms": 5010.299999982119
         },
         {
           "screen": "level-up",
-          "ms": 2019.4000000059605
+          "ms": 2022.5
         },
         {
           "screen": "skill-tree",
-          "ms": 2035
+          "ms": 2288.4000000059605
         },
         {
           "screen": "play",
-          "ms": 11012.09999999404
+          "ms": 1089.300000011921
         },
         {
           "screen": "reconnecting",
-          "ms": 4216.5
+          "ms": 5616.0999999940395
         },
         {
           "screen": "play",
-          "ms": 13998.699999988079
+          "ms": 25098.90000000596
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5216.199999988079
+        },
+        {
+          "screen": "play",
+          "ms": 8800.5
+        },
+        {
+          "screen": "level-up",
+          "ms": 2005.5999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1014.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 6412.5
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3616.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 3599.9000000059605
         },
         {
           "screen": "battle-pass",
-          "ms": 1524.300000011921
+          "ms": 1501.8999999761581
         },
         {
           "screen": "play",
-          "ms": 5009.0999999940395
+          "ms": 26413.100000023842
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3817.2999999821186
+        },
+        {
+          "screen": "play",
+          "ms": 3583
         },
         {
           "screen": "level-up",
-          "ms": 2021.4000000059605
+          "ms": 2020.5999999940395
         },
         {
           "screen": "skill-tree",
-          "ms": 2291
+          "ms": 1017.7000000178814
         },
         {
           "screen": "play",
-          "ms": 1103.9000000059605
+          "ms": 17710.19999998808
         },
         {
           "screen": "reconnecting",
-          "ms": 5617.0999999940395
-        },
-        {
-          "screen": "play",
-          "ms": 25098.29999998212
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5216.100000023842
-        },
-        {
-          "screen": "play",
-          "ms": 8801
-        },
-        {
-          "screen": "level-up",
-          "ms": 2005.0999999940395
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 1002
-        },
-        {
-          "screen": "play",
-          "ms": 6408.9000000059605
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3615.7999999821186
-        },
-        {
-          "screen": "play",
-          "ms": 3600.4000000059605
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1524.4000000059605
-        },
-        {
-          "screen": "play",
-          "ms": 26407.90000000596
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3815.5
-        },
-        {
-          "screen": "play",
-          "ms": 3602.2999999821186
-        },
-        {
-          "screen": "level-up",
-          "ms": 2002.800000011921
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 1019.6999999880791
-        },
-        {
-          "screen": "play",
-          "ms": 17707.90000000596
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3716.800000011921
+          "ms": 3716.7000000178814
         },
         {
           "screen": "play",
@@ -548,55 +548,347 @@
         },
         {
           "screen": "battle-pass",
-          "ms": 1520.5
+          "ms": 1522
         },
         {
           "screen": "play",
-          "ms": 19311.399999976158
+          "ms": 19311
         },
         {
           "screen": "reconnecting",
-          "ms": 5817.4000000059605
+          "ms": 5816.399999976158
         },
         {
           "screen": "play",
-          "ms": 5699.5999999940395
+          "ms": 5699.800000011921
         },
         {
           "screen": "level-up",
-          "ms": 2020.5
+          "ms": 2022.4000000059605
         },
         {
           "screen": "skill-tree",
-          "ms": 1015.1000000238419
+          "ms": 1014.1999999880791
         },
         {
           "screen": "play",
-          "ms": 20913
+          "ms": 20912.40000000596
         },
         {
           "screen": "reconnecting",
-          "ms": 4416.899999976158
+          "ms": 4415.5
         },
         {
           "screen": "play",
-          "ms": 4100
+          "ms": 4100.199999988079
         },
         {
           "screen": "battle-pass",
-          "ms": 1502
+          "ms": 1526.800000011921
         },
         {
           "screen": "play",
-          "ms": 12114.200000017881
+          "ms": 12107.300000011921
         },
         {
           "screen": "reconnecting",
-          "ms": 5315.5999999940395
+          "ms": 5315.699999988079
         },
         {
           "screen": "play",
-          "ms": 12900
+          "ms": 12898.699999988079
+        },
+        {
+          "screen": "level-up",
+          "ms": 2005.4000000059605
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1016.5
+        },
+        {
+          "screen": "play",
+          "ms": 9011.800000011921
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4915.5
+        },
+        {
+          "screen": "play",
+          "ms": 16000.09999999404
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1503.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 2112.399999976158
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4817
+        },
+        {
+          "screen": "play",
+          "ms": 15699
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5616.100000023842
+        },
+        {
+          "screen": "play",
+          "ms": 12200.299999982119
+        },
+        {
+          "screen": "level-up",
+          "ms": 2005.5999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1014.2000000178814
+        },
+        {
+          "screen": "play",
+          "ms": 7713.199999988079
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3715.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 12299.5
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1526.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 3207.5
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3716.199999988079
+        },
+        {
+          "screen": "play",
+          "ms": 26298.70000001788
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3117.199999988079
+        },
+        {
+          "screen": "play",
+          "ms": 10499.800000011921
+        },
+        {
+          "screen": "level-up",
+          "ms": 2021.5999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1002
+        },
+        {
+          "screen": "play",
+          "ms": 4908.4000000059605
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3117.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 5100
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1503.4000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 11312.799999982119
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5216.5
+        },
+        {
+          "screen": "play",
+          "ms": 15099.300000011921
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3716.199999988079
+        },
+        {
+          "screen": "play",
+          "ms": 19799.100000023842
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 6016.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 3799.7999999821186
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1523.1000000238419
+        },
+        {
+          "screen": "play",
+          "ms": 5010.299999982119
+        },
+        {
+          "screen": "level-up",
+          "ms": 2004.5999999940395
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1015.6000000238419
+        },
+        {
+          "screen": "play",
+          "ms": 12713
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4916.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 24998.69999998808
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4017.2000000178814
+        },
+        {
+          "screen": "play",
+          "ms": 7298.799999982119
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1521
+        },
+        {
+          "screen": "play",
+          "ms": 16012.5
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4815.5999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 9000.40000000596
+        },
+        {
+          "screen": "level-up",
+          "ms": 2021.800000011921
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 999.1999999880791
+        },
+        {
+          "screen": "play",
+          "ms": 7412.0999999940395
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5416.100000023842
+        },
+        {
+          "screen": "play",
+          "ms": 17599.59999999404
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1506.5
+        },
+        {
+          "screen": "play",
+          "ms": 6009.9000000059605
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 4116
+        },
+        {
+          "screen": "play",
+          "ms": 19699.69999998808
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5416.199999988079
+        },
+        {
+          "screen": "play",
+          "ms": 20598.600000023842
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3217.399999976158
+        },
+        {
+          "screen": "play",
+          "ms": 3700.2000000178814
+        },
+        {
+          "screen": "level-up",
+          "ms": 2004.5
+        },
+        {
+          "screen": "skill-tree",
+          "ms": 1013.5999999940395
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1515.800000011921
+        },
+        {
+          "screen": "play",
+          "ms": 23113.899999976158
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3816.9000000059605
+        },
+        {
+          "screen": "play",
+          "ms": 26899.30000001192
+        },
+        {
+          "screen": "battle-pass",
+          "ms": 1505.0999999940395
+        },
+        {
+          "screen": "play",
+          "ms": 2210.699999988079
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 5816.300000011921
+        },
+        {
+          "screen": "play",
+          "ms": 24699.80000001192
+        },
+        {
+          "screen": "reconnecting",
+          "ms": 3016.2999999821186
+        },
+        {
+          "screen": "play",
+          "ms": 3099.800000011921
         },
         {
           "screen": "level-up",
@@ -604,412 +896,120 @@
         },
         {
           "screen": "skill-tree",
-          "ms": 998.5
+          "ms": 999.3000000119209
         },
         {
           "screen": "play",
-          "ms": 9013.800000011921
+          "ms": 13713.09999999404
         },
         {
           "screen": "reconnecting",
-          "ms": 4916.5999999940395
+          "ms": 3715.5999999940395
         },
         {
           "screen": "play",
-          "ms": 15998.59999999404
+          "ms": 6300.4000000059605
         },
         {
           "screen": "battle-pass",
-          "ms": 1520.1000000238419
+          "ms": 1521.5999999940395
         },
         {
           "screen": "play",
-          "ms": 2113.7999999821186
+          "ms": 11011.40000000596
         },
         {
           "screen": "reconnecting",
-          "ms": 4816.0999999940395
+          "ms": 5515.9000000059605
         },
         {
           "screen": "play",
-          "ms": 15699.40000000596
+          "ms": 21699.40000000596
         },
         {
           "screen": "reconnecting",
-          "ms": 5616.700000017881
+          "ms": 5516.799999982119
         },
         {
           "screen": "play",
-          "ms": 12199.699999988079
-        },
-        {
-          "screen": "level-up",
-          "ms": 2022.0999999940395
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 997.7000000178814
-        },
-        {
-          "screen": "play",
-          "ms": 7712
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3717.399999976158
-        },
-        {
-          "screen": "play",
-          "ms": 12299.600000023842
+          "ms": 17299.20000001788
         },
         {
           "screen": "battle-pass",
-          "ms": 1505.5
+          "ms": 1519.8999999761581
         },
         {
           "screen": "play",
-          "ms": 3211
+          "ms": 313.60000002384186
         },
         {
           "screen": "reconnecting",
-          "ms": 3716.5999999940395
+          "ms": 5215.699999988079
         },
         {
           "screen": "play",
-          "ms": 26298.69999998808
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3116.7000000178814
-        },
-        {
-          "screen": "play",
-          "ms": 10499.59999999404
-        },
-        {
-          "screen": "level-up",
-          "ms": 2004.9000000059605
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 1000
-        },
-        {
-          "screen": "play",
-          "ms": 4910.699999988079
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3117.300000011921
-        },
-        {
-          "screen": "play",
-          "ms": 5098.899999976158
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1519
-        },
-        {
-          "screen": "play",
-          "ms": 11315.600000023842
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5215
-        },
-        {
-          "screen": "play",
-          "ms": 15099.899999976158
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3716.5
-        },
-        {
-          "screen": "play",
-          "ms": 19799.5
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 6016.200000017881
-        },
-        {
-          "screen": "play",
-          "ms": 3799
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1522.2999999821186
-        },
-        {
-          "screen": "play",
-          "ms": 5010.800000011921
-        },
-        {
-          "screen": "level-up",
-          "ms": 2022.0999999940395
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 999.8000000119209
-        },
-        {
-          "screen": "play",
-          "ms": 12711.199999988079
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 4916.9000000059605
-        },
-        {
-          "screen": "play",
-          "ms": 24999.09999999404
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 4016.2000000178814
-        },
-        {
-          "screen": "play",
-          "ms": 7299.799999982119
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1520
-        },
-        {
-          "screen": "play",
-          "ms": 16012.800000011921
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 4815.699999988079
-        },
-        {
-          "screen": "play",
-          "ms": 9000
-        },
-        {
-          "screen": "level-up",
-          "ms": 2024.2000000178814
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 997.5999999940395
-        },
-        {
-          "screen": "play",
-          "ms": 7410.9000000059605
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5416.399999976158
-        },
-        {
-          "screen": "play",
-          "ms": 17598.90000000596
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1523.9000000059605
-        },
-        {
-          "screen": "play",
-          "ms": 6010.0999999940395
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 4116.5
-        },
-        {
-          "screen": "play",
-          "ms": 19699
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5416.5
-        },
-        {
-          "screen": "play",
-          "ms": 20599.5
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3215.800000011921
-        },
-        {
-          "screen": "play",
-          "ms": 3700.7999999821186
-        },
-        {
-          "screen": "level-up",
-          "ms": 2020.300000011921
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 999.8000000119209
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1515.5999999940395
-        },
-        {
-          "screen": "play",
-          "ms": 23112.90000000596
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3815.5999999940395
-        },
-        {
-          "screen": "play",
-          "ms": 26899.29999998212
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1522
-        },
-        {
-          "screen": "play",
-          "ms": 2210.7000000178814
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5817.5
-        },
-        {
-          "screen": "play",
-          "ms": 24698.40000000596
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3017
-        },
-        {
-          "screen": "play",
-          "ms": 3099.2999999821186
-        },
-        {
-          "screen": "level-up",
-          "ms": 2023.9000000059605
-        },
-        {
-          "screen": "skill-tree",
-          "ms": 998.5
-        },
-        {
-          "screen": "play",
-          "ms": 13710.90000000596
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 3715.7999999821186
-        },
-        {
-          "screen": "play",
-          "ms": 6300.5
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1524.1000000238419
-        },
-        {
-          "screen": "play",
-          "ms": 11008.799999982119
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5516.300000011921
-        },
-        {
-          "screen": "play",
-          "ms": 21698.19999998808
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5517.5
-        },
-        {
-          "screen": "play",
-          "ms": 17298.59999999404
-        },
-        {
-          "screen": "battle-pass",
-          "ms": 1519.7000000178814
-        },
-        {
-          "screen": "play",
-          "ms": 313.90000000596046
-        },
-        {
-          "screen": "reconnecting",
-          "ms": 5215.899999976158
-        },
-        {
-          "screen": "play",
-          "ms": 9200
+          "ms": 9200.300000011921
         },
         {
           "screen": "finisher",
-          "ms": 821.8000000119209
+          "ms": 827.8999999761581
         },
         {
           "screen": "finisher-bite",
-          "ms": 1522
+          "ms": 1515.9000000059605
         }
       ],
-      "loadMs": 30163,
+      "loadMs": 30151.20000001788,
       "sessionMs": 180000,
-      "controlMs": 52913.999999940395,
-      "controlShare": 0.29396666666633553,
+      "controlMs": 52945.79999998212,
+      "controlShare": 0.294143333333234,
       "controlInPlay": {
         "controlMs": 60000,
-        "fromMs": 103364.70000001788,
-        "toMs": 192602.5000000596,
-        "share": 0.6723608157078272
+        "fromMs": 103338.09999999404,
+        "toMs": 192570.59999999404,
+        "share": 0.6724007508475051
       },
       "search": {
         "cellsSeen": 52228,
         "tick": 7589,
-        "t": 1101905.800000012
+        "t": 1101846.5
       },
       "memory": {
-        "atMs": 192663.59999999404,
-        "controlMsAtRead": 60004.59999999404,
-        "usedSizeAfterGc": 1854092,
+        "atMs": 192639.70000001788,
+        "controlMsAtRead": 60001.40000000596,
+        "usedSizeAfterGc": 1853948,
         "totalSizeAfterGc": 2621440,
-        "usedSizeBeforeGc": 2325196,
+        "usedSizeBeforeGc": 5222700,
         "framesExcluded": [
-          192663.59999999404,
-          193181.20000001788
+          192639.70000001788,
+          193159
         ]
       },
       "memoryRaw": {
         "beforeGc": {
-          "usedSize": 2325196,
-          "totalSize": 10223616,
-          "embedderHeapUsedSize": 7107480,
-          "backingStorageSize": 396486
+          "usedSize": 5222700,
+          "totalSize": 11534336,
+          "embedderHeapUsedSize": 3914288,
+          "backingStorageSize": 396446
         },
         "afterGc": {
-          "usedSize": 1854092,
+          "usedSize": 1853948,
           "totalSize": 2621440,
-          "embedderHeapUsedSize": 1573928,
-          "backingStorageSize": 396468
+          "embedderHeapUsedSize": 1587504,
+          "backingStorageSize": 396431
         }
       },
       "fps": {
         "frames": 3593,
         "seconds": 57,
         "median": 60,
-        "p5": 59.52380952385077,
+        "p5": 59.88023952091634,
         "medianPerFrame": 59.8802395210207,
         "longestFrameMs": 16.800000000017462,
         "window": {
           "controlMs": 60000,
-          "from": 103364.70000001788,
-          "to": 192602.5000000596
+          "from": 103338.09999999404,
+          "to": 192570.59999999404
         }
       },
       "steering": {
@@ -1038,7 +1038,7 @@
       "deathsInSession": 0,
       "requests": {
         "count": 47,
-        "bytes": 663192,
+        "bytes": 663282,
         "external": [],
         "failed": []
       },
@@ -1049,16 +1049,16 @@
     {
       "run": 1,
       "mode": "visible",
-      "frames": 3593,
+      "frames": 3594,
       "seconds": 55,
       "median": 60,
-      "p5": 57.47126436783532,
+      "p5": 56.818181818163026,
       "medianPerFrame": 59.8802395210207,
-      "longestFrameMs": 17.79999999998836,
+      "longestFrameMs": 18.69999999999709,
       "window": {
         "controlMs": 60000,
-        "from": 103155.40000000596,
-        "to": 192279.70000004768
+        "from": 103271.5,
+        "to": 192405.59999999404
       },
       "page": {
         "devicePixelRatio": 2,
@@ -1068,7 +1068,7 @@
         "version": "v1.7",
         "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)"
       },
-      "endMs": 193343.40000000596,
+      "endMs": 193451.79999998212,
       "errors": []
     }
   ],

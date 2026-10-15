@@ -1072,3 +1072,55 @@ pass, with the pass at full resolution** (REMASTER.scale = 1, ANGLE Metal on the
   time). The second attempt replayed the apple at 1107950 ms against 1107972.7999999821 recorded. The shorts of v1.0
   to v1.7 were made with the old rule and are not rendered again.
 - The full `npm test` after it: 104 of 104, exit 0.
+
+## Prompt 14: v1.7's camera fixed inside v1.7; v2.0
+
+### v1.7, rebuilt correct
+Your decision: no new version, no patch. The one line that drew only the middle of the board (`const seen = half /
+zoom;`, see prompt 13) became `const seen = BOARD / 2 / zoom;` in v1.7's own sources, in a commit made on top of v1.7's
+tagged commit (in a separate worktree, so nothing else came along): src/game.js and dist/v1.7/game.js, one line each.
+**The v1.7 tag moved from ad4cb9a to 7fc8bb2.** Nothing else in v1.7 changed: rules.js, world.js, season.js,
+online.js, progress.js, skins.js and story.js of dist/v1.7 are byte for byte those of ad4cb9a. On main, dist/v1.7/game.js
+was brought in line with the tag (be404fd), and tests/v1.7.test.mjs now checks that the camera sees 480 x 480 px and
+that the bot's search, offline on v1.7's own files, finds the first apple on tick 7595. CLAUDE.md records the move.
+
+**v1.7 measured again** (`npm run measure v1.7`, a single run; the run before the fix is kept in
+measurements/v1.7-before-camera-fix/):
+
+| Metric | v1.7 as first built (ad4cb9a) | v1.7 rebuilt (7fc8bb2) |
+|---|---|---|
+| First apple's tick | 7595 | 7595 |
+| Time to first apple | 1104846.900000006 ms | 1104786 ms |
+| Load time | 30163 ms | 30151.20000001788 ms |
+| Control share (first 180 s) | 0.29396666666633553 | 0.294143333333234 |
+| Control share in play | 0.6723608157078272 | 0.6724007508475051 |
+| JS heap after GC | 1854092 bytes | 1853948 bytes |
+| Download | 663192 bytes | 663282 bytes |
+| JS lines / bytes | 3016 / 124762 | 3016 / 124852 (the longer line) |
+| Assets | 529875 bytes | 529875 bytes |
+| Frame rate (visible) | median 60, p5 57.47126436783532 fps | median 60, p5 56.818181818163026 fps |
+| Cells seen when the apple came into view | 52228 | 52228 |
+
+Drawing the whole board (21 x 21 tiles instead of about 15 x 15) did not move the median; the 5th percentile is lower
+by 0.6530825496722912 fps, inside the spread of single runs seen before. Checks and budget: pass.
+- `npm run requirements v1.7` again: src/requirements.js and dist/v1.9/requirements.js now hold 663282, 1853948 and
+  529875 bytes (v1.7 rebuilt, single run, 2026-10-15). v1.9's tag was not moved; tests/build.test.mjs now lets
+  requirements.js follow its measurement, as it lets the voice files follow src/voice/ (CLAUDE.md says so).
+- The chart and v1.7's short were made again.
+
+### What broke: the short's replay, twice more
+- **v1.7's short failed like v1.9's had** ("line 10 did not start in segment D"), though this run had no long frame
+  (its longest was 83.4 ms). Replaying the keys one by one showed where: the replay stopped at a battle-pass Enter
+  pressed 1488 ms after the screen came up. The game counts a screen's time by its animation frames, and the replay's
+  frames came on a 60 Hz grid while the run's came when they came; the screen began to listen in the run just before
+  the key and in the replay just after, the key was lost, and nothing moved on.
+- **First change:** the replay's frames now come at the times the measured run had them (the rig records every one),
+  then on the 60 Hz grid after the recording ends. The replay got further and stopped at the next battle-pass Enter:
+  the run's network loads (the patch, the voice) finish at other moments of the replay's virtual time, so its screens
+  can still be a few ms off the run's.
+- **Second change:** a key the bot pressed because the screen offered it (Enter, E, Page Down, Space: the probe's
+  `next`) is replayed when the screen offers it, never before its recorded time. Every other key goes by its time, and
+  keys in play by their tick (prompt 13). With both, v1.7's replay pressed all 163 keys of the run and replayed the
+  first apple at 1104774.1 ms against 1104786 ms recorded. The fixture's short test still passes. The shorts of v1.0
+  to v1.6 and v1.9 were made with the earlier rules and are not made again.
+- The full `npm test` after this: 105 of 105, exit 0.
