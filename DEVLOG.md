@@ -1499,3 +1499,19 @@ prompt 21's full run, a pass every other time. The count now leaves out voice/NN
 requests are still recorded, so the own-origin check still covers them. src/ and dist/ are unchanged.
 The test passed 5 runs in a row (one after another), then 5 runs at once (to load the machine). It ran every time,
 none skipped.
+
+### The script check, after all
+The author then pasted the script. Saved as is, it is 17641 bytes with sha256 starting 3d77069de028921c, so it is
+the version the prompt names. The check went to the author, and nothing in the script was changed. What it found in
+the repository:
+- **The game loop is not the same ten lines.** v1.0's `frame()` in game.js is 12 lines (10 between the braces). It is
+  different at every tag except v1.6 to v1.7: 12, 16, 17, 22, 27, 29, 29, 29, 31 and 42 lines. What never changed is
+  its core: `TICK_MS = 100` in every version, and the fixed tick, `waited -= TICK_MS; tick();` inside
+  `while (waited >= TICK_MS ...)`, then `draw()` and `requestAnimationFrame(frame)`.
+- **v2.0's size:** 3752 JS lines (240 of them v1.0's, inside the cabinet) and 3810 code lines; 3316 is v1.9's JS.
+- **Mismatches:** they include the studio logo (OVERBUDGET INTERACTIVE; GRID & BONES is the engine), the
+  autosave text, what the 4519 bytes are (the nine requests in all, not their headers alone), the queue position
+  (30 to 69, then counting down, not 1), what the Scales buy (nothing), the levels of the first three skills, the first
+  death in the series (v1.0's runs died too), "game over" in v2.0, and the hook's right side, which is on the day-one
+  patch, not the logos, at that moment.
+- ep04-facts.md, which the script names as its source, is in neither repository.
