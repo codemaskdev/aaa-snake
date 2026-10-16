@@ -15,7 +15,9 @@
     "short": "node tools/short.mjs",
     "voice": "node tools/voice.mjs",
     "requirements": "node tools/requirements.mjs",
-    "play-share": "node tools/play-share.mjs"
+    "play-share": "node tools/play-share.mjs",
+    "build-site": "node scripts/build-site.mjs",
+    "publish:day": "gh workflow run pages.yml"
   },
   "engines": {
     "node": ">=22"

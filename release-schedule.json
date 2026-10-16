@@ -1,0 +1,21 @@
+{
+  "about": "One patch a day on the site (scripts/build-site.mjs), the same calendar as the shorts: a version is on the site from its date on, in UTC+3; its short goes live at 19:00 UTC+3 that day. Patch 1.8 is the viewers' open slot and has no entry.",
+  "utcOffsetHours": 3,
+  "releaseTime": "19:00 UTC+3",
+  "versions": [
+    { "version": "1.0", "date": "2026-10-16", "name": "the honest original", "short": null },
+    { "version": "1.1", "date": "2026-10-16", "name": "cinematic intro", "short": "https://youtube.com/shorts/u-KBgk6uRTA" },
+    { "version": "1.2", "date": "2026-10-17", "name": "day-one patch", "short": "https://youtube.com/shorts/_dWQhY4p6FA" },
+    { "version": "1.3", "date": "2026-10-18", "name": "story and voice", "short": "https://youtube.com/shorts/dXLTb1Nv8P8" },
+    { "version": "1.4", "date": "2026-10-19", "name": "online only", "short": "https://youtube.com/shorts/H6VdDW3yNGo" },
+    { "version": "1.5", "date": "2026-10-20", "name": "open world", "short": "https://youtube.com/shorts/uR1YFq1giBk" },
+    { "version": "1.6", "date": "2026-10-21", "name": "skill tree", "short": "https://youtube.com/shorts/HjHSVrTwAfI" },
+    { "version": "1.7", "date": "2026-10-22", "name": "Season One", "short": "https://youtube.com/shorts/QpKuQDYQDek" },
+    { "version": "1.9", "date": "2026-10-23", "name": "Remastered", "short": "https://youtube.com/shorts/fnV6Wk5Jydw" },
+    { "version": "2.0", "date": "2026-10-24", "name": "Game of the Year Edition", "short": "https://youtube.com/shorts/zmx3qqE4f5o" }
+  ],
+  "series": {
+    "trailer": { "date": "2026-10-25", "url": "https://youtube.com/shorts/NdfDxokI_TY" }
+  },
+  "repository": "https://github.com/codemaskdev/aaa-snake"
+}
