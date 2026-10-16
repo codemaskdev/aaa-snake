@@ -1564,3 +1564,31 @@ The commit hashes quoted earlier in this file and in CLAUDE.md were changed to t
 filter-repo's commit map; filter-repo did the same inside commit messages. PROMPTS.md is the prompts as sent and
 keeps any hash they quote. Where an older entry above says the early commits "keep the old address", that was true
 until this rewrite.
+
+### Public
+- **Repository:** https://github.com/codemaskdev/aaa-snake, public, with the given description and no topics. main
+  and all ten tags were pushed. README now opens with what this is, that it is a parody with nothing for sale, that the
+  voices are synthetic, and how to play, run and measure it.
+- **The site:** https://codemaskdev.github.io/aaa-snake/, one patch a day. release-schedule.json has the dates, the
+  patch names and the shorts' links. scripts/build-site.mjs takes "today" at a fixed UTC+3 (RELEASE_TODAY=YYYY-MM-DD
+  to test) and copies only the released versions from dist/. The index lists them with their measured time to first
+  apple and names the next patch. There is no script, no font from elsewhere and no analytics on the page.
+- **Workflow:** .github/workflows/pages.yml runs on a push to main, by hand, and at 15:30 and 16:30 UTC every day. It
+  builds site/ and deploys it with configure-pages, upload-pages-artifact and deploy-pages. The Pages source was set
+  to GitHub Actions through the API, and `npm run publish:day` runs the workflow by hand.
+- **Checked before the push:**
+  - 16 Oct: v1.0 and v1.1, next "Patch 1.2: tomorrow, 19:00 UTC+3.".
+  - 18 Oct: v1.0 to v1.3.
+  - 24 Oct: every version but 1.8, with the closing line.
+  - 26 Oct: the trailer link.
+  - tests/site.test.mjs serves a built site under /aaa-snake/ and opens every version: no page error, no failed or
+    off-site request, and v1.0 plays to its first apple.
+- **After the push:** the run from the push and one by hand (publish:day) both succeeded.
+  - curl: the index and /v1.1/ (with its scripts) answered 200, /v1.2/ and /v2.0/ answered 404.
+  - The index shows v1.0 (0.320 s) and v1.1 (18.928 s) and "Patch 1.2: tomorrow, 19:00 UTC+3.".
+  - The actions warn that their Node 20 runtime is deprecated; they ran on Node 24 and succeeded.
+
+### What broke
+- node_modules/ was gone when the site test first ran: "Cannot find package 'playwright'". It was never tracked, so
+  it is not in the mirror kept from before the rewrite, and I do not know what removed it; out/ and voice/host/ were
+  untouched. `npm ci` put back the pinned playwright 1.63.0 from package-lock.json.
