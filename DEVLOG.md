@@ -5,8 +5,8 @@ What was done, what broke, the real numbers, and what actually happened in each 
 
 ## 2026-10-14 — Prompt 1: setup, Snake v1.0, the measuring rig, the short recorder, the update plan
 
-Commits: bf750bb (rules and logs), b107036 (Snake v1.0, tag v1.0), b685f9e (rig, chart, v1.0 measured),
-a919bfc (UPDATES.md proposal), 30d0713 (chart labels), 321cb33 (short recorder), aea276d (replay fix).
+Commits: d4d420b (rules and logs), 49cf175 (Snake v1.0, tag v1.0), 4bfd001 (rig, chart, v1.0 measured),
+46c8ac9 (UPDATES.md proposal), 2c07dff (chart labels), 9a267fc (short recorder), 7f194e5 (replay fix).
 No update was built; UPDATES.md waits for approval.
 
 ### What was built
@@ -85,9 +85,9 @@ No update was built; UPDATES.md waits for approval.
 
 ## 2026-10-14 — Prompt 2: UPDATES.md frozen, v1.1 Launch experience built and measured
 
-Commits: b1d6864 (UPDATES.md approved and frozen), be976f4 (rig: own origin only, `accepts` load time), 2ff5609 (v1.0
-short 24 s), 6a96093 (v1.1, tag v1.1), db0b90d (v1.1 measured), 219a23f (v1.1 short plan), 0453a06 (chart labels),
-fe9ca9d (test fix). From this prompt on, commits use codemask@codemask.invalid; earlier ones keep the old address.
+Commits: 402d805 (UPDATES.md approved and frozen), d8623f5 (rig: own origin only, `accepts` load time), 2bbb486 (v1.0
+short 24 s), 06d7996 (v1.1, tag v1.1), df9f626 (v1.1 measured), 691ef7a (v1.1 short plan), f2e4019 (chart labels),
+70c963a (test fix). From this prompt on, commits use codemask@codemask.invalid; earlier ones keep the old address.
 
 ### Decisions recorded
 - The hero is Warden Snek, a retired orchard warden; every guardrail stays. v1.2's patch may come only from the game's
@@ -139,9 +139,9 @@ Interactive" returned nothing. "Squarescale Studios" was dropped: the search fou
 - **Chart labels under the line.** The rising lines ran through the value labels "18.91 s" and "19.5 KB". Each panel
   now shows its latest value under its title.
 - **A test assumed v1.0's file list:** `✖ sizes: js, code and assets are split by file type` once launch.js existed.
-- **I committed with a failing test.** Commit 219a23f went in while `✖ clip start: the first frame after the first
+- **I committed with a failing test.** Commit 691ef7a went in while `✖ clip start: the first frame after the first
   key, or after a screen first appears` was failing: my command chain checked grep's exit code instead of npm test's.
-  The test compared 31 × (1000 / 60) with 31000 / 60 bit for bit. Fixed in fe9ca9d; history not rewritten.
+  The test compared 31 × (1000 / 60) with 31000 / 60 bit for bit. Fixed in 70c963a; history not rewritten.
 - **Email note:** the ping-vtuber repo's local git config still says codemask@users.noreply.github.com, but its
   commits are made as codemask@codemask.invalid. This repo now uses the address its commits show, as asked.
 
@@ -155,7 +155,7 @@ Interactive" returned nothing. "Squarescale Studios" was dropped: the search fou
 
 ## 2026-10-14 — Prompt 3: expectations for v1.2, written before measuring
 
-v1.2 is built and tagged (998f1f7). Nothing has been measured yet. What each metric should do, and why
+v1.2 is built and tagged (fcc9116). Nothing has been measured yet. What each metric should do, and why
 (direction only):
 - **Time to first apple: up.** Four new screens come before the logos (the update notice, a download throttled to one
   piece per second, the install, "preparing"), and a loading screen comes after the title. The walk to the apple
@@ -175,8 +175,8 @@ v1.2 is built and tagged (998f1f7). Nothing has been measured yet. What each met
 
 ## 2026-10-14 — Prompt 3: one fixed plan for every short; v1.2 Day-one patch measured
 
-Commits: 43d0cd3 (fixed short plan, v1.1 re-rendered), 998f1f7 (v1.2, tag v1.2), dc0a05f (expectations, before
-measuring), 01230fb (v1.2 measured), 0fda333 (v1.2 short plan).
+Commits: 72d2ddd (fixed short plan, v1.1 re-rendered), fcc9116 (v1.2, tag v1.2), 785c885 (expectations, before
+measuring), f518229 (v1.2 measured), 072c888 (v1.2 short plan).
 
 ### The fixed short plan
 Every short after v1.0 now opens on the result: 3 s of the previous version reaching its first apple (its counter
@@ -524,7 +524,7 @@ its own generator, so the apples are the game's own.
   The arrow now circles the head; the message sits below it.
 - **The full `npm test` failed once, 74 of 75:** v1.0's bot test saw 87 of 88 turns accepted. The 88th was sent on the
   run's last look at the game, so nothing ever checked it, and it counted as refused. Three more v1.0 runs gave 87 of
-  87. The rig now counts such a turn as unchecked, like one sent just before a death (commit 21037e1). This only
+  87. The rig now counts such a turn as unchecked, like one sent just before a death (commit 3fae5f3). This only
   showed up now because since prompt 5 a headless run, v1.0's test too, goes on to 61 s of control. Then I broke
   tools/measure.mjs with an apostrophe inside a quoted string ("run's"), which the rig test caught.
 
@@ -726,7 +726,7 @@ headless run first, and if it takes more than 20 minutes I stop and tell you bef
 
 ### Prompt 9 (the same v1.7, with skins), before building
 Prompt 9 came while prompt 8 was under way; the vision radius, the offline search and the run-time estimate above were
-already written and committed (ed0991d) and stand. What follows is prompt 9's clarification of "cosmetics only",
+already written and committed (b71d3ab) and stand. What follows is prompt 9's clarification of "cosmetics only",
 written before building.
 
 **Skins: 10 in the loot boxes, plus the one Snek starts with.** All drawn in code (src/skins.js), no image files.
@@ -853,7 +853,7 @@ it. README.md has the plan; tests/short.test.mjs checks D's length, the steps of
 again: they have no voice, so their plan did not change.
 
 ### v1.7, what was built
-The plan of prompts 8 and 9 above (ed0991d, 846fa33): radius 6, the battle pass, the PARODY shop, the loot box, the
+The plan of prompts 8 and 9 above (b71d3ab, 2dda7a7): radius 6, the battle pass, the PARODY shop, the loot box, the
 wardrobe, the skins, the bot's search. The work was in `git stash` during prompts 10 and 11 and came back unchanged
 (`git stash pop`); what follows was added after.
 - **The apple shows only within 6 cells** of the head (src/season.js, `appleVisible`): in the world, on the minimap,
@@ -1003,7 +1003,7 @@ this one 1104846.900000006 ms.
   26.01934841771573 s to 29.85934841771573 s, in full. Its counter said "median of 1 measured runs": it now says "a
   single measured run".
 - The full `npm test` before tagging and again here: 96 of 96, then 97 of 97 (the summary test for "single run"), exit 0.
-- v1.7 was tagged before this measurement (ad4cb9a); nothing in the game changed since.
+- v1.7 was tagged before this measurement (9d22281); nothing in the game changed since.
 
 ### v1.9, what was built
 As planned above: src/remaster.js (the WebGL pass and the REMASTERED screen), src/hair.js (the hair), src/requirements.js
@@ -1079,15 +1079,15 @@ pass, with the pass at full resolution** (REMASTER.scale = 1, ANGLE Metal on the
 Your decision: no new version, no patch. The one line that drew only the middle of the board (`const seen = half /
 zoom;`, see prompt 13) became `const seen = BOARD / 2 / zoom;` in v1.7's own sources, in a commit made on top of v1.7's
 tagged commit (in a separate worktree, so nothing else came along): src/game.js and dist/v1.7/game.js, one line each.
-**The v1.7 tag moved from ad4cb9a to 7fc8bb2.** Nothing else in v1.7 changed: rules.js, world.js, season.js,
-online.js, progress.js, skins.js and story.js of dist/v1.7 are byte for byte those of ad4cb9a. On main, dist/v1.7/game.js
-was brought in line with the tag (be404fd), and tests/v1.7.test.mjs now checks that the camera sees 480 x 480 px and
+**The v1.7 tag moved from 9d22281 to 2b6f37c.** Nothing else in v1.7 changed: rules.js, world.js, season.js,
+online.js, progress.js, skins.js and story.js of dist/v1.7 are byte for byte those of 9d22281. On main, dist/v1.7/game.js
+was brought in line with the tag (f78be29), and tests/v1.7.test.mjs now checks that the camera sees 480 x 480 px and
 that the bot's search, offline on v1.7's own files, finds the first apple on tick 7595. CLAUDE.md records the move.
 
 **v1.7 measured again** (`npm run measure v1.7`, a single run; the run before the fix is kept in
 measurements/v1.7-before-camera-fix/):
 
-| Metric | v1.7 as first built (ad4cb9a) | v1.7 rebuilt (7fc8bb2) |
+| Metric | v1.7 as first built (9d22281) | v1.7 rebuilt (2b6f37c) |
 |---|---|---|
 | First apple's tick | 7595 | 7595 |
 | Time to first apple | 1104846.900000006 ms | 1104786 ms |
@@ -1168,7 +1168,7 @@ measuring: the JS heap is read when the game has ended (there is no 60 s of cont
 rate is taken over the control frames the run had. The chart and the row say which.
 
 ### v2.0, what was built
-As planned above (239ebb0), nothing else: src/cabinet.js (the cabinet, its door, the inside, THE END and the
+As planned above (0e5794a), nothing else: src/cabinet.js (the cabinet, its door, the inside, THE END and the
 credits), the cabinet drawn in the world at (134, 128) with v1.0's screen on it, and `npm run build` taking dist/v1.0's
 three files from the v1.0 tag into dist/v2.0/cabinet/ (tools/build.mjs, `exportCabinet`). The rest of the game is
 v1.9's: rules.js, world.js, season.js, skins.js, progress.js, online.js, story.js, launch.js, hair.js and remaster.js
@@ -1535,3 +1535,32 @@ and browser. Left for the author's decision:
 - Prompt 23's entry above names the folders searched (Desktop, Downloads, Documents); no user or path.
 .gitignore now also covers .env files and site/ (the Pages build); out/, voice/host/, node_modules/ and .DS_Store
 were already there. The voice backup lives outside the repository.
+
+## Prompt 25: one history rewrite, then public
+
+### The rewrite (before anything was pushed)
+`git filter-repo` ran once, over every ref. It used a mailmap for the nine early commits and the v1.0 tag, whose
+author, committer and tagger were codemask@users.noreply.github.com and are now CodeMask
+<codemask@codemask.invalid>. A message callback removed every "Claude-Session: …" line; the Co-Authored-By lines
+stayed. A text replacement wrote the release time zone as UTC+3 in the one commit that named it by a place.
+A full mirror of the repository from before the rewrite was kept outside it until the push was checked.
+Afterwards: one identity on every commit and tag, `git log --all --grep=Claude-Session` empty, no place name in any
+revision. Every tag points to a rewritten commit whose tree is identical to before:
+
+| tag | tag object | commit |
+|---|---|---|
+| v1.0 | fc7f01024984405ca7d9c99700bcc8f5c8ab25b3 | 49cf175af94267d9086c912df30d871c3d1bc216 |
+| v1.1 | 8330278fc5fce927caca7febad745a62f583e5d4 | 06d7996e12583d83def0ae5090441d45bf5d4de9 |
+| v1.2 | 87b551805f09ecd8c1889687f5e39dd70246432c | fcc91161ae7cc4657d72a62dafa24703d3175a63 |
+| v1.3 | 79497f117dfc825737dd64fc81842337660d6b67 | 1d68cc2ce42dc4c72b6cc1a5a66b106793cc6647 |
+| v1.4 | 0c0c99aeb40063f64d6744fe8dea9ac22f51a71b | 1652a24ac1524b843a2299a0d33b9fb28e82d7ac |
+| v1.5 | 579cf0523fbec68940d7dd8e7d835ac1c1f2e22f | 34fe2d918223684e04661269f0706bb62044a382 |
+| v1.6 | d2f38bda8fc556df0dce0a78c9485c50b7470f10 | 597c5f321f810c083b7a8089de47700f78be9252 |
+| v1.7 | d3b271a8214d1d72feacce934752e8ce0c081f9c | 2b6f37c499f04fe9bce96ddbe3c681b86b41587c |
+| v1.9 | ac3d172dab7ae6217db18ca271c05a7daa134c6f | d36c221f3ec395eeab60a3545541cb72dc1e6eac |
+| v2.0 | e15f29c428b1c36f392c12881b22962d2527c1af | 366eb4f84c1a7a8bcadce860cb300501fa676f10 |
+
+The commit hashes quoted earlier in this file and in CLAUDE.md were changed to the rewritten ones, 37 in all, from
+filter-repo's commit map; filter-repo did the same inside commit messages. PROMPTS.md is the prompts as sent and
+keeps any hash they quote. Where an older entry above says the early commits "keep the old address", that was true
+until this rewrite.
