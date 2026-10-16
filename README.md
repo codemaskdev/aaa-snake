@@ -1,11 +1,20 @@
 # AAA Snake
 
-A tiny, honest Snake that receives a series of "AAA updates": each one adds a cliché of big-budget games, and each one
-is measured: how much heavier and slower the game got, and how long it now takes to reach the first apple. Made for the
-CodeMask video "How I Turned Snake Into a AAA Game with Claude Code".
+Snake, turned into a AAA game one industry habit per patch. A tiny, honest Snake (v1.0) gets ten patches of big-game
+clichés (logos, a day-one patch, a story, always online, an open world, a skill tree, a season pass, a remaster, a Game
+of the Year Edition), and every patch is measured: how long until the first apple, and how much of that time you
+actually control the snake. Built with Claude Code for the CodeMask channel.
 
-Every version stays playable side by side in `dist/<version>/`. The original is `dist/v1.0/`: open its `index.html`,
-or run `npm run serve` and visit http://localhost:8080/.
+- **A parody.** Nothing is for sale: every shop, currency and loot box is fake, there is no payment code, and the game
+  makes no request outside its own site. The publisher, studio and engine are invented.
+- **Synthetic voices.** Warden Snek and the host of the shorts are generated with ElevenLabs text-to-speech (see
+  Disclosure below).
+- **Play it:** https://codemaskdev.github.io/aaa-snake/ adds one patch a day, at 19:00 UTC+3. Locally: `npm run serve`,
+  then http://localhost:8080/, or open any `dist/<version>/index.html`.
+- **Measure it:** `npm install`, `npx playwright install chromium`, then `npm run measure <version>`. The numbers in
+  the series are single runs, in `measurements/`.
+- **Site:** `npm run publish:day` runs the Pages workflow by hand, if a scheduled run was missed. It needs `gh`, logged
+  in with access to the repository.
 
 ## Commands (Node 22+)
 
@@ -15,12 +24,14 @@ npx playwright install chromium
 npm test                    # game rules, determinism, the rig, the chart, the recorder
 npm run build <version>     # copy src/ to dist/<version>/ (never overwrites)
 npm run measure <version>   # one headless and one visible run -> measurements/<version>.json, summary.csv ("single run")
-npm run measure:final <version>  # 5 + 5 runs and their medians; once, overnight, before release
+npm run measure:final <version>  # 5 + 5 runs and their medians (not used: the series uses the single runs)
 npm run reevaluate <version>  # the frame rate again from the saved runs, with the current rules
 npm run fps-check           # headless vs visible window frame rate, on test loads
 npm run chart               # measurements/summary.csv -> out/bloat.png
 npm run short <version>     # 30-second vertical short -> out/shorts/<version>/
-npm run short -- trailer v1.0 v2.0  # the trailer: both side by side on one clock -> out/shorts/trailer/
+npm run short -- trailer v1.0 v2.0  # the trailer -> out/shorts/trailer/
+npm run build-site          # the GitHub Pages site for today (UTC+3) -> site/; RELEASE_TODAY=YYYY-MM-DD to test
+npm run publish:day         # gh workflow run pages.yml: publish today's patch if a scheduled run was missed
 npm run voice               # voice/LINES.md, placeholders, and src/voice/ copied into every build
 npm run voice -- --check    # every voice line against its slot, and every build against src/voice/
 npm run voice -- --record   # record the 17 lines with the ElevenLabs API (needs ELEVENLABS_API_KEY in the environment)
