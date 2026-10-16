@@ -927,3 +927,54 @@ Script check before voice-over, plus one test fix.
    or dist/.
 Report and STOP.
 ````
+
+## 24. Public: the anonymity audit, the repository, the site one patch a day
+
+````text
+Repo: aaa-snake. Today the repository goes public and the game goes online. Three parts, in this order; STOP after part 1 and wait for my "go" before anything leaves the machine. The Shorts are scheduled one per day at 19:00 UTC+3, patch 1.1 on 16 Oct 2026 through patch 2.0 on 24 Oct 2026, trailer on 25 Oct; the site must follow the same calendar, so it reads like a diary, not an archive. The first Short goes live today at 19:00, so part 3 must be live before that. No game code, tags, UPDATES.md or measurements change. measure:final is cancelled: the single runs are the series numbers.
+
+## Part 1 — anonymity audit (STOP after it)
+Search the whole repository, including git history, tags and everything that would be pushed, for anything that identifies the author or the machine: real names, e-mail addresses other than codemask@codemask.invalid, usernames, home directory paths (/home/<name>, /Users/<name>), hostnames, local IPs, API keys or tokens (ElevenLabs or any other), .env files, voice mp3s (they stay out of git), screenshots with personal windows, timezone or locale strings that name a place, author fields in generated files (ffmpeg metadata, PNG text chunks, package.json "author"). Check every commit's author and committer. Check that .gitignore covers out/, voice files, node_modules and local backups. Fix what is fixable without rewriting history (if history must be rewritten, say so and stop; do not rewrite on your own). Report findings as a list: what, where, what you did. Then STOP.
+
+## Part 2 — publish the repository (after "go")
+Create the public repo codemaskdev/aaa-snake with gh (same account as the existing codemaskdev repos), description "Snake, turned into a AAA game one industry habit per patch. Built with Claude Code for the CodeMask channel." No topics that name anything real. Push main and all tags. README must say in its first lines what this is, that it is a parody, that nothing is for sale, that voices are synthetic, and how to run and measure it; keep it short.
+
+## Part 3 — GitHub Pages, one patch a day
+
+### 3.1 Release schedule
+Add `release-schedule.json` at the repo root:
+  1.0 → 2026-10-16, 1.1 → 2026-10-16, 1.2 → 2026-10-17, 1.3 → 2026-10-18, 1.4 → 2026-10-19,
+  1.5 → 2026-10-20, 1.6 → 2026-10-21, 1.7 → 2026-10-22, 1.9 → 2026-10-23, 2.0 → 2026-10-24.
+Patch 1.8 has no entry (open slot for viewers). Each entry also carries the patch name (from HOST.md / the Shorts) and the YouTube Short URL:
+  1.1 https://youtube.com/shorts/u-KBgk6uRTA
+  1.2 https://youtube.com/shorts/_dWQhY4p6FA
+  1.3 https://youtube.com/shorts/dXLTb1Nv8P8
+  1.4 https://youtube.com/shorts/H6VdDW3yNGo
+  1.5 https://youtube.com/shorts/uR1YFq1giBk
+  1.6 https://youtube.com/shorts/HjHSVrTwAfI
+  1.7 https://youtube.com/shorts/QpKuQDYQDek
+  1.9 https://youtube.com/shorts/fnV6Wk5Jydw
+  2.0 https://youtube.com/shorts/zmx3qqE4f5o
+  (1.0 has no Short; the trailer https://youtube.com/shorts/NdfDxokI_TY goes on the page on 2026-10-25 as a "series" link, not as a version.)
+
+### 3.2 Site builder
+Add `scripts/build-site.mjs` (Node, no new dependencies): reads the schedule, takes "today" as the calendar date in UTC+3 (override with env `RELEASE_TODAY=YYYY-MM-DD` for testing), and writes `site/`:
+- `site/v<version>/` = a copy of `dist/<version>/` for every version whose date ≤ today. Versions not yet released are NOT copied at all, so their URLs 404 until their day.
+- `site/index.html`: the released versions oldest first, one row each: version, patch name, time to first apple from the measurements, link "Play", link "Watch the patch" to its Short. Above the table one line: "I'm turning Snake into a AAA game, one industry habit per patch, one patch a day. Every patch is real code; every number is a real measurement." Below the table one line naming the next one: "Patch 1.4: tomorrow, 19:00 UTC+3." (on the last day: "That's the series. Patch 1.8 is yours: say what's missing in the comments."). From 25 Oct add a link to the trailer. Link to the repo at the bottom. Plain HTML/CSS, no analytics, no external scripts, no third-party fonts, no real names or brands.
+- URLs must be exactly `/aaa-snake/v1.1/`, `/aaa-snake/v2.0/` etc. (lowercase v, dotted version).
+
+### 3.3 Workflow
+`.github/workflows/pages.yml`: builds `site/` with the script and deploys it with the official Pages actions (configure-pages, upload-pages-artifact, deploy-pages). Pages source = GitHub Actions (set it with gh api if possible; otherwise tell me the exact click). Triggers: push to main, `workflow_dispatch`, and schedule at 15:30 UTC and 16:30 UTC daily (18:30 and 19:30 UTC+3; GitHub cron can run late, so two runs). Fallback for a missed run: `npm run publish:day` = `gh workflow run pages.yml`; two lines in README.
+
+### 3.4 Check before committing
+- `RELEASE_TODAY=2026-10-16 node scripts/build-site.mjs` → site has v1.0 and v1.1 only, next line says patch 1.2.
+- `RELEASE_TODAY=2026-10-18` → v1.0–v1.3; `2026-10-24` → everything except 1.8, closing line; `2026-10-26` → trailer link present.
+- Each copied version opens from `site/` with a static server and plays (reuse the existing smoke test if there is one).
+- Run the anonymity checks from part 1 on the new files. Commit with the CodeMask identity, push, trigger the workflow, wait for it, then open https://codemaskdev.github.io/aaa-snake/ and https://codemaskdev.github.io/aaa-snake/v1.1/ with curl and confirm 200, and that /v1.2/ is 404.
+
+## Report
+- Part 1: the findings list (even if empty).
+- Repo URL; live URL of the index and of v1.1; what the index shows right now (should be v1.0 and v1.1); the workflow run link; the two cron times.
+- Anything you could not do, one line each.
+No paid services are involved. One STOP: after part 1.
+````

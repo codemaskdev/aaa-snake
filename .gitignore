@@ -4,3 +4,6 @@ out/
 *.log
 test-results/
 voice/host/
+.env
+.env.*
+site/

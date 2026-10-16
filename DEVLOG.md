@@ -1515,3 +1515,22 @@ the repository:
   death in the series (v1.0's runs died too), "game over" in v2.0, and the hook's right side, which is on the day-one
   patch, not the logos, at that moment.
 - ep04-facts.md, which the script names as its source, is in neither repository.
+
+## Prompt 24, part 1: the anonymity audit (before anything is pushed)
+Searched every revision of every file, every commit and tag message, the identities on commits and tags, the
+tracked file types, the mp3 tags, the measurement files and the working tree. Nothing was found that names the
+author or the machine. There are no home-directory paths, no usernames, no e-mail addresses other than the two
+CodeMask ones, no IPs and no keys or tokens. No .env, PNG or .DS_Store was ever committed, package.json has no
+author, and every date is UTC. The mp3s carry only an encoder tag. The measurements hold only the model, chip, RAM, OS
+and browser. Left for the author's decision:
+- 9 early commits and the v1.0 tag use codemask@users.noreply.github.com, the address in use before prompt 2 (CLAUDE.md
+  records it). GitHub may attach those commits to whichever account is called "codemask". Changing them means
+  rewriting history, which was not done.
+- 52 commit messages end with a Claude-Session link (claude.ai/code/session_…). It is private: it opens only for the
+  account that ran the session. Removing it also means rewriting history.
+- Warden Snek's 17 voice lines are tracked (src/voice and every build from v1.3) because the game plays them; the
+  host's lines for the shorts were never committed.
+- This prompt (PROMPTS.md #24) names the release time zone, UTC+3, and the site is to say "UTC+3".
+- Prompt 23's entry above names the folders searched (Desktop, Downloads, Documents); no user or path.
+.gitignore now also covers .env files and site/ (the Pages build); out/, voice/host/, node_modules/ and .DS_Store
+were already there. The voice backup lives outside the repository.
