@@ -1530,7 +1530,8 @@ and browser. Left for the author's decision:
   account that ran the session. Removing it also means rewriting history.
 - Warden Snek's 17 voice lines are tracked (src/voice and every build from v1.3) because the game plays them; the
   host's lines for the shorts were never committed.
-- This prompt (PROMPTS.md #24) names the release time zone, UTC+3, and the site is to say "UTC+3".
+- This prompt (PROMPTS.md #24) named the release time zone by a place, and the site was to name it too (prompt 25:
+  UTC+3 instead, everywhere).
 - Prompt 23's entry above names the folders searched (Desktop, Downloads, Documents); no user or path.
 .gitignore now also covers .env files and site/ (the Pages build); out/, voice/host/, node_modules/ and .DS_Store
 were already there. The voice backup lives outside the repository.

@@ -978,3 +978,20 @@ Add `scripts/build-site.mjs` (Node, no new dependencies): reads the schedule, ta
 - Anything you could not do, one line each.
 No paid services are involved. One STOP: after part 1.
 ````
+
+Edited in prompt 25, by the author's decision (no place names): the time zone in this record is written as UTC+3 (4 places).
+
+## 25. Go: one history rewrite, then public, then the site
+
+````text
+go, with these decisions:
+
+1+2. Rewrite history once, before anything is pushed: set author and committer of the nine early commits to the CodeMask identity codemask@codemask.invalid, and strip every "Claude-Session: …" line from all commit messages (keep the "Co-Authored-By" lines). Use git filter-repo if available, otherwise filter-branch; re-point all ten tags to the rewritten commits; verify afterwards with `git log --format='%an <%ae> %cn <%ce>' | sort -u` (one identity) and `git log --all --grep=Claude-Session` (empty). Do not add a Claude-Session line to any commit from now on in this repo. Report the new hashes of the ten tags.
+3. Warden Snek's lines stay in git as part of the game. Correct reading.
+4. No place names anywhere: write "19:00 UTC+3" on the site and in README, and compute "today" in build-site.mjs as a fixed UTC+3 offset, not an IANA zone. In PROMPTS.md replace "[the time zone's place name]" in the prompt-24 record with "UTC+3" and add one line noting the edit.
+5. Fine as is.
+
+Then parts 2 and 3 as written. The first Short is live at 19:00 UTC+3; if the site is a few minutes late that is fine, do not skip checks.
+````
+
+Edited when logged, by the same decision: the place name in item 4 is written as "[the time zone's place name]".

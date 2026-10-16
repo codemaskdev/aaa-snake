@@ -26,7 +26,8 @@ measurements/ are the raw material for the video.
 ## Versions
 - Every update is one git tag (v1.0, v1.1, ...) and one build in dist/<version>/ (`npm run build <version>` copies
   src/ there; it refuses to overwrite an existing build). Every version stays playable side by side (`npm run serve`).
-- Never rewrite an old tag, unless I decide otherwise for a version (prompt 14 moved v1.7's tag to its camera fix,
+- Never rewrite an old tag, unless I decide otherwise for a version (prompt 25 re-pointed all of them to the rewritten
+  history, see Commits; prompt 14 moved v1.7's tag to its camera fix,
   7fc8bb2; it was ad4cb9a). tests/build.test.mjs checks that each tagged build in dist/ still matches its tag, except
   its voice lines (see Voice) and requirements.js (v1.9 on: written by `npm run requirements` from a measurement).
 - The VERSION constant in src/game.js names the version being built.
@@ -106,9 +107,13 @@ Every version exposes `window.snakeGame = { version, log, probe() }`:
 
 ## Commits and anonymity
 - Commits are authored as CodeMask (user.name CodeMask, user.email codemask@codemask.invalid, the email the
-  ping-vtuber repo commits with; set in this repo's local git config, never the global git config). Commits before
-  2026-10-14's prompt 2 used codemask@users.noreply.github.com; history is never rewritten. Every commit and tag with
-  TZ=UTC: `TZ=UTC git commit ...`.
+  ping-vtuber repo commits with; set in this repo's local git config, never the global git config). Every commit and
+  tag with TZ=UTC: `TZ=UTC git commit ...`. No "Claude-Session" line in commit messages (the Co-Authored-By line
+  stays).
+- History was rewritten once, in prompt 25, before the repository went public. The commits before 2026-10-14's
+  prompt 2 had used codemask@users.noreply.github.com, and they got the CodeMask identity. The session links came out
+  of every message, and the release time zone's place name came out of PROMPTS.md and DEVLOG.md. All ten tags were
+  re-pointed to the rewritten commits (same trees). History is not rewritten again.
 - No local paths, no usernames, no .DS_Store, no personal data in the repo, including measurement files (they record
   machine model, chip, RAM, OS and browser only; never serial numbers or hardware IDs).
 - Never commit generated media: out/ (shorts, frames, the chart) is ignored and can be re-made.
