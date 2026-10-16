@@ -1483,3 +1483,19 @@ The freeze on THE END now lasts line 5 plus 300 ms: 5740 ms from 25.523934042564
 31266.666666666668 ms (938 frames; the last frame ends 2.732624102569389 ms after the freeze's planned end, because the
 video is counted in whole frames). Line 5 from 25.523934042564097 s to 30.963934042564098 s. Everything before it is
 unchanged.
+
+## Prompt 23: a script check, and the flaky v1.4 network test
+
+### The script check: not done
+The prompt names CodeMask/episodes/04-aaa-snake/script.en.md (17641 bytes, sha256 starting 3d77069de028921c). There
+is no 04-aaa-snake folder under CodeMask/episodes (it holds 01 to 03), and no 17641-byte .md or .txt file in Desktop,
+Downloads or Documents has that hash. The prompt says to stop if the hash differs, so nothing was checked.
+
+### The v1.4 network test
+Cause: the Enter that accepts the terms opens v1.4's loading screen, and that screen starts downloading the voice pack
+(voice/01.mp3 to 17.mp3, own origin; dist/v1.4/game.js, `loadVoice` on 'loading'). The test read its final request
+count right after that Enter. Whether the 17 downloads had started by then depended on timing: 34 against 17 in
+prompt 21's full run, a pass every other time. The count now leaves out voice/NN.mp3, and the test says why. The
+requests are still recorded, so the own-origin check still covers them. src/ and dist/ are unchanged.
+The test passed 5 runs in a row (one after another), then 5 runs at once (to load the machine). It ran every time,
+none skipped.

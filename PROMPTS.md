@@ -901,3 +901,29 @@ voice/HOST.md. Re-render the trailer: the freeze on THE END lasts
 exactly as long as the new line 5 plus 300 ms, then the file ends.
 Report length and the line's start and end. STOP.
 ````
+
+## 23. A script check, and the flaky v1.4 network test
+
+````text
+Script check before voice-over, plus one test fix.
+
+1. The episode script is at CodeMask/episodes/04-aaa-snake/script.en.md,
+   17641 bytes, sha256 starts 3d77069de028921c. Check the hash first;
+   if it differs, stop. Do not change the script.
+   Check every number and claim against the repository
+   (measurements/summary.csv, DEVLOG.md, UPDATES.md, voice/LINES.md,
+   the builds) and return:
+   a. Mismatches: the line, what it says, what the data says.
+   b. Two open questions: did the game loop in game.js change between
+      v1.0 and v2.0 (the script says "never changed"): compare the loop
+      across the tags and report what differs, if anything; and the JS
+      line count and total code lines of v2.0.
+   c. Lines the TTS may stumble on (numbers, abbreviations, names).
+   d. For every on-screen element in a director note (DEVLOG quotes,
+      screens, counters), whether it exists as written.
+2. Fix the flaky v1.4 network test: count requests only after the page
+   reports network idle, or exclude voice/*.mp3 from the count and say
+   why in the test. It must pass 5 runs in a row. Do not change src/
+   or dist/.
+Report and STOP.
+````

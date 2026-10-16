@@ -100,6 +100,12 @@ test('v1.4: SnakeNet makes no request; sign in, the queue, and terms you must sc
     const page = await browser.newPage();
     const requests = [];
     page.on('request', request => requests.push({ url: request.url(), at: null }));
+    // SnakeNet's requests, if it made any: everything but the voice pack. The Enter that accepts the terms opens the
+    // loading screen, which downloads voice/01.mp3 to voice/17.mp3 from the game's own origin (dist/v1.4/game.js,
+    // loadVoice on 'loading'). Whether those 17 requests have started by the time the count below is read depends
+    // only on timing, so they are left out of it (prompt 23: the test once counted 34 where it expects 17). They are
+    // still in `requests`, so the own-origin check at the end covers them.
+    const snakeNet = () => requests.filter(r => !/\/voice\/\d{2}\.mp3$/.test(new URL(r.url).pathname)).length;
     await page.goto(`${server.url}/index.html?seed=1`);
     const probe = () => page.evaluate(() => window.snakeGame.probe());
     const until = (fn, timeout, arg) => page.waitForFunction(fn, arg, { timeout, polling: 10 });
@@ -107,9 +113,9 @@ test('v1.4: SnakeNet makes no request; sign in, the queue, and terms you must sc
       await until(s => window.snakeGame.probe().screen === s && window.snakeGame.probe().next, 60000, screen);
       await page.keyboard.press('Enter');
     }
-    const before = requests.length;
+    const before = snakeNet();
     await until(() => window.snakeGame.probe().screen === 'sign-in' && window.snakeGame.probe().next === 'Enter', 10000);
-    assert.equal(requests.length, before, 'connecting to SnakeNet made no request');
+    assert.equal(snakeNet(), before, 'connecting to SnakeNet made no request');
     assert.equal(await page.evaluate(() => online.status), 'online');
     await page.keyboard.press('KeyX');
     assert.equal((await probe()).screen, 'sign-in', 'only Enter signs in');
@@ -136,7 +142,7 @@ test('v1.4: SnakeNet makes no request; sign in, the queue, and terms you must sc
     assert.ok(presses > 3, `${presses} pages of terms`);
     await page.keyboard.press('Enter');
     assert.equal((await probe()).screen, 'loading');
-    assert.equal(requests.length, before, 'no request from connecting to the end of the terms');
+    assert.equal(snakeNet(), before, 'no request from connecting to the end of the terms');
     assert.deepEqual(offOrigin(requests.map(r => r.url), new URL(server.url).origin), [], 'the rig\'s own-origin check');
   } finally {
     await browser.close();
